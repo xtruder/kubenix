@@ -80,7 +80,16 @@ let
     );
 
     kubernetesList = toKubernetesList resources;
-  in pkgs.writeText "resources.json" (builtins.toJSON kubernetesList);
+
+    listHash = builtins.hashString "sha1" (builtins.toJSON kubernetesList);
+
+    hashedList = kubernetesList // {
+      labels."kubenix/build" = listHash;
+      items = map (resource: recursiveUpdate resource {
+        metadata.labels."kubenix/build" = listHash;
+      }) kubernetesList.items;
+    };
+  in pkgs.writeText "resources.json" (builtins.toJSON hashedList);
 
 in {
   inherit buildResources;
