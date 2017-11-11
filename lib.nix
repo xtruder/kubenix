@@ -29,4 +29,29 @@ rec {
   toBase64 = value:
     builtins.readFile
       (pkgs.runCommand "value-to-b64" {} "echo '${value}' | ${pkgs.coreutils}/bin/base64 -w0 > $out");
+
+  mkValueOrSecretOption = {...}@options: mkOption ({
+    type = types.either types.str (types.submodule {
+      options.secret = mkOption {
+        description = "Name of the secret where password is stored";
+        type = types.str;
+      };
+
+      options.key = mkOption {
+        description = "Name of the key where password is stored";
+        type = types.str;
+        default = "password";
+      };
+    });
+
+    apply = value:
+      if isAttrs value
+      then {
+        valueFrom.secretKeyRef = {
+          name = value.secret;
+          key = value.key;
+        };
+      }
+      else {inherit value;};
+  } // options);
 }

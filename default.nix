@@ -11,7 +11,7 @@ let
     args = {
       inherit pkgs;
       name = "default";
-      k8s = { inherit loadJSON loadYAML toBase64; };
+      k8s = { inherit loadJSON loadYAML toBase64 mkValueOrSecretOption; };
     };
   };
 

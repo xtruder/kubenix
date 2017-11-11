@@ -1,5 +1,6 @@
 {lib, k8s, ...}:
 
+with k8s;
 with lib;
 
 {
@@ -11,11 +12,16 @@ with lib;
           type = types.int;
           default = 80;
         };
+
+        password = mkValueOrSecretOption {
+          description = "Nginx simple auth credentials";
+          default.secret = "test";
+        };
       };
 
       config = {
         kubernetes.resources.deployments.nginx = mkMerge [
-          (k8s.loadJSON ./deployment.json)
+          (loadJSON ./deployment.json)
           {
             metadata.name = "${name}-nginx";
 
@@ -23,15 +29,12 @@ with lib;
               containerPort = config.port;
             };
 
-            spec.template.spec.containers.nginx.env.name.valueFrom.secretKeyRef = {
-              name = config.kubernetes.resources.configMaps.nginx.metadata.name;
-              key = "somekey";
-            };
+            spec.template.spec.containers.nginx.env.name = config.password;
           }
         ];
 
         kubernetes.resources.configMaps.nginx = mkMerge [
-          (k8s.loadJSON ./configMap.json)
+          (loadJSON ./configMap.json)
           {
             metadata.name = mkForce "${name}-nginx";
           }
@@ -45,7 +48,7 @@ with lib;
       configuration.port = 8080;
     };
 
-    kubernetes.resources.services.nginx = k8s.loadJSON ./service.json;
+    kubernetes.resources.services.nginx = loadJSON ./service.json;
 
     kubernetes.defaultModuleConfiguration = [{
       kubernetes.defaults.deployments.spec.replicas = 3;
