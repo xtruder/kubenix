@@ -53,5 +53,7 @@ with lib;
     kubernetes.defaultModuleConfiguration = [{
       kubernetes.defaults.deployments.spec.replicas = 3;
     }];
+
+    kubernetes.defaults.all.metadata.namespace = "test";
   };
 }

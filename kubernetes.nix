@@ -232,6 +232,11 @@ let
               metadata.name = mkOptionDefault name;
             }
             (mkAllDefault config.kubernetes.defaults.${groupName} 1001)
+            (mkAllDefault (
+              if hasAttr "all" config.kubernetes.defaults
+              then config.kubernetes.defaults.all
+              else {}
+            ) 1001)
           ];
         });
 
@@ -317,7 +322,12 @@ in {
 
   options.kubernetes.defaults = mkOption {
     type = types.submodule {
-      options = defaultOptions;
+      options = defaultOptions // {
+        all = mkOption {
+          type = types.attrs;
+          default = {};
+        };
+      };
     };
     description = "";
     default = {};
