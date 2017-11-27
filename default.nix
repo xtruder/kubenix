@@ -7,7 +7,10 @@ with import ./lib.nix { inherit pkgs; inherit (pkgs) lib; };
 
 let
   evalKubernetesModules = configuration: evalModules {
-    modules = [./kubernetes.nix ./modules.nix configuration];
+    modules = [
+      (import ./kubernetes.nix {})
+      ./modules.nix configuration
+    ];
     args = {
       inherit pkgs;
       name = "default";

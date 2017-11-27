@@ -1,3 +1,5 @@
+{ customResourceDefinitions ? null }:
+
 { config, lib, k8s, pkgs, ... }:
 
 with lib;
@@ -282,7 +284,11 @@ let
             } // extraOptions;
           }));
         }
-      ) config.kubernetes.resources.customResourceDefinitions;
+      ) (
+        if customResourceDefinitions == null
+        then config.kubernetes.resources.customResourceDefinitions
+        else customResourceDefinitions
+      );
     in {
       inherit swaggerDefinitions definitions exportedDefinitions kubernetesResourceOptions customResourceOptions;
     };

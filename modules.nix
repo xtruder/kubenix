@@ -8,7 +8,10 @@ let
 
   evalK8SModule = {module, name, configuration}: evalModules {
     modules = [
-      ./kubernetes.nix ./modules.nix module configuration
+      (import ./kubernetes.nix {
+        customResourceDefinitions = config.kubernetes.resources.customResourceDefinitions;
+      })
+      ./modules.nix module configuration
     ] ++ config.kubernetes.defaultModuleConfiguration;
     args = {
       inherit pkgs k8s name;
@@ -85,6 +88,12 @@ in {
     kubernetes.resources = mkMerge (
       mapAttrsToList (name: module:
         prefixResources (moduleToAttrs module.evaledModule.config.kubernetes.resources) module.name
+      ) config.kubernetes.modules
+    );
+
+    kubernetes.customResources = mkMerge (
+      mapAttrsToList (name: module:
+        prefixResources (moduleToAttrs module.evaledModule.config.kubernetes.customResources) module.name
       ) config.kubernetes.modules
     );
 

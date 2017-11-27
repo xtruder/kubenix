@@ -39,6 +39,11 @@ with lib;
             metadata.name = mkForce "${name}-nginx";
           }
         ];
+
+        kubernetes.customResources.cron.my-awesome-cron-object = mkMerge [
+          (k8s.loadJSON ./cr.json)
+          {metadata.name = name;}
+        ];
       };
     };
 
