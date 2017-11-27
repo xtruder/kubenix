@@ -256,6 +256,7 @@ let
 
       customResourceOptions = mapAttrs (name: crd:
         mkOption {
+          description = "Custom resource for ${name}";
           type = types.attrsOf (types.submodule ({name, config, ...}: {
             options = {
               apiVersion = mkOption {
