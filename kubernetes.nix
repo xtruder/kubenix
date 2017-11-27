@@ -283,6 +283,7 @@ let
               };
             } // extraOptions;
           }));
+          default = {};
         }
       ) (
         if customResourceDefinitions == null
