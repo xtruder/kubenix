@@ -30,6 +30,14 @@ rec {
     builtins.readFile
       (pkgs.runCommand "value-to-b64" {} "echo '${value}' | ${pkgs.coreutils}/bin/base64 -w0 > $out");
 
+  exp = base: exp: foldr (value: acc: acc * base) 1 (range 1 exp);
+
+  octalToDecimal = value:
+    (foldr (char: acc: {
+      i = acc.i + 1;
+      value = acc.value + (toInt char) * (exp 8 acc.i);
+    }) {i = 0; value = 0;} (stringToCharacters value)).value;
+
   mkValueOrSecretOption = {...}@options: mkOption ({
     type = types.nullOr (types.either types.str (types.submodule {
       options.secret = mkOption {
