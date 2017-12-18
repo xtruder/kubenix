@@ -50,15 +50,17 @@ rec {
         name = mkOption {
           description = "Name of the secret where secret is stored";
           type = types.str;
+        } // optionalAttrs (hasAttr "default" options && options.default != null && hasAttr "name" options.default) {
+          default = options.default.name;
         };
 
         key = mkOption {
           description = "Name of the key where secret is stored";
           type = types.str;
+        } // optionalAttrs (hasAttr "default" options && options.default != null && hasAttr "key" options.default) {
+          default = options.default.key;
         };
       };
-    } // optionalAttrs (hasAttr "default" options && options.default != null) {
-      config = mkAllDefault options.default 1000;
     });
 
     apply = value: if value == null then null else {
