@@ -57,16 +57,16 @@ rec {
           type = types.str;
         };
       };
-
-      config = mkIf (hasAttr "default" options) (mkAllDefault options.default 1000);
+    } // optionalAttrs (hasAttr "default" options && options.default != null) {
+      config = mkAllDefault options.default 1000;
     });
 
-    apply = value: {
+    apply = value: if value == null then null else {
       valueFrom.secretKeyRef = {
         inherit (value) name key;
       };
     };
 
-    default = {};
+    default = null;
   });
 }

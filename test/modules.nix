@@ -15,10 +15,7 @@ with lib;
 
         password = mkSecretOption {
           description = "Nginx simple auth credentials";
-          default = {
-            name = "test";
-            key = "password";
-          };
+          default = null;
         };
       };
 
@@ -32,7 +29,7 @@ with lib;
               containerPort = config.port;
             };
 
-            spec.template.spec.containers.nginx.env.name = config.password;
+            spec.template.spec.containers.nginx.env.name = mkIf (config.password != null) config.password;
           }
         ];
 
@@ -53,6 +50,7 @@ with lib;
     kubernetes.modules.app-v1 = {
       module = "nginx";
       configuration.password.name = "test2";
+      configuration.password.key = "password";
     };
     kubernetes.modules.app-v2 = {
       module = "nginx";
