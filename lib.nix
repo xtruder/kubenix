@@ -44,28 +44,29 @@ rec {
       value = acc.value + (toInt char) * (exp 8 acc.i);
     }) {i = 0; value = 0;} (stringToCharacters value)).value;
 
-  mkValueOrSecretOption = {...}@options: mkOption ({
-    type = types.nullOr (types.either types.str (types.submodule {
-      options.secret = mkOption {
-        description = "Name of the secret where password is stored";
-        type = types.str;
-      };
-
-      options.key = mkOption {
-        description = "Name of the key where password is stored";
-        type = types.str;
-        default = "password";
-      };
-    }));
-
-    apply = value:
-      if isAttrs value
-      then {
-        valueFrom.secretKeyRef = {
-          name = value.secret;
-          key = value.key;
+  mkSecretOption = {...}@options: mkOption (options // {
+    type = types.nullOr (types.submodule {
+      options = {
+        name = mkOption {
+          description = "Name of the secret where secret is stored";
+          type = types.str;
         };
-      }
-      else {inherit value;};
-  } // options);
+
+        key = mkOption {
+          description = "Name of the key where secret is stored";
+          type = types.str;
+        };
+      };
+
+      config = mkIf (hasAttr "default" options) (mkAllDefault options.default 1000);
+    });
+
+    apply = value: {
+      valueFrom.secretKeyRef = {
+        inherit (value) name key;
+      };
+    };
+
+    default = {};
+  });
 }

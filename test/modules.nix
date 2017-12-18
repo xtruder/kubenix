@@ -13,9 +13,12 @@ with lib;
           default = 80;
         };
 
-        password = mkValueOrSecretOption {
+        password = mkSecretOption {
           description = "Nginx simple auth credentials";
-          default.secret = "test";
+          default = {
+            name = "test";
+            key = "password";
+          };
         };
       };
 
@@ -47,7 +50,10 @@ with lib;
       };
     };
 
-    kubernetes.modules.app-v1.module = "nginx";
+    kubernetes.modules.app-v1 = {
+      module = "nginx";
+      configuration.password.name = "test2";
+    };
     kubernetes.modules.app-v2 = {
       module = "nginx";
       configuration.port = 8080;
