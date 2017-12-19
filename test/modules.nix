@@ -15,7 +15,10 @@ with lib;
 
         password = mkSecretOption {
           description = "Nginx simple auth credentials";
-          default = null;
+          default = {
+            key = "test";
+            name = "test";
+          };
         };
       };
 

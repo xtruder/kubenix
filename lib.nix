@@ -68,7 +68,5 @@ rec {
         inherit (value) name key;
       };
     };
-
-    default = null;
   });
 }
