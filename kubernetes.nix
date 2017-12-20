@@ -224,7 +224,7 @@ let
           groupVersion = if group != "" then "${group}/${version}" else version;
         in types.submodule ({name, ...}: {
           options = definition.options // extraOptions;
-          config = mkMerge [
+          config = mkMerge ([
             definition.config
             {
               kind = mkOptionDefault kind;
@@ -233,13 +233,8 @@ let
               # metdata.name cannot use option default, due deep config
               metadata.name = mkOptionDefault name;
             }
-            (mkAllDefault config.kubernetes.defaults.${groupName} 1001)
-            (mkAllDefault (
-              if hasAttr "all" config.kubernetes.defaults
-              then config.kubernetes.defaults.all
-              else {}
-            ) 1001)
-          ];
+          ] ++ config.kubernetes.defaults.${groupName}
+            ++ config.kubernetes.defaults.all);
         });
 
         type =
@@ -312,8 +307,8 @@ let
   };
 
   defaultOptions = mapAttrs (name: value: mkOption {
-    type = types.attrs;
-    default = {};
+    type = types.listOf types.attrs;
+    default = [];
   }) versionOptions.${config.kubernetes.version};
 in {
   options.kubernetes.version = mkOption {
@@ -334,8 +329,8 @@ in {
     type = types.submodule {
       options = defaultOptions // {
         all = mkOption {
-          type = types.attrs;
-          default = {};
+          type = types.listOf types.attrs;
+          default = [];
         };
       };
     };
