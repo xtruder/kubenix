@@ -6,29 +6,33 @@ with import ./lib.nix { inherit pkgs lib; };
 let
   globalConfig = config;
 
-  evalK8SModule = {module, name, configuration}: evalModules {
-    modules = [
+  mkModuleOptions = moduleDefinition: module:
+  let
+    nameToModule = moduleConfig:
+    if isFunction moduleConfig then
+      {name, ...}@args:
+        (moduleConfig (args // {name = module.name;})) // {_file = "module-${module.name}";}
+      else {name, ...}: moduleConfig // {_file = "module-${module.name}";};
+  in [
       (import ./kubernetes.nix {
-        customResourceDefinitions = config.kubernetes.resources.customResourceDefinitions;
+        customResourceDefinitions =
+          config.kubernetes.resources.customResourceDefinitions;
       })
-      ./modules.nix module configuration
-    ] ++ config.kubernetes.defaultModuleConfiguration;
-    args = {
-      inherit pkgs k8s name;
-    };
-  };
+      ./modules.nix (nameToModule moduleDefinition.module)
+     ] ++ config.kubernetes.defaultModuleConfiguration.all
+       ++ (optionals (hasAttr moduleDefinition.name config.kubernetes.defaultModuleConfiguration)
+         config.kubernetes.defaultModuleConfiguration.${moduleDefinition.name});
 
   prefixResources = resources: serviceName:
     mapAttrs (groupName: resources:
       mapAttrs' (name: resource: nameValuePair "${serviceName}-${name}" resource) resources
     ) resources;
-in {
-  options.kubernetes.defaultModuleConfiguration = mkOption {
-    description = "Default configuration for kubernetes modules";
-    type = types.listOf types.attrs;
-    default = {};
-  };
 
+  defaultModuleConfigurationOptions = mapAttrs (name: moduleDefinition: mkOption {
+    type = types.listOf types.attrs;
+    default = [];
+  }) config.kubernetes.moduleDefinitions;
+in {
   options.kubernetes.moduleDefinitions = mkOption {
     description = "Attribute set of module definitions";
     default = {};
@@ -47,6 +51,20 @@ in {
     }));
   };
 
+  options.kubernetes.defaultModuleConfiguration = mkOption {
+    description = "Module default options";
+    type = types.submodule {
+      options = defaultModuleConfigurationOptions // {
+        all = mkOption {
+          description = "Module default configuration for all modules";
+          type = types.listOf types.attrs;
+          default = [];
+        };
+      };
+    };
+    default = {};
+  };
+
   options.kubernetes.modules = mkOption {
     description = "Attribute set of module definitions";
     default = {};
@@ -60,7 +78,9 @@ in {
 
         configuration = mkOption {
           description = "Module configuration";
-          type = types.attrs;
+          type = types.submodule {
+            imports = mkModuleOptions globalConfig.kubernetes.moduleDefinitions.${config.module} config;
+          };
           default = {};
         };
 
@@ -68,18 +88,6 @@ in {
           description = "Name of the module to use";
           type = types.str;
         };
-
-        evaledModule = mkOption {
-          description = "Evaluated config";
-          internal = true;
-        };
-      };
-
-      config = {
-        evaledModule = (evalK8SModule {
-          module = globalConfig.kubernetes.moduleDefinitions.${config.module}.module;
-          inherit (config) name configuration;
-        });
       };
     }));
   };
@@ -87,17 +95,17 @@ in {
   config = {
     kubernetes.resources = mkMerge (
       mapAttrsToList (name: module:
-        prefixResources (moduleToAttrs module.evaledModule.config.kubernetes.resources) module.name
+        prefixResources (moduleToAttrs module.configuration.kubernetes.resources) module.name
       ) config.kubernetes.modules
     );
 
     kubernetes.customResources = mkMerge (
       mapAttrsToList (name: module:
-        prefixResources (moduleToAttrs module.evaledModule.config.kubernetes.customResources) module.name
+        prefixResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
       ) config.kubernetes.modules
     );
 
-    kubernetes.defaultModuleConfiguration = [{
+    kubernetes.defaultModuleConfiguration.all = [{
       config.kubernetes.version = mkDefault config.kubernetes.version;
     }];
   };
