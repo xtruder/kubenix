@@ -307,7 +307,8 @@ let
   };
 
   defaultOptions = mapAttrs (name: value: mkOption {
-    type = types.listOf types.attrs;
+    description = "Kubernetes defaults for ${name} resources";
+    type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
     default = [];
   }) versionOptions.${config.kubernetes.version};
 in {
@@ -329,7 +330,8 @@ in {
     type = types.submodule {
       options = defaultOptions // {
         all = mkOption {
-          type = types.listOf types.attrs;
+          description = "Kubernetes defaults for all resources";
+          type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
           default = [];
         };
       };

@@ -62,14 +62,14 @@ with lib;
 
     kubernetes.resources.services.nginx = loadJSON ./service.json;
 
-    kubernetes.defaultModuleConfiguration.all = [{
-      config.kubernetes.defaults.deployments = [{spec.replicas = 3;}];
-    }];
+    kubernetes.defaultModuleConfiguration.all = {
+      config.kubernetes.defaults.deployments.spec.replicas = 3;
+    };
 
-    kubernetes.defaultModuleConfiguration.nginx = [{
-      kubernetes.defaults.deployments = [{spec.replicas = mkDefault 4;}];
-    }];
+    kubernetes.defaultModuleConfiguration.nginx = {
+      kubernetes.defaults.deployments.spec.replicas = mkDefault 4;
+    };
 
-    kubernetes.defaults.all = [{metadata.namespace = "test";}];
+    kubernetes.defaults.all.metadata.namespace = "test";
   };
 }
