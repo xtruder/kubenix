@@ -62,11 +62,11 @@ rec {
         };
       };
     });
-
-    apply = value: if value == null then null else {
-      valueFrom.secretKeyRef = {
-        inherit (value) name key;
-      };
-    };
   });
+
+  secretToEnv = value: {
+    valueFrom.secretKeyRef = {
+      inherit (value) name key;
+    };
+  };
 }

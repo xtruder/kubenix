@@ -15,10 +15,7 @@ with lib;
 
         password = mkSecretOption {
           description = "Nginx simple auth credentials";
-          default = {
-            key = "test";
-            name = "test";
-          };
+          default = null;
         };
       };
 
@@ -32,7 +29,8 @@ with lib;
               containerPort = config.port;
             };
 
-            spec.template.spec.containers.nginx.env.name = mkIf (config.password != null) config.password;
+            spec.template.spec.containers.nginx.env.name =
+              mkIf (config.password != null) (secretToEnv config.password);
           }
         ];
 
