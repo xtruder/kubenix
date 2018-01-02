@@ -11,14 +11,22 @@ let
     nameToModule = moduleConfig:
     if isFunction moduleConfig then
       {name, ...}@args:
-        (moduleConfig (args // {name = module.name;})) // {_file = "module-${module.name}";}
+        (moduleConfig (args // {
+          name = module.name;
+          moduleDefinition = moduleDefinition;
+          module = module;
+        })) // {_file = "module-${module.name}";}
       else {name, ...}: moduleConfig // {_file = "module-${module.name}";};
   in [
       (import ./kubernetes.nix {
         customResourceDefinitions =
           config.kubernetes.resources.customResourceDefinitions;
       })
-      ./modules.nix (nameToModule moduleDefinition.module)
+      ./modules.nix
+      (nameToModule moduleDefinition.module)
+      {
+        config.kubernetes.defaults.all.metadata.namespace = mkDefault module.namespace;
+      }
      ] ++ config.kubernetes.defaultModuleConfiguration.all
        ++ (optionals (hasAttr moduleDefinition.name config.kubernetes.defaultModuleConfiguration)
          config.kubernetes.defaultModuleConfiguration.${moduleDefinition.name});
@@ -75,6 +83,12 @@ in {
           description = "Module name";
           type = types.str;
           default = name;
+        };
+
+        namespace = mkOption {
+          description = "Namespace where to deploy module";
+          type = types.str;
+          default = "default";
         };
 
         configuration = mkOption {
