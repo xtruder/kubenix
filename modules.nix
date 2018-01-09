@@ -15,6 +15,7 @@ let
           name = module.name;
           moduleDefinition = moduleDefinition;
           module = module;
+          k8s = k8s;
         })) // {_file = "module-${module.name}";}
       else {name, ...}: moduleConfig // {_file = "module-${module.name}";};
   in [
