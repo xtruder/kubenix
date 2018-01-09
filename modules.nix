@@ -7,24 +7,13 @@ let
   globalConfig = config;
 
   mkModuleOptions = moduleDefinition: module:
-  let
-    nameToModule = moduleConfig:
-    if isFunction moduleConfig then
-      {name, ...}@args:
-        (moduleConfig (args // {
-          name = module.name;
-          moduleDefinition = moduleDefinition;
-          module = module;
-          k8s = k8s;
-        })) // {_file = "module-${module.name}";}
-      else {name, ...}: moduleConfig // {_file = "module-${module.name}";};
-  in [
+    [
       (import ./kubernetes.nix {
         customResourceDefinitions =
           config.kubernetes.resources.customResourceDefinitions;
       })
       ./modules.nix
-      (nameToModule moduleDefinition.module)
+      (moduleDefinition.module)
       {
         config.kubernetes.defaults.all.metadata.namespace = mkDefault module.namespace;
       }
