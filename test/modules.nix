@@ -67,7 +67,5 @@ with lib;
     kubernetes.defaultModuleConfiguration.nginx = {
       kubernetes.defaults.deployments.spec.replicas = mkDefault 4;
     };
-
-    kubernetes.defaults.all.metadata.namespace = "test";
   };
 }

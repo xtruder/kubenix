@@ -249,10 +249,10 @@ let
         default = {};
       }) exportedDefinitions;
 
-      customResourceOptions = mapAttrs (name: crd:
+      customResourceOptions = mapAttrs (groupName: crd:
         mkOption {
           description = "Custom resource for ${name}";
-          type = types.attrsOf (types.submodule ({name, config, ...}: {
+          type = types.attrsOf (types.submodule ({name, ...}: {
             options = {
               apiVersion = mkOption {
                 description = "API version of custom resource";
@@ -278,6 +278,10 @@ let
                 default = {};
               };
             } // extraOptions;
+            config = mkMerge (
+              config.kubernetes.defaults.${groupName} ++
+              config.kubernetes.defaults.all
+            );
           }));
           default = {};
         }
@@ -297,20 +301,25 @@ let
   };
 
   versionOptions = {
-    "1.7" = (versionDefinitions."1.7").kubernetesResourceOptions // {
-      # kubernetes 1.7 supports crd, but does not have swagger definitions for some reason
-      customResourceDefinitions =
-        versionDefinitions."1.8".kubernetesResourceOptions.customResourceDefinitions;
+    "1.7" = versionDefinitions."1.7" // {
+      kubernetesResourceOptions = versionDefinitions."1.7".kubernetesResourceOptions // {
+        # kubernetes 1.7 supports crd, but does not have swagger definitions for some reason
+        customResourceDefinitions =
+          versionDefinitions."1.8".kubernetesResourceOptions.customResourceDefinitions;
+      };
     };
-    "1.8" = (versionDefinitions."1.8").kubernetesResourceOptions;
-    "1.9" = (versionDefinitions."1.9").kubernetesResourceOptions;
+    "1.8" = versionDefinitions."1.8";
+    "1.9" = versionDefinitions."1.9";
   };
 
   defaultOptions = mapAttrs (name: value: mkOption {
     description = "Kubernetes defaults for ${name} resources";
     type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
     default = [];
-  }) versionOptions.${config.kubernetes.version};
+  }) (
+    (versionOptions.${config.kubernetes.version}.kubernetesResourceOptions) //
+    (versionOptions.${config.kubernetes.version}.customResourceOptions)
+  );
 in {
   options.kubernetes.version = mkOption {
     description = "Kubernetes version to deploy to";
@@ -320,7 +329,7 @@ in {
 
   options.kubernetes.resources = mkOption {
     type = types.submodule {
-      options = versionOptions.${config.kubernetes.version};
+      options = versionOptions.${config.kubernetes.version}.kubernetesResourceOptions;
     };
     description = "Attribute set of kubernetes resources";
     default = {};
