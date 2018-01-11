@@ -9,6 +9,7 @@ let
   mkModuleOptions = moduleDefinition: module:
     [
       {
+        _file = "${module.name}";
         _module.args.k8s = k8s;
       }
       (import ./kubernetes.nix {
