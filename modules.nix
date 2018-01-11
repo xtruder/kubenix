@@ -52,6 +52,7 @@ let
         _file = "${module.name}";
         _module.args.k8s = k8s;
         _module.args.name = module.name;
+        _module.args.module = module;
       }
       (import ./kubernetes.nix {
         customResourceDefinitions =
