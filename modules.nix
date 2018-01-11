@@ -21,7 +21,6 @@ let
           modules = opts' ++ map (def: { _file = def.file; imports = [(coerce def.value)]; }) defs;
         in (evalModules {
           inherit modules;
-          args.name = module.name;
           prefix = loc;
         }).config;
       getSubOptions = prefix: (evalModules
@@ -52,6 +51,7 @@ let
       {
         _file = "${module.name}";
         _module.args.k8s = k8s;
+        _module.args.name = module.name;
       }
       (import ./kubernetes.nix {
         customResourceDefinitions =
