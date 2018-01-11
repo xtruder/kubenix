@@ -6,11 +6,52 @@ with import ./lib.nix { inherit pkgs lib; };
 let
   globalConfig = config;
 
+  # A submodule (like typed attribute set). See NixOS manual.
+  submodule = opts:
+    let
+      opts' = toList opts;
+      inherit (lib.modules) evalModules;
+    in
+    mkOptionType rec {
+      name = "submodule";
+      check = x: isAttrs x || isFunction x;
+      merge = loc: defs:
+        let
+          coerce = def: if isFunction def then def else { config = def; };
+          modules = opts' ++ map (def: { _file = def.file; imports = [(coerce def.value)]; }) defs;
+        in (evalModules {
+          inherit modules;
+          prefix = loc;
+        }).config;
+      getSubOptions = prefix: (evalModules
+        { modules = opts'; inherit prefix;
+          # This is a work-around due to the fact that some sub-modules,
+          # such as the one included in an attribute set, expects a "args"
+          # attribute to be given to the sub-module. As the option
+          # evaluation does not have any specific attribute name, we
+          # provide a default one for the documentation.
+          #
+          # This is mandatory as some option declaration might use the
+          # "name" attribute given as argument of the submodule and use it
+          # as the default of option declarations.
+          args.name = "&lt;name&gt;";
+        }).options;
+      getSubModules = opts';
+      substSubModules = m: submodule m;
+      functor = (defaultFunctor name) // {
+        # Merging of submodules is done as part of mergeOptionDecls, as we have to annotate
+        # each submodule with its location.
+        payload = [];
+        binOp = lhs: rhs: [];
+      };
+    };
+
   mkModuleOptions = moduleDefinition: module:
     [
       {
         _file = "${module.name}";
         _module.args.k8s = k8s;
+        _module.args.name = module.name;
       }
       (import ./kubernetes.nix {
         customResourceDefinitions =
@@ -87,7 +128,7 @@ in {
 
         configuration = mkOption {
           description = "Module configuration";
-          type = types.submodule {
+          type = submodule {
             imports = mkModuleOptions globalConfig.kubernetes.moduleDefinitions.${config.module} config;
           };
           default = {};
