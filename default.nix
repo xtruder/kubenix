@@ -6,7 +6,7 @@ with pkgs.lib;
 with import ./lib.nix { inherit pkgs; inherit (pkgs) lib; };
 
 let
-  evalKubernetesModules = configuration: evalModules {
+  evalKubernetesModules = configuration: evalModules rec {
     modules = [
       (import ./kubernetes.nix {})
       ./modules.nix configuration
@@ -14,7 +14,10 @@ let
     args = {
       inherit pkgs;
       name = "default";
-      k8s = { inherit loadJSON loadYAML toYAML toBase64 octalToDecimal mkSecretOption secretToEnv; };
+      k8s = import ./k8s.nix {
+        inherit pkgs;
+        inherit (pkgs) lib;
+      };
     };
   };
 
