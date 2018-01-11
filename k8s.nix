@@ -3,7 +3,7 @@
 with lib;
 with import ./lib.nix {inherit lib pkgs;};
 
-{
+rec {
   loadJSON = path: mkAllDefault (builtins.fromJSON (builtins.readFile path)) 1000;
 
   loadYAML = path: loadJSON (pkgs.runCommand "yaml-to-json" {
