@@ -8,6 +8,9 @@ let
 
   mkModuleOptions = moduleDefinition: module:
     [
+      {
+        _module.args.k8s = k8s;
+      }
       (import ./kubernetes.nix {
         customResourceDefinitions =
           config.kubernetes.resources.customResourceDefinitions;
