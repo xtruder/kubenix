@@ -138,6 +138,7 @@ in {
         module = mkOption {
           description = "Name of the module to use";
           type = types.str;
+          default = config.name;
         };
       };
     }));
