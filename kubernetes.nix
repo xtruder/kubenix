@@ -1,5 +1,3 @@
-{ customResourceDefinitions ? null }:
-
 { config, lib, k8s, pkgs, ... }:
 
 with lib;
@@ -251,7 +249,7 @@ let
 
       customResourceOptions = mapAttrs (groupName: crd:
         mkOption {
-          description = "Custom resource for ${name}";
+          description = "Custom resource for ${groupName}";
           type = types.attrsOf (types.submodule ({name, ...}: {
             options = {
               apiVersion = mkOption {
@@ -285,11 +283,7 @@ let
           }));
           default = {};
         }
-      ) (
-        if customResourceDefinitions == null
-        then config.kubernetes.resources.customResourceDefinitions
-        else customResourceDefinitions
-      );
+      ) config.kubernetes.resources.customResourceDefinitions;
     in {
       inherit swaggerDefinitions definitions exportedDefinitions kubernetesResourceOptions customResourceOptions;
     };

@@ -54,10 +54,7 @@ let
         _module.args.name = module.name;
         _module.args.module = module;
       }
-      (import ./kubernetes.nix {
-        customResourceDefinitions =
-          config.kubernetes.resources.customResourceDefinitions;
-      })
+      ./kubernetes.nix
       ./modules.nix
       (moduleDefinition.module)
       {
@@ -70,6 +67,11 @@ let
   prefixResources = resources: serviceName:
     mapAttrs (groupName: resources:
       mapAttrs' (name: resource: nameValuePair "${serviceName}-${name}" resource) resources
+    ) resources;
+
+  prefixGroupResources = resources: serviceName:
+    mapAttrs' (groupName: resources:
+      nameValuePair "${serviceName}-${groupName}" resources
     ) resources;
 
   defaultModuleConfigurationOptions = mapAttrs (name: moduleDefinition: mkOption {
@@ -153,7 +155,7 @@ in {
 
     kubernetes.customResources = mkMerge (
       mapAttrsToList (name: module:
-        prefixResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
+        prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
       ) config.kubernetes.modules
     );
 
