@@ -113,7 +113,7 @@ in {
   };
 
   options.kubernetes.modules = mkOption {
-    description = "Attribute set of module definitions";
+    description = "Attribute set of modules";
     default = {};
     type = types.attrsOf (types.submodule ({config, name, ...}: {
       options = {
