@@ -100,7 +100,6 @@ with lib;
     kubernetes.resources.services.nginx = loadJSON ./service.json;
 
     kubernetes.defaultModuleConfiguration.all = {
-      config.kubernetes.moduleDefinitions = config.kubernetes.moduleDefinitions;
       config.kubernetes.defaults.deployments.spec.replicas = 3;
     };
 

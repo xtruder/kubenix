@@ -161,6 +161,7 @@ in {
 
     kubernetes.defaultModuleConfiguration.all = {
       config.kubernetes.version = mkDefault config.kubernetes.version;
+      config.kubernetes.moduleDefinitions = config.kubernetes.moduleDefinitions;
     };
   };
 }
