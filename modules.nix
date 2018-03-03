@@ -132,7 +132,10 @@ in {
         configuration = mkOption {
           description = "Module configuration";
           type = submodule {
-            imports = mkModuleOptions globalConfig.kubernetes.moduleDefinitions.${config.module} config;
+            imports =
+              if hasAttr config.module globalConfig.kubernetes.moduleDefinitions
+              then mkModuleOptions globalConfig.kubernetes.moduleDefinitions.${config.module} config
+              else throw ''Kubernetes moduleDefinition "${config.module}" does not exist'';
           };
           default = {};
         };
