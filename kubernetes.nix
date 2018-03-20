@@ -308,7 +308,7 @@ let
 
   defaultOptions = mapAttrs (name: value: mkOption {
     description = "Kubernetes defaults for ${name} resources";
-    type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
+    type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
     default = [];
   }) (
     (versionOptions.${config.kubernetes.version}.kubernetesResourceOptions) //
@@ -334,7 +334,7 @@ in {
       options = defaultOptions // {
         all = mkOption {
           description = "Kubernetes defaults for all resources";
-          type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
+          type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
           default = [];
         };
       };

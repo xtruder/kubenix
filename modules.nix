@@ -76,7 +76,7 @@ let
 
   defaultModuleConfigurationOptions = mapAttrs (name: moduleDefinition: mkOption {
     description = "Module default configuration for ${name} module";
-    type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
+    type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
     default = [];
   }) config.kubernetes.moduleDefinitions;
 in {
@@ -104,7 +104,7 @@ in {
       options = defaultModuleConfigurationOptions // {
         all = mkOption {
           description = "Module default configuration for all modules";
-          type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
+          type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
           default = [];
         };
       };
