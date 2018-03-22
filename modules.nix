@@ -129,6 +129,12 @@ in {
           default = "default";
         };
 
+        labels = mkOption {
+          description = "Attribute set of module lables";
+          type = types.attrsOf types.str;
+          default = {};
+        };
+
         configuration = mkOption {
           description = "Module configuration";
           type = submodule {
