@@ -12,11 +12,18 @@ let
     hasAttr "type" def &&
     elem def.type ["string" "integer" "boolean" "object"];
 
+  str = mkOptionType {
+    name = "str";
+    description = "string";
+    check = isString;
+    merge = mergeEqualOption;
+  };
+
   mapType = def:
     if def.type == "string" then
       if hasAttr "format" def && def.format == "int-or-string"
-      then types.either types.int types.str
-      else types.str
+      then types.either types.int str
+      else str
     else if def.type == "integer" then types.int
     else if def.type == "boolean" then types.bool
     else if def.type == "object" then types.attrs
