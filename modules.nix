@@ -164,17 +164,21 @@ in {
   config = {
     kubernetes.resources = mkMerge (
       mapAttrsToList (name: module:
-        if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
-        then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) module.name
-        else moduleToAttrs module.configuration.kubernetes.resources
+        mkAllDefault (
+          if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
+          then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) module.name
+          else moduleToAttrs module.configuration.kubernetes.resources
+        ) 1000
       ) config.kubernetes.modules
     );
 
     kubernetes.customResources = mkMerge (
       mapAttrsToList (name: module:
-        if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
-        then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
-        else moduleToAttrs module.configuration.kubernetes.customResources
+        mkAllDefault (
+          if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
+          then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
+          else moduleToAttrs module.configuration.kubernetes.customResources
+        ) 1000
       ) config.kubernetes.modules
     );
 
