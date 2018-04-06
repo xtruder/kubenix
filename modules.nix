@@ -92,15 +92,9 @@ in {
         };
 
         prefixResources = mkOption {
-          description = "Whether resources should be automatically prefixed with module name";
+          description = "Whether resources should be automatically prefix";
           type = types.bool;
           default = true;
-        };
-
-        assignAsDefaults = mkOption {
-          description = "Whether to assign resources as defaults, this is usefull for module that add some functionality";
-          type = types.bool;
-          default = false;
         };
 
         module = mkOption {
@@ -169,30 +163,22 @@ in {
 
   config = {
     kubernetes.resources = mkMerge (
-      mapAttrsToList (name: module: let
-        moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
-        moduleConfig =
-          if moduleDefinition.prefixResources
+      mapAttrsToList (name: module:
+        mkAllDefault (
+          if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
           then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) module.name
-          else moduleToAttrs module.configuration.kubernetes.resources;
-      in
-        if moduleDefinition.assignAsDefaults
-        then mkAllDefault moduleConfig 1000
-        else moduleConfig
+          else moduleToAttrs module.configuration.kubernetes.resources
+        ) 1000
       ) config.kubernetes.modules
     );
 
     kubernetes.customResources = mkMerge (
-      mapAttrsToList (name: module: let
-        moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
-        moduleConfig =
+      mapAttrsToList (name: module:
+        mkAllDefault (
           if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
           then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
-          else moduleToAttrs module.configuration.kubernetes.customResources;
-      in
-        if moduleDefinition.assignAsDefaults
-        then mkAllDefault moduleConfig 1000
-        else moduleConfig
+          else moduleToAttrs module.configuration.kubernetes.customResources
+        ) 1000
       ) config.kubernetes.modules
     );
 
