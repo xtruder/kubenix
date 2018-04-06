@@ -58,7 +58,7 @@ let
       ./modules.nix
       (moduleDefinition.module)
       {
-        config.kubernetes.defaults.all.metadata.namespace = module.namespace;
+        config.kubernetes.defaults.all.metadata.namespace = mkOptionDefault module.namespace;
       }
      ] ++ config.kubernetes.defaultModuleConfiguration.all
        ++ (optionals (hasAttr moduleDefinition.name config.kubernetes.defaultModuleConfiguration)
