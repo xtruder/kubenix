@@ -18,6 +18,7 @@ let
         inherit pkgs;
         inherit (pkgs) lib;
       };
+      module = null;
     };
   };
 

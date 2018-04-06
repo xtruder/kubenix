@@ -1,10 +1,11 @@
-{ config, lib, pkgs, k8s, ... }:
+{ config, lib, pkgs, k8s, module ? null, ... }:
 
 with lib;
 with import ./lib.nix { inherit pkgs lib; };
 
 let
   globalConfig = config;
+  parentModule = module;
 
   # A submodule (like typed attribute set). See NixOS manual.
   submodule = opts:
@@ -138,7 +139,10 @@ in {
         namespace = mkOption {
           description = "Namespace where to deploy module";
           type = types.str;
-          default = "default";
+          default =
+            if parentModule != null
+            then parentModule.namespace
+            else "default";
         };
 
         labels = mkOption {
