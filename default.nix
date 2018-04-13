@@ -74,7 +74,7 @@ let
       then recursiveUpdate resourceDependencies filteredResources
       else filteredResources;
 
-    resources = removeNixOptions (
+    resources = unique (removeNixOptions (
       # custom resource definitions have to be allways created first
       (flattenResources (filterResources (groupName: name: resource:
         groupName == "customResourceDefinitions"
@@ -84,7 +84,7 @@ let
       (flattenResources (filterResources (groupName: name: resource:
         groupName != "customResourceDefinitions"
       ) finalResources))
-    );
+    ));
 
     kubernetesList = toKubernetesList resources;
 
