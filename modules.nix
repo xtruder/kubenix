@@ -177,7 +177,7 @@ in {
         moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
         moduleConfig =
           if moduleDefinition.prefixResources
-          then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) module.name
+          then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) name
           else moduleToAttrs module.configuration.kubernetes.resources;
       in
         if moduleDefinition.assignAsDefaults
@@ -191,7 +191,7 @@ in {
         moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
         moduleConfig =
           if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
-          then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) module.name
+          then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) name
           else moduleToAttrs module.configuration.kubernetes.customResources;
       in
         if moduleDefinition.assignAsDefaults
