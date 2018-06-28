@@ -1,4 +1,4 @@
-{ config, lib, pkgs, k8s, module ? null, ... }:
+{ config, options, lib, pkgs, k8s, module ? null, ... }:
 
 with lib;
 with import ./lib.nix { inherit pkgs lib; };
@@ -48,16 +48,33 @@ let
     };
 
   mkModuleOptions = moduleDefinition: module:
-    [
+    let
+      # gets file where module is defined by looking into moduleDefinitions
+      # option.
+      file =
+        elemAt options.kubernetes.moduleDefinitions.files (
+          (findFirst (i: i > 0) 0
+            (imap
+              (i: def: if hasAttr module.module def then i else 0)
+              options.kubernetes.moduleDefinitions.definitions
+            )
+          ) - 1
+        );
+
+      injectModuleAttrs = module: attrs: (
+        if isFunction module then args: (applyIfFunction file module args) // attrs
+        else if isAttrs mkOptionDefault.module then module // attrs
+        else module
+      );
+    in [
       {
-        _file = "${module.name}";
         _module.args.k8s = k8s;
         _module.args.name = module.name;
         _module.args.module = module;
       }
       ./kubernetes.nix
       ./modules.nix
-      (moduleDefinition.module)
+      (injectModuleAttrs moduleDefinition.module {_file = file;})
       {
         config.kubernetes.defaults.all.metadata.namespace = mkOptionDefault module.namespace;
       }
@@ -201,6 +218,7 @@ in {
     );
 
     kubernetes.defaultModuleConfiguration.all = {
+      _file = head options.kubernetes.defaultModuleConfiguration.files;
       config.kubernetes.version = mkDefault config.kubernetes.version;
       config.kubernetes.moduleDefinitions = config.kubernetes.moduleDefinitions;
     };
