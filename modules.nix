@@ -97,6 +97,11 @@ let
     type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
     default = [];
   }) config.kubernetes.moduleDefinitions;
+
+  getModuleDefinition = name:
+    if hasAttr name config.kubernetes.moduleDefinitions
+    then config.kubernetes.moduleDefinitions.${name}
+    else throw ''requested kubernetes moduleDefinition with name "${name}" does not exist'';
 in {
   options.kubernetes.moduleDefinitions = mkOption {
     description = "Attribute set of module definitions";
@@ -171,10 +176,7 @@ in {
         configuration = mkOption {
           description = "Module configuration";
           type = submodule {
-            imports =
-              if hasAttr config.module globalConfig.kubernetes.moduleDefinitions
-              then mkModuleOptions globalConfig.kubernetes.moduleDefinitions.${config.module} config
-              else throw ''Kubernetes moduleDefinition "${config.module}" does not exist'';
+            imports = mkModuleOptions (getModuleDefinition config.module) config;
           };
           default = {};
         };
@@ -191,7 +193,7 @@ in {
   config = {
     kubernetes.resources = mkMerge (
       mapAttrsToList (name: module: let
-        moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
+        moduleDefinition = getModuleDefinition module.module;
         moduleConfig =
           if moduleDefinition.prefixResources
           then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) name
@@ -205,9 +207,9 @@ in {
 
     kubernetes.customResources = mkMerge (
       mapAttrsToList (name: module: let
-        moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
+        moduleDefinition = getModuleDefinition module.module;
         moduleConfig =
-          if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
+          if moduleDefinition.prefixResources
           then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) name
           else moduleToAttrs module.configuration.kubernetes.customResources;
       in
