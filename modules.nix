@@ -1,4 +1,4 @@
-{ config, lib, pkgs, k8s, module ? null, ... }:
+{ config, options, lib, pkgs, k8s, module ? null, ... }:
 
 with lib;
 with import ./lib.nix { inherit pkgs lib; };
@@ -48,16 +48,33 @@ let
     };
 
   mkModuleOptions = moduleDefinition: module:
-    [
+    let
+      # gets file where module is defined by looking into moduleDefinitions
+      # option.
+      file =
+        elemAt options.kubernetes.moduleDefinitions.files (
+          (findFirst (i: i > 0) 0
+            (imap
+              (i: def: if hasAttr module.module def then i else 0)
+              options.kubernetes.moduleDefinitions.definitions
+            )
+          ) - 1
+        );
+
+      injectModuleAttrs = module: attrs: (
+        if isFunction module then args: (applyIfFunction file module args) // attrs
+        else if isAttrs mkOptionDefault.module then module // attrs
+        else module
+      );
+    in [
       {
-        _file = "${module.name}";
         _module.args.k8s = k8s;
         _module.args.name = module.name;
         _module.args.module = module;
       }
       ./kubernetes.nix
       ./modules.nix
-      (moduleDefinition.module)
+      (injectModuleAttrs moduleDefinition.module {_file = file;})
       {
         config.kubernetes.defaults.all.metadata.namespace = mkOptionDefault module.namespace;
       }
@@ -80,6 +97,11 @@ let
     type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
     default = [];
   }) config.kubernetes.moduleDefinitions;
+
+  getModuleDefinition = name:
+    if hasAttr name config.kubernetes.moduleDefinitions
+    then config.kubernetes.moduleDefinitions.${name}
+    else throw ''requested kubernetes moduleDefinition with name "${name}" does not exist'';
 in {
   options.kubernetes.moduleDefinitions = mkOption {
     description = "Attribute set of module definitions";
@@ -154,10 +176,7 @@ in {
         configuration = mkOption {
           description = "Module configuration";
           type = submodule {
-            imports =
-              if hasAttr config.module globalConfig.kubernetes.moduleDefinitions
-              then mkModuleOptions globalConfig.kubernetes.moduleDefinitions.${config.module} config
-              else throw ''Kubernetes moduleDefinition "${config.module}" does not exist'';
+            imports = mkModuleOptions (getModuleDefinition config.module) config;
           };
           default = {};
         };
@@ -174,7 +193,7 @@ in {
   config = {
     kubernetes.resources = mkMerge (
       mapAttrsToList (name: module: let
-        moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
+        moduleDefinition = getModuleDefinition module.module;
         moduleConfig =
           if moduleDefinition.prefixResources
           then prefixResources (moduleToAttrs module.configuration.kubernetes.resources) name
@@ -188,9 +207,9 @@ in {
 
     kubernetes.customResources = mkMerge (
       mapAttrsToList (name: module: let
-        moduleDefinition = config.kubernetes.moduleDefinitions."${module.module}";
+        moduleDefinition = getModuleDefinition module.module;
         moduleConfig =
-          if config.kubernetes.moduleDefinitions."${module.module}".prefixResources
+          if moduleDefinition.prefixResources
           then prefixGroupResources (moduleToAttrs module.configuration.kubernetes.customResources) name
           else moduleToAttrs module.configuration.kubernetes.customResources;
       in
@@ -201,6 +220,7 @@ in {
     );
 
     kubernetes.defaultModuleConfiguration.all = {
+      _file = head options.kubernetes.defaultModuleConfiguration.files;
       config.kubernetes.version = mkDefault config.kubernetes.version;
       config.kubernetes.moduleDefinitions = config.kubernetes.moduleDefinitions;
     };

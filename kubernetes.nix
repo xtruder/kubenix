@@ -325,7 +325,7 @@ in {
   options.kubernetes.version = mkOption {
     description = "Kubernetes version to deploy to";
     type = types.enum (attrNames versionDefinitions);
-    default = "1.7";
+    default = "1.9";
   };
 
   options.kubernetes.resources = mkOption {
