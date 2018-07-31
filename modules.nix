@@ -7,6 +7,8 @@ let
   globalConfig = config;
   parentModule = module;
 
+  mkOptionDefault = mkOverride 1001;
+
   # A submodule (like typed attribute set). See NixOS manual.
   submodule = opts:
     let
