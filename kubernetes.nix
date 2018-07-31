@@ -59,6 +59,8 @@ let
 
   refType = attr: head (tail (tail (splitString "/" attr."$ref")));
 
+  mkOptionDefault = mkOverride 1001;
+
   extraOptions = {
     nix.dependencies = mkOption {
       description = "List of resources that resource depends on";
