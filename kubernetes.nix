@@ -301,6 +301,8 @@ let
     "1.7" = definitionsForKubernetesSpecs ./specs/1.7/swagger.json;
     "1.8" = definitionsForKubernetesSpecs ./specs/1.8/swagger.json;
     "1.9" = definitionsForKubernetesSpecs ./specs/1.9/swagger.json;
+    "1.10" = definitionsForKubernetesSpecs ./specs/1.10/swagger.json;
+    "1.11" = definitionsForKubernetesSpecs ./specs/1.11/swagger.json;
   };
 
   versionOptions = {
@@ -313,6 +315,8 @@ let
     };
     "1.8" = versionDefinitions."1.8";
     "1.9" = versionDefinitions."1.9";
+    "1.10" = versionDefinitions."1.10";
+    "1.11" = versionDefinitions."1.11";
   };
 
   defaultOptions = mapAttrs (name: value: mkOption {
