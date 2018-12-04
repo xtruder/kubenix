@@ -98,8 +98,20 @@ let
     };
   in pkgs.writeText "resources.json" (builtins.toJSON hashedList);
 
+  buildTest = test: version: buildResources {
+    configuration = {
+      require = [test {
+        config.kubernetes.version = version;
+      }];
+    };
+  };
+
 in {
   inherit buildResources;
 
-  test = buildResources { configuration = ./test/default.nix; };
+  tests."k8s-1_7" = buildTest ./test/default.nix "1.7";
+  tests."k8s-1_8" = buildTest ./test/default.nix "1.8";
+  tests."k8s-1_9" = buildTest ./test/default.nix "1.9";
+  tests."k8s-1_10" = buildTest ./test/default.nix "1.10";
+  tests."k8s-1_11" = buildTest ./test/default.nix "1.11";
 }
