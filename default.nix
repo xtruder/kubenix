@@ -47,7 +47,8 @@ let
   buildResources = {
     configuration ? {},
     resourceFilter ? groupName: name: resource: true,
-    withDependencies ? true
+    withDependencies ? true,
+    writeJSON ? true
   }: let
     evaldConfiguration = evalKubernetesModules configuration;
 
@@ -96,7 +97,12 @@ let
         metadata.labels."kubenix/build" = listHash;
       }) kubernetesList.items;
     };
-  in pkgs.writeText "resources.json" (builtins.toJSON hashedList);
+
+    result = if writeJSON then
+      pkgs.writeText "resources.json" (builtins.toJSON hashedList)
+      else hashedList;
+  in
+    result;
 
   buildTest = test: version: buildResources {
     configuration = {
