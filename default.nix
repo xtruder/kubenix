@@ -1,105 +1,31 @@
-{
-  pkgs ? import <nixpkgs> {}
-}:
-
-with pkgs.lib;
-with import ./lib.nix { inherit pkgs; inherit (pkgs) lib; };
+{ pkgs ? import <nixpkgs> {}, lib ? pkgs.lib }:
 
 let
-  evalKubernetesModules = configuration: evalModules rec {
+  lib' = lib.extend (lib: self: import ./lib.nix { inherit lib pkgs; });
+
+  specialArgs = {
+    inherit kubenix;
+  };
+
+  evalKubernetesModules = configuration: lib'.evalModules rec {
     modules = [
-      ./kubernetes.nix
-      ./modules.nix configuration
+      configuration
     ];
     args = {
       inherit pkgs;
       name = "default";
-      k8s = import ./k8s.nix {
-        inherit pkgs;
-        inherit (pkgs) lib;
-      };
-      module = null;
     };
+    inherit specialArgs;
   };
 
-  flattenResources = resources: flatten (
-    mapAttrsToList (name: resourceGroup:
-      mapAttrsToList (name: resource: resource) resourceGroup
-    ) resources
-  );
+  buildResources = configuration:
+    (evalKubernetesModules configuration).config.kubernetes.generated;
 
-  filterResources = resourceFilter: resources:
-    mapAttrs (groupName: resources:
-      (filterAttrs (name: resource:
-        resourceFilter groupName name resource
-      ) resources)
-    ) resources;
+  kubenix = {
+    inherit buildResources kubenix;
 
-  toKubernetesList = resources: {
-    kind = "List";
-    apiVersion = "v1";
-    items = resources;
+    lib = lib';
+    submodules = ./submodules.nix;
+    k8s = ./k8s;
   };
-
-  removeNixOptions = resources:
-    map (filterAttrs (name: attr: name != "nix")) resources;
-
-  buildResources = {
-    configuration ? {},
-    resourceFilter ? groupName: name: resource: true,
-    withDependencies ? true
-  }: let
-    evaldConfiguration = evalKubernetesModules configuration;
-
-    allResources = moduleToAttrs (
-      evaldConfiguration.config.kubernetes.resources //
-      evaldConfiguration.config.kubernetes.customResources
-    );
-
-    filteredResources = filterResources resourceFilter allResources;
-
-    allDependencies = flatten (
-      mapAttrsToList (groupName: resources:
-        mapAttrsToList (name: resource: resource.nix.dependencies) resources
-      ) filteredResources
-    );
-
-    resourceDependencies =
-      filterResources (groupName: name: resource:
-        elem "${groupName}/${name}" allDependencies
-      ) allResources;
-
-    finalResources =
-      if withDependencies
-      then recursiveUpdate resourceDependencies filteredResources
-      else filteredResources;
-
-    resources = unique (removeNixOptions (
-      # custom resource definitions have to be allways created first
-      (flattenResources (filterResources (groupName: name: resource:
-        groupName == "customResourceDefinitions"
-      ) finalResources)) ++
-
-      # everything but custom resource definitions
-      (flattenResources (filterResources (groupName: name: resource:
-        groupName != "customResourceDefinitions"
-      ) finalResources))
-    ));
-
-    kubernetesList = toKubernetesList resources;
-
-    listHash = builtins.hashString "sha1" (builtins.toJSON kubernetesList);
-
-    hashedList = kubernetesList // {
-      labels."kubenix/build" = listHash;
-      items = map (resource: recursiveUpdate resource {
-        metadata.labels."kubenix/build" = listHash;
-      }) kubernetesList.items;
-    };
-  in pkgs.writeText "resources.json" (builtins.toJSON hashedList);
-
-in {
-  inherit buildResources;
-
-  test = buildResources { configuration = ./test/default.nix; };
-}
+in kubenix
