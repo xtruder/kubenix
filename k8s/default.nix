@@ -88,8 +88,6 @@ in {
         options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
           description = cr.description;
           type = types.attrsOf (types.submodule ({name, ...}: {
-            imports = [cr.module];
-
             options = {
               apiVersion = mkOption {
                 description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources";
@@ -104,6 +102,12 @@ in {
               metadata = mkOption {
                 description = "Standard object metadata; More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata.";
                 type = types.nullOr (types.submodule config.definitions."io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta");
+              };
+
+              spec = mkOption {
+                description = "Module spec";
+                type = types.submodule cr.module;
+                default = {};
               };
             };
 
