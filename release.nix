@@ -27,6 +27,7 @@ in {
     imports = [
       kubenix.k8s
       kubenix.submodules
+      kubenix.istio
     ];
 
     config = {
@@ -93,6 +94,32 @@ in {
 
       submodules.instances.test = {
         submodule = "test";
+      };
+
+      kubernetes.api."networking.istio.io"."v1alpha3".Gateway.test.spec = {
+        selector.istio = "ingressgateway";
+        servers = [{
+          port = {
+            number = 80;
+            name = "http";
+            protocol = "HTTP";
+          };
+          hosts = ["host.example.com"];
+          tls.httpsRedirect = true;
+        } {
+          port = {
+            number = 443;
+            name = "https";
+            protocol = "HTTPS";
+          };
+          hosts = ["host.example.com"];
+          tls = {
+            mode = "SIMPLE";
+            serverCertificate = "/path/to/server.crt";
+            privateKey = "/path/to/private.key";
+            caCertificates = "/path/to/ca.crt";
+          };
+        }];
       };
 
       #kubernetes.api."cloud.google.com".v1beta1.BackendConfig.my-backend = {

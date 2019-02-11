@@ -27,5 +27,6 @@ let
     lib = lib';
     submodules = ./submodules.nix;
     k8s = ./k8s;
+    istio = ./istio;
   };
 in kubenix
