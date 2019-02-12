@@ -1,26 +1,37 @@
 {pkgs ? import <nixpkgs> {}}:
 
 let
-  generate = path: import ./k8s/generator.nix {
+  generateK8S = path: import ./k8s/generator.nix {
     inherit pkgs;
     inherit (pkgs) lib;
     inherit path;
   };
 
+  generateIstio = spec: import ./istio/generator.nix {
+    inherit pkgs;
+    inherit (pkgs) lib;
+    inherit spec;
+  };
+
   kubenix = import ./. { inherit pkgs; };
 in {
-  generate = pkgs.linkFarm "k8s-generated.nix" [{
+  generate.k8s = pkgs.linkFarm "k8s-generated.nix" [{
     name = "v1.7.nix";
-    path = generate ./k8s/specs/1.7/swagger.json;
+    path = generateK8S ./k8s/specs/1.7/swagger.json;
   } {
     name = "v1.8.nix";
-    path = generate ./k8s/specs/1.8/swagger.json;
+    path = generateK8S ./k8s/specs/1.8/swagger.json;
   } {
     name = "v1.9.nix";
-    path = generate ./k8s/specs/1.9/swagger.json;
+    path = generateK8S ./k8s/specs/1.9/swagger.json;
   } {
     name = "v1.10.nix";
-    path = generate ./k8s/specs/1.10/swagger.json;
+    path = generateK8S ./k8s/specs/1.10/swagger.json;
+  }];
+
+  generate.istio = pkgs.linkFarm "istio-generated.nix" [{
+    name = "latest.nix";
+    path = generateIstio ./istio/istio-schema.json;
   }];
 
   test = kubenix.buildResources ({lib, config, kubenix, ...}: with lib; {
