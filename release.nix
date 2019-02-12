@@ -1,6 +1,10 @@
 {pkgs ? import <nixpkgs> {}}:
 
 let
+  kubenix = import ./. { inherit pkgs; };
+
+  lib = kubenix.lib;
+
   generateK8S = path: import ./k8s/generator.nix {
     inherit pkgs;
     inherit (pkgs) lib;
@@ -12,8 +16,6 @@ let
     inherit (pkgs) lib;
     inherit spec;
   };
-
-  kubenix = import ./. { inherit pkgs; };
 in {
   generate.k8s = pkgs.linkFarm "k8s-generated.nix" [{
     name = "v1.7.nix";
@@ -34,152 +36,158 @@ in {
     path = generateIstio ./istio/istio-schema.json;
   }];
 
-  test = kubenix.buildResources ({lib, config, kubenix, ...}: with lib; {
-    imports = [
-      kubenix.k8s
-      kubenix.submodules
-      kubenix.istio
-    ];
+  test = import ./test {
+    inherit pkgs lib kubenix;
+  };
 
-    config = {
-      kubernetes.version = "1.10";
-
-      kubernetes.api.defaults.all.metadata.namespace = mkDefault "my-namespace";
-
-      submodules.defaults = {config, parentConfig, ...}: {
-        kubernetes = mkIf (hasAttr "kubernetes" config) {
-          version = mkDefault parentConfig.kubernetes.version;
-          api.defaults = mkDefault parentConfig.kubernetes.api.defaults;
-        };
-      };
-
-      submodules.imports = [
-        # import nginx submodule
-        ./examples/module/nginx.nix
-
-        # import of patched nginx submodule
-        {
-          modules = [./examples/module/nginx.nix ({config, ...}: {
-            config = {
-              submodule.version = mkForce "1.0-xtruder";
-              args.image = "xtruder/nginx";
-
-              submodules.instances.test2 = {
-                submodule = "test";
-              };
-
-              kubernetes.objects = config.submodules.instances.test2.config.kubernetes.objects;
-            };
-          })];
-        }
-
-        # definition of test submodule
-        {
-          module = {submodule, ...}: {
-            submodule.name = "test";
-
-            imports = [
-              kubenix.k8s
-            ];
-
-            kubernetes.api.Pod.my-pod = {
-              metadata.name = submodule.name;
-            };
-          };
-        }
+  test-old = kubenix.buildResources ({
+    module = {lib, config, kubenix, ...}: with lib; {
+      imports = [
+        kubenix.k8s
+        kubenix.submodules
+        kubenix.istio
       ];
 
-      submodules.instances.nginx-default = {
-        submodule = "nginx";
-      };
+      config = {
+        kubernetes.version = "1.10";
 
-      submodules.instances.nginx-xtruder = {
-        submodule = "nginx";
-        version = "1.0-xtruder";
+        kubernetes.api.defaults.all.metadata.namespace = mkDefault "my-namespace";
 
-        config = {
-          args.replicas = 9;
-          kubernetes.api.Deployment.nginx.metadata.namespace = "other-namespace";
+        submodules.defaults = {config, parentConfig, ...}: {
+          kubernetes = mkIf (hasAttr "kubernetes" config) {
+            version = mkDefault parentConfig.kubernetes.version;
+            api.defaults = mkDefault parentConfig.kubernetes.api.defaults;
+          };
         };
-      };
 
-      submodules.instances.test = {
-        submodule = "test";
-      };
+        submodules.imports = [
+          # import nginx submodule
+          ./examples/module/nginx.nix
 
-      kubernetes.api."networking.istio.io"."v1alpha3".Gateway.test.spec = {
-        selector.istio = "ingressgateway";
-        servers = [{
-          port = {
-            number = 80;
-            name = "http";
-            protocol = "HTTP";
+          # import of patched nginx submodule
+          {
+            modules = [./examples/module/nginx.nix ({config, ...}: {
+              config = {
+                submodule.version = mkForce "1.0-xtruder";
+                args.image = "xtruder/nginx";
+
+                submodules.instances.test2 = {
+                  submodule = "test";
+                };
+
+                kubernetes.objects = config.submodules.instances.test2.config.kubernetes.objects;
+              };
+            })];
+          }
+
+          # definition of test submodule
+          {
+            module = {submodule, ...}: {
+              submodule.name = "test";
+
+              imports = [
+                kubenix.k8s
+              ];
+
+              kubernetes.api.Pod.my-pod = {
+                metadata.name = submodule.name;
+              };
+            };
+          }
+        ];
+
+        submodules.instances.nginx-default = {
+          submodule = "nginx";
+        };
+
+        submodules.instances.nginx-xtruder = {
+          submodule = "nginx";
+          version = "1.0-xtruder";
+
+          config = {
+            args.replicas = 9;
+            kubernetes.api.Deployment.nginx.metadata.namespace = "other-namespace";
           };
-          hosts = ["host.example.com"];
-          tls.httpsRedirect = true;
-        } {
-          port = {
-            number = 443;
-            name = "https";
-            protocol = "HTTPS";
-          };
-          hosts = ["host.example.com"];
-          tls = {
-            mode = "SIMPLE";
-            serverCertificate = "/path/to/server.crt";
-            privateKey = "/path/to/private.key";
-            caCertificates = "/path/to/ca.crt";
-          };
-        }];
-      };
+        };
 
-      #kubernetes.api."cloud.google.com".v1beta1.BackendConfig.my-backend = {
-      #};
+        submodules.instances.test = {
+          submodule = "test";
+        };
 
-      #modules.nginx1 = {
-        #args = {
-          #replicas = 2;
+        kubernetes.api."networking.istio.io"."v1alpha3".Gateway.test.spec = {
+          selector.istio = "ingressgateway";
+          servers = [{
+            port = {
+              number = 80;
+              name = "http";
+              protocol = "HTTP";
+            };
+            hosts = ["host.example.com"];
+            tls.httpsRedirect = true;
+          } {
+            port = {
+              number = 443;
+              name = "https";
+              protocol = "HTTPS";
+            };
+            hosts = ["host.example.com"];
+            tls = {
+              mode = "SIMPLE";
+              serverCertificate = "/path/to/server.crt";
+              privateKey = "/path/to/private.key";
+              caCertificates = "/path/to/ca.crt";
+            };
+          }];
+        };
+
+        #kubernetes.api."cloud.google.com".v1beta1.BackendConfig.my-backend = {
         #};
 
-        #kubernetes.api.defaults.deployments = {
-          #spec.replicas = mkForce 3;
-        #};
+        #modules.nginx1 = {
+          #args = {
+            #replicas = 2;
+          #};
 
-        #kubernetes.customResources = [{
-          #group = "cloud.google.com";
-          #version = "v1beta1";
-          #kind = "BackendConfig";
-          #plural = "backendconfigs";
-          #description = "Custom resource";
-          #module = {
-            #options.spec = {
-              #cdn = mkOption {
-                #description = "My cdn";
-                #type = types.str;
-                #default = "test";
+          #kubernetes.api.defaults.deployments = {
+            #spec.replicas = mkForce 3;
+          #};
+
+          #kubernetes.customResources = [{
+            #group = "cloud.google.com";
+            #version = "v1beta1";
+            #kind = "BackendConfig";
+            #plural = "backendconfigs";
+            #description = "Custom resource";
+            #module = {
+              #options.spec = {
+                #cdn = mkOption {
+                  #description = "My cdn";
+                  #type = types.str;
+                  #default = "test";
+                #};
               #};
             #};
+          #}];
+        #};
+
+        #modules.nginx2 = {
+          #args = {
+            #replicas = 2;
           #};
-        #}];
-      #};
 
-      #modules.nginx2 = {
-        #args = {
-          #replicas = 2;
+          #kubernetes.api.defaults.deployments = {
+            #spec.replicas = mkForce 3;
+          #};
         #};
 
-        #kubernetes.api.defaults.deployments = {
-          #spec.replicas = mkForce 3;
-        #};
-      #};
+        kubernetes.objects = mkMerge [
+          config.submodules.instances.nginx-default.config.kubernetes.objects
+          config.submodules.instances.nginx-xtruder.config.kubernetes.objects
+          config.submodules.instances.test.config.kubernetes.objects
+        ];
 
-      kubernetes.objects = mkMerge [
-        config.submodules.instances.nginx-default.config.kubernetes.objects
-        config.submodules.instances.nginx-xtruder.config.kubernetes.objects
-        config.submodules.instances.test.config.kubernetes.objects
-      ];
-
-      #kubernetes.customResources = config.modules.nginx1.kubernetes.customResources;
+        #kubernetes.customResources = config.modules.nginx1.kubernetes.customResources;
+      };
     };
   });
 }

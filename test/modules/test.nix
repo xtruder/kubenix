@@ -1,0 +1,41 @@
+{ lib, ... }:
+
+with lib;
+
+{
+  options.test = {
+    name = mkOption {
+      description = "Test name";
+      type = types.str;
+    };
+
+    description = mkOption {
+      description = "Test description";
+      type = types.str;
+    };
+
+    assertions = mkOption {
+      type = types.listOf (types.submodule {
+        options = {
+          assertion = mkOption {
+            description = "assertion value";
+            type = types.bool;
+            default = false;
+          };
+
+          message = mkOption {
+            description = "assertion message";
+            type = types.str;
+          };
+        };
+      });
+      default = [];
+      example = [ { assertion = false; message = "you can't enable this for that reason"; } ];
+      description = ''
+        This option allows modules to express conditions that must
+        hold for the evaluation of the system configuration to
+        succeed, along with associated error messages for the user.
+      '';
+    };
+  };
+}
