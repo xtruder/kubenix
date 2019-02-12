@@ -3,26 +3,25 @@
 let
   lib' = lib.extend (lib: self: import ./lib.nix { inherit lib pkgs; });
 
-  specialArgs = {
+  specialArgs' = {
     inherit kubenix;
   };
 
-  evalKubernetesModules = configuration: lib'.evalModules rec {
-    modules = [
-      configuration
-    ];
+  evalKubernetesModules = {module ? null, modules ? [module], specialArgs ? specialArgs', ...}@attrs: let
+    attrs' = lib.filterAttrs (n: _: n != "module") attrs;
+  in lib'.evalModules (attrs' // {
+    inherit specialArgs modules;
     args = {
       inherit pkgs;
       name = "default";
     };
-    inherit specialArgs;
-  };
+  });
 
-  buildResources = configuration:
-    (evalKubernetesModules configuration).config.kubernetes.generated;
+  buildResources = args:
+    (evalKubernetesModules args).config.kubernetes.generated;
 
   kubenix = {
-    inherit buildResources kubenix;
+    inherit evalKubernetesModules buildResources kubenix;
 
     lib = lib';
     submodules = ./submodules.nix;
