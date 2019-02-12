@@ -1,6 +1,2 @@
-language: node_js
-node_js:
-  - v5
-  - v4
-  - '0.12'
-  - '0.10'
+language: nix
+script: nix-build release.nix -A test -A test-old -A generate.istio -A generate.k8s
