@@ -67,7 +67,7 @@ let
       version = mkOption {
         description = "Module version";
         type = types.str;
-        default = "0.0.0";
+        default = null;
       };
 
       passthru = mkOption {
