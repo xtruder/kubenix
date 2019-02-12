@@ -4,6 +4,15 @@ with lib;
 
 let
 in rec {
+  moduleToAttrs = value:
+    if isAttrs value
+    then mapAttrs (n: v: moduleToAttrs v) (filterAttrs (n: v: !(hasPrefix "_" n) && v != null) value)
+
+    else if isList value
+    then map (v: moduleToAttrs v) value
+
+    else value;
+
   mkOptionDefault = mkOverride 1001;
 
   mkAllDefault = value: priority:
