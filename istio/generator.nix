@@ -188,7 +188,7 @@ let
     }
   ) swagger.definitions);
 
-  genResources = swagger: mapAttrsToList (name: property: rec {
+  genResources = swagger: (mapAttrsToList (name: property: rec {
     splittedType = splitString "." (removePrefix "me.snowdrop.istio.api." property.javaType);
     group = (concatStringsSep "." (take ((length splittedType) - 2) splittedType)) + ".istio.io";
     kind = removeSuffix "Spec" (last splittedType);
@@ -196,9 +196,18 @@ let
     ref = removePrefix "#/definitions/" property."$ref";
   })
   (filterAttrs (name: property:
-    hasPrefix "me.snowdrop.istio.api" property.javaType &&
+    (hasPrefix "me.snowdrop.istio.api" property.javaType) &&
     hasSuffix "Spec" property.javaType
-  ) swagger.properties);
+  ) swagger.properties)) ++ (mapAttrsToList (name: property: rec {
+    splittedType = splitString "." (removePrefix "me.snowdrop.istio.mixer." property.javaType);
+    group = "config.istio.io";
+    version = "v1alpha2";
+    kind = head (tail splittedType);
+    ref = removePrefix "#/definitions/" property."$ref";
+  }) (filterAttrs (name: property:
+    (hasPrefix "me.snowdrop.istio.mixer" property.javaType) &&
+    hasSuffix "Spec" property.javaType
+  ) swagger.properties));
 
   swagger = fetchSpecs spec;
 
