@@ -5,10 +5,10 @@ let
 
   lib = kubenix.lib;
 
-  generateK8S = path: import ./k8s/generator.nix {
+  generateK8S = spec: import ./k8s/generator.nix {
     inherit pkgs;
     inherit (pkgs) lib;
-    inherit path;
+    inherit spec;
   };
 
   generateIstio = spec: import ./istio/generator.nix {
@@ -29,6 +29,15 @@ in {
   } {
     name = "v1.10.nix";
     path = generateK8S ./k8s/specs/1.10/swagger.json;
+  } {
+    name = "v1.11.nix";
+    path = generateK8S ./k8s/specs/1.11/swagger.json;
+  } {
+    name = "v1.12.nix";
+    path = generateK8S ./k8s/specs/1.12/swagger.json;
+  } {
+    name = "v1.13.nix";
+    path = generateK8S ./k8s/specs/1.13/swagger.json;
   }];
 
   generate.istio = pkgs.linkFarm "istio-generated.nix" [{

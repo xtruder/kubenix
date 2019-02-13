@@ -75,8 +75,8 @@ in {
 
   options.kubernetes.version = mkOption {
     description = "Kubernetes version to use";
-    type = types.enum ["1.7" "1.8" "1.9" "1.10"];
-    default = "1.10";
+    type = types.enum ["1.7" "1.8" "1.9" "1.10" "1.11" "1.12" "1.13"];
+    default = "1.13";
   };
 
   options.kubernetes.api = mkOption {
