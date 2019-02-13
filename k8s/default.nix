@@ -152,11 +152,12 @@ in {
         description = mkOption {
           description = "CRD description";
           type = types.str;
+          default = "";
         };
 
         module = mkOption {
           description = "CRD module";
-          default = {};
+          default = types.unspecified;
         };
       };
     }));

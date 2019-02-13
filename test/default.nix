@@ -16,6 +16,8 @@ with lib;
       testing.tests = [
         ./k8s/simple.nix
         ./k8s/deployment.nix
+        ./k8s/crd.nix
+        ./k8s/1.13/crd.nix
         ./submodules/simple.nix
       ];
     }
