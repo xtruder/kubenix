@@ -1,7 +1,7 @@
 { config, test, kubenix, ... }:
 
 let
-  cfg = config.kubernetes.api.Pod.nginx;
+  cfg = config.kubernetes.api.pods.nginx;
 in {
   imports = [
     kubenix.k8s
@@ -19,5 +19,5 @@ in {
     }];
   };
 
-  kubernetes.api.Pod.nginx = {};
+  kubernetes.api.pods.nginx = {};
 }

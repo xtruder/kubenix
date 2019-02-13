@@ -354,11 +354,11 @@ in {
   options = {${concatStrings (mapAttrsToList (name: resource: "
     \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = ${genResourceOptions resource};
   ") resources)}} // {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.kind}\" = ${genResourceOptions resource};
+    \"${resource.plural}\" = ${genResourceOptions resource};
   ") latestResourcesByKind)}};
 
   config = {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = config.\"${resource.kind}\";
+    \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = config.\"${resource.plural}\";
   ") latestResourcesByKind)}} // {
     inherit definitions;
 

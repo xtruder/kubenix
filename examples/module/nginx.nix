@@ -41,7 +41,7 @@ in {
       };
     };
 
-    kubernetes.api.Deployment.nginx = {
+    kubernetes.api.deployments.nginx = {
       metadata = {
         name = name;
         labels = {

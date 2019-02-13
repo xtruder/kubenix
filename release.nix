@@ -89,7 +89,7 @@ in {
                 kubenix.k8s
               ];
 
-              kubernetes.api.Pod.my-pod = {
+              kubernetes.api.pods.my-pod = {
                 metadata.name = submodule.name;
               };
             };
@@ -106,7 +106,7 @@ in {
 
           config = {
             args.replicas = 9;
-            kubernetes.api.Deployment.nginx.metadata.namespace = "other-namespace";
+            kubernetes.api.deployments.nginx.metadata.namespace = "other-namespace";
           };
         };
 

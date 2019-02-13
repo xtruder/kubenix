@@ -1,7 +1,7 @@
 { config, test, kubenix, ... }:
 
 let
-  cfg = config.kubernetes.api.Deployment.nginx;
+  cfg = config.kubernetes.api.deployments.nginx;
 in {
   imports = [
     kubenix.k8s
@@ -19,7 +19,7 @@ in {
     }];
   };
 
-  kubernetes.api.Deployment.nginx = {
+  kubernetes.api.deployments.nginx = {
     spec = {
       replicas = 10;
       selector.matchLabels.app = "nginx";
