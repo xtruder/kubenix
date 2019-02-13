@@ -14,6 +14,12 @@ with lib;
       type = types.str;
     };
 
+    enable = mkOption {
+      description = "Whether to enable test";
+      type = types.bool;
+      default = true;
+    };
+
     assertions = mkOption {
       type = types.listOf (types.submodule {
         options = {

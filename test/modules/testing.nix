@@ -25,16 +25,14 @@ in {
           inherit modules;
         }).config.test;
 
-        evaled = builtins.trace "testing ${test.name}" (kubenix.evalKubernetesModules {
-          inherit modules;
-        });
+        evaled =
+          if test.enable
+          then builtins.trace "testing ${test.name}" (kubenix.evalKubernetesModules {
+            inherit modules;
+          })
+          else {success = false;};
       in {
         options = {
-          module = mkOption {
-            description = "Module defining submodule";
-            type = types.unspecified;
-          };
-
           name = mkOption {
             description = "test name";
             type = types.str;
@@ -45,6 +43,17 @@ in {
             description = "test description";
             type = types.str;
             internal = true;
+          };
+
+          enable = mkOption {
+            description = "Whether to enable test";
+            type = types.bool;
+            internal = true;
+          };
+
+          module = mkOption {
+            description = "Module defining submodule";
+            type = types.unspecified;
           };
 
           evaled = mkOption {
@@ -73,11 +82,12 @@ in {
         };
 
         config = {
-          inherit (test) name description;
+          inherit (test) name description enable;
           assertions = mkIf config.evaled evaled.config.test.assertions;
           success = mkIf config.evaled (all (el: el.assertion) config.assertions);
         };
       })));
+      apply = tests: filter (test: test.enable) tests;
     };
 
     testing.success = mkOption {
@@ -94,7 +104,7 @@ in {
         tests = map (test: {
           inherit (test) name description evaled success;
           assertions = moduleToAttrs test.assertions;
-        }) cfg.tests;
+        }) (filter (test: test.enable) cfg.tests);
       });
     };
   };
