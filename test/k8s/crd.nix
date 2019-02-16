@@ -12,6 +12,7 @@ in {
   test = {
     name = "k8s/crd";
     description = "Simple test tesing CRD";
+    enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
       message = "should have group set";
       assertion = cfg.spec.group == "stable.example.com";

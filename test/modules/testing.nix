@@ -4,6 +4,7 @@ with lib;
 
 let
   cfg = config.testing;
+  parentConfig = config;
 in {
   options = {
     testing.throwError = mkOption {
@@ -12,13 +13,22 @@ in {
       default = true;
     };
 
+    testing.defaults = mkOption {
+      description = "Testing defaults";
+      type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
+      example = literalExample ''{config, ...}: {
+        kubernetes.version = config.kubernetes.version;
+      }'';
+      default = [];
+    };
+
     testing.tests = mkOption {
       description = "Attribute set of test cases";
       default = [];
       type = types.listOf (types.coercedTo types.path (module: {inherit module;}) (types.submodule ({config, ...}: let
         modules = [config.module ./test.nix {
           config._module.args.test = config;
-        }];
+        }] ++ cfg.defaults;
 
         test = (kubenix.evalKubernetesModules {
           check = false;
