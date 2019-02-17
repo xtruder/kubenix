@@ -19,7 +19,6 @@ let
           modules = opts' ++ map (def: { _file = def.file; imports = [(coerce def.value)]; }) defs;
         in (evalModules {
           inherit modules specialArgs;
-          args.name = last loc;
           prefix = loc;
         }).config;
       getSubOptions = prefix: (evalModules
@@ -203,9 +202,7 @@ in {
             description = "Submodule instance ${config.name} for ${submoduleDefinition.name}:${submoduleDefinition.version} config";
             type =  submoduleWithSpecialArgs ({...}: {
               imports = submodule.modules ++ cfg.defaults ++ [submoduleOptions ./submodules.nix];
-              _module.args.submodule = {
-                name = config.name;
-              };
+              _module.args.name = config.name;
             }) specialArgs;
             default = {};
           };
