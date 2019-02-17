@@ -45,7 +45,7 @@ in {
     path = generateIstio ./istio/istio-schema.json;
   }];
 
-  test = import ./test {
+  tests = import ./tests {
     inherit pkgs lib kubenix;
   };
 

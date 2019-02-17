@@ -12,7 +12,7 @@ listToAttrs (map (version: let
   version' = replaceStrings ["."] ["_"] version;
 in nameValuePair "v${version'}" (evalModules {
   modules = [
-    ./modules/testing.nix
+    kubenix.testing
 
     {
       imports = [kubenix.k8s kubenix.submodules];
