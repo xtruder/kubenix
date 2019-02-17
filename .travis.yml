@@ -1,2 +1,2 @@
 language: nix
-script: nix-build release.nix -A test -A test-old -A generate.istio -A generate.k8s
+script: nix-build release.nix -A test -A generate.istio -A generate.k8s
