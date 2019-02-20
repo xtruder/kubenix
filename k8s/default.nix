@@ -189,7 +189,7 @@ in {
   ) config.kubernetes.api.resources);
 
   options.kubernetes.generated = mkOption {
-    type = types.package;
+    type = types.attrs;
     description = "Generated json file";
   };
 
@@ -204,5 +204,5 @@ in {
         metadata.labels."kubenix/build" = listHash;
       }) kubernetesList.items;
     };
-  in pkgs.writeText "resources.json" (builtins.toJSON hashedList);
+  in hashedList;
 }
