@@ -29,49 +29,49 @@ let
     in nixosTesting.makeTest {
       inherit name;
 
-      nodes = mapAttrs (machineName: machine:
-        { config, pkgs, lib, nodes, ... }:
-          mkMerge [
-            {
-              boot.postBootCommands = "rm -fr /var/lib/kubernetes/secrets /tmp/shared/*";
-              virtualisation.memorySize = mkDefault 1536;
-              virtualisation.diskSize = mkDefault 4096;
-              networking = {
-                inherit domain extraHosts;
-                primaryIPAddress = mkForce machine.ip;
+      nodes = mapAttrs (machineName: machine: { config, pkgs, lib, nodes, ... }: {
+        imports = [<nixpkgs/nixos/modules/profiles/minimal.nix>];
 
-                firewall = {
-                  allowedTCPPorts = [
-                    10250 # kubelet
-                  ];
-                  trustedInterfaces = ["docker0"];
+        config = mkMerge [{
+          virtualisation.cores = "all";
+          boot.postBootCommands = "rm -fr /var/lib/kubernetes/secrets /tmp/shared/*";
+          virtualisation.memorySize = mkDefault 1536;
+          virtualisation.diskSize = mkDefault 4096;
+          networking = {
+            inherit domain extraHosts;
+            primaryIPAddress = mkForce machine.ip;
 
-                  extraCommands = concatMapStrings  (node: ''
-                    iptables -A INPUT -s ${node.config.networking.primaryIPAddress} -j ACCEPT
-                  '') (attrValues nodes);
-                };
-              };
-              environment.systemPackages = [ kubectl ];
-              services.flannel.iface = "eth1";
-              services.kubernetes = {
-                easyCerts = true;
-                inherit (machine) roles;
-                apiserver = {
-                  securePort = 443;
-                  advertiseAddress = master.ip;
-                };
-                masterAddress = "${masterName}.${config.networking.domain}";
-              };
-            }
-            (optionalAttrs (any (role: role == "master") machine.roles) {
-              networking.firewall.allowedTCPPorts = [
-                443 # kubernetes apiserver
+            firewall = {
+              allowedTCPPorts = [
+                10250 # kubelet
               ];
-            })
-            (optionalAttrs (machine ? "extraConfiguration") (machine.extraConfiguration { inherit config pkgs lib nodes; }))
-            (optionalAttrs (extraConfiguration != null) (extraConfiguration { inherit config pkgs lib nodes; }))
-          ]
-      ) machines;
+              trustedInterfaces = ["docker0"];
+
+              extraCommands = concatMapStrings  (node: ''
+                iptables -A INPUT -s ${node.config.networking.primaryIPAddress} -j ACCEPT
+              '') (attrValues nodes);
+            };
+          };
+          environment.systemPackages = [ kubectl ];
+          services.flannel.iface = "eth1";
+          services.kubernetes = {
+            easyCerts = true;
+            inherit (machine) roles;
+            apiserver = {
+              securePort = 443;
+              advertiseAddress = master.ip;
+            };
+            masterAddress = "${masterName}.${config.networking.domain}";
+          };
+        }
+        (optionalAttrs (any (role: role == "master") machine.roles) {
+          networking.firewall.allowedTCPPorts = [
+            443 # kubernetes apiserver
+          ];
+        })
+        (optionalAttrs (machine ? "extraConfiguration") (machine.extraConfiguration { inherit config pkgs lib nodes; }))
+        (optionalAttrs (extraConfiguration != null) (extraConfiguration { inherit config pkgs lib nodes; }))];
+      }) machines;
 
       testScript = ''
         startAll;
@@ -190,7 +190,7 @@ in {
           script = if evaled.config.test.check != null then mkKubernetesSingleNodeTest {
             name = config.name;
             test = ''
-              $kube->waitUntilSucceeds("kubectl get node machine1.my.zyx | grep -w Ready");
+              $kube->waitUntilSucceeds("kubectl get node kube.my.zyx | grep -w Ready");
               ${evaled.config.test.check}
             '';
           } else null;
