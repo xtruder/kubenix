@@ -176,7 +176,9 @@ in {
   options.kubernetes.objects = mkOption {
     description = "Attribute set of kubernetes objects";
     type = types.listOf types.attrs;
-    apply = unique;
+    apply = items: sort (r1: r2:
+      if r1.kind == "CustomResourceDefinition" || r2.kind == "CustomResourceDefinition" then true else false
+    ) (moduleToAttrs (unique items));
     default = [];
   };
 
