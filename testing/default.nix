@@ -33,12 +33,13 @@ let
         imports = [<nixpkgs/nixos/modules/profiles/minimal.nix>];
 
         config = mkMerge [{
-          virtualisation.cores = "all";
           boot.postBootCommands = "rm -fr /var/lib/kubernetes/secrets /tmp/shared/*";
-          virtualisation.memorySize = mkDefault 1536;
+          virtualisation.memorySize = mkDefault 2048;
+          virtualisation.cores = mkDefault "all";
           virtualisation.diskSize = mkDefault 4096;
           networking = {
             inherit domain extraHosts;
+            nameservers = ["10.0.0.254"];
             primaryIPAddress = mkForce machine.ip;
 
             firewall = {
@@ -90,10 +91,119 @@ let
   } // attrs // {
     name = "kubernetes-${attrs.name}-singlenode";
   });
+
+  testOptions = {config, ...}: let
+    modules = [config.module ./test.nix {
+      config._module.args.test = config;
+    }] ++ cfg.defaults;
+
+    test = (kubenix.evalKubernetesModules {
+      check = false;
+      inherit modules;
+    }).config.test;
+
+    evaled =
+      if test.enable
+      then builtins.trace "testing ${test.name}" (kubenix.evalKubernetesModules {
+        inherit modules;
+      })
+      else {success = false;};
+  in {
+    options = {
+      name = mkOption {
+        description = "test name";
+        type = types.str;
+        internal = true;
+      };
+
+      description = mkOption {
+        description = "test description";
+        type = types.str;
+        internal = true;
+      };
+
+      enable = mkOption {
+        description = "Whether to enable test";
+        type = types.bool;
+        internal = true;
+      };
+
+      module = mkOption {
+        description = "Module defining submodule";
+        type = types.unspecified;
+      };
+
+      evaled = mkOption {
+        description = "Wheter test was evaled";
+        type = types.bool;
+        default =
+          if cfg.throwError
+          then if evaled.config.test.assertions != [] then true else true
+          else (builtins.tryEval evaled.config.test.assertions).success;
+        internal = true;
+      };
+
+      success = mkOption {
+        description = "Whether test was success";
+        type = types.bool;
+        internal = true;
+        default = false;
+      };
+
+      assertions = mkOption {
+        description = "Test result";
+        type = types.unspecified;
+        internal = true;
+        default = [];
+      };
+
+      script = mkOption {
+        description = "Test script";
+        type = types.nullOr types.package;
+        default = null;
+      };
+
+      driver = mkOption {
+        description = "Testing driver";
+        type = types.nullOr types.package;
+      };
+
+      generated = mkOption {
+        description = "Generated resources";
+        type = types.nullOr types.package;
+        default = null;
+      };
+    };
+
+    config = mkMerge [{
+      inherit (test) name description enable;
+    } (mkIf config.evaled {
+      inherit (evaled.config.test) assertions;
+      success = all (el: el.assertion) config.assertions;
+      script =
+        if cfg.e2e && evaled.config.test.check != null
+        then mkKubernetesSingleNodeTest {
+          name = config.name;
+          test = ''
+            $kube->waitUntilSucceeds("kubectl get node kube.my.zyx | grep -w Ready");
+            ${evaled.config.test.check}
+          '';
+        } else null;
+      driver = mkIf (config.script != null) config.script.driver;
+      generated = mkIf (hasAttr "kubernetes" evaled.config)
+        pkgs.writeText "${config.name}-gen.json" (builtins.toJSON evaled.config.kubernetes.generated);
+    })];
+  };
 in {
   options = {
     testing.throwError = mkOption {
       description = "Whether to throw error";
+      type = types.bool;
+      default = true;
+    };
+
+    testing.e2e = mkOption {
+      description = "Whether to enable e2e tests";
       type = types.bool;
       default = true;
     };
@@ -110,93 +220,14 @@ in {
     testing.tests = mkOption {
       description = "Attribute set of test cases";
       default = [];
-      type = types.listOf (types.coercedTo types.path (module: {inherit module;}) (types.submodule ({config, ...}: let
-        modules = [config.module ./test.nix {
-          config._module.args.test = config;
-        }] ++ cfg.defaults;
-
-        test = (kubenix.evalKubernetesModules {
-          check = false;
-          inherit modules;
-        }).config.test;
-
-        evaled =
-          if test.enable
-          then builtins.trace "testing ${test.name}" (kubenix.evalKubernetesModules {
-            inherit modules;
-          })
-          else {success = false;};
-      in {
-        options = {
-          name = mkOption {
-            description = "test name";
-            type = types.str;
-            internal = true;
-          };
-
-          description = mkOption {
-            description = "test description";
-            type = types.str;
-            internal = true;
-          };
-
-          enable = mkOption {
-            description = "Whether to enable test";
-            type = types.bool;
-            internal = true;
-          };
-
-          module = mkOption {
-            description = "Module defining submodule";
-            type = types.unspecified;
-          };
-
-          evaled = mkOption {
-            description = "Wheter test was evaled";
-            type = types.bool;
-            default =
-              if cfg.throwError
-              then if evaled.config.test.assertions != [] then true else true
-              else (builtins.tryEval evaled.config.test.assertions).success;
-            internal = true;
-          };
-
-          success = mkOption {
-            description = "Whether test was success";
-            type = types.bool;
-            internal = true;
-            default = false;
-          };
-
-          assertions = mkOption {
-            description = "Test result";
-            type = types.unspecified;
-            internal = true;
-            default = [];
-          };
-
-          script = mkOption {
-            description = "Test script";
-            type = types.nullOr types.package;
-            default = null;
-          };
-        };
-
-        config = mkMerge [{
-          inherit (test) name description enable;
-        } (mkIf config.evaled {
-          inherit (evaled.config.test) assertions;
-          success = all (el: el.assertion) config.assertions;
-          script = if evaled.config.test.check != null then mkKubernetesSingleNodeTest {
-            name = config.name;
-            test = ''
-              $kube->waitUntilSucceeds("kubectl get node kube.my.zyx | grep -w Ready");
-              ${evaled.config.test.check}
-            '';
-          } else null;
-        })];
-      })));
+      type = types.listOf (types.coercedTo types.path (module: {inherit module;}) (types.submodule testOptions));
       apply = tests: filter (test: test.enable) tests;
+    };
+
+    testing.testsByName = mkOption {
+      description = "Tests by name";
+      type = types.attrsOf types.attrs;
+      default = listToAttrs (map (test: nameValuePair test.name test) cfg.tests);
     };
 
     testing.success = mkOption {

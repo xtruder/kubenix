@@ -10,7 +10,7 @@ in {
   ];
 
   test = {
-    name = "k8s/1.13/crd";
+    name = "k8s-1.13-crd";
     description = "Simple test tesing CRD for k8s 1.13";
     enable = builtins.compareVersions config.kubernetes.version "1.13" >= 0;
     assertions = [{
