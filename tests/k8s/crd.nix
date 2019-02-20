@@ -1,4 +1,4 @@
-{ config, lib, kubenix, ... }:
+{ config, lib, kubenix, pkgs, ... }:
 
 with lib;
 
@@ -10,13 +10,18 @@ in {
   ];
 
   test = {
-    name = "k8s/crd";
+    name = "k8s.crd";
     description = "Simple test tesing CRD";
     enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
       message = "should have group set";
       assertion = cfg.spec.group == "stable.example.com";
     }];
+    check = ''
+      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->succeed("kubectl get crds | grep -i crontabs");
+      $kube->succeed("kubectl get crontabs | grep -i crontab");
+    '';
   };
 
   kubernetes.api.customresourcedefinitions.crontabs = {
@@ -33,4 +38,20 @@ in {
       };
     };
   };
+
+  kubernetes.customResources = [{
+    group = "stable.example.com";
+    version = "v1";
+    kind = "CronTab";
+    plural = "crontabs";
+    description = "CronTabs resources";
+    module = {
+      options.schedule = mkOption {
+        description = "Crontab schedule script";
+        type = types.str;
+      };
+    };
+  }];
+
+  kubernetes.api."stable.example.com"."v1".CronTab.crontab.spec.schedule = "* * * * *";
 }

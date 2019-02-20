@@ -1,8 +1,10 @@
-{ lib, ... }:
+{ lib, config, pkgs, ... }:
 
 with lib;
 
-{
+let
+  cfg = config.test;
+in {
   options.test = {
     name = mkOption {
       description = "Test name";
@@ -42,6 +44,17 @@ with lib;
         hold for the evaluation of the system configuration to
         succeed, along with associated error messages for the user.
       '';
+    };
+
+    extraCheckInputs = mkOption {
+      description = "Extra check inputs";
+      type = types.listOf types.package;
+    };
+
+    check = mkOption {
+      description = "Script to run as part testing";
+      type = types.nullOr types.lines;
+      default = null;
     };
   };
 }

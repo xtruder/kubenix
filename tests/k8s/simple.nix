@@ -1,4 +1,6 @@
-{ config, test, kubenix, ... }:
+{ config, test, kubenix, k8s, ... }:
+
+with k8s;
 
 let
   cfg = config.kubernetes.api.pods.nginx;
