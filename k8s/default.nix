@@ -196,13 +196,18 @@ in {
   config.kubernetes.generated = let
     kubernetesList = toKubernetesList config.kubernetes.objects;
 
-    listHash = builtins.hashString "sha1" (builtins.toJSON kubernetesList);
-
     hashedList = kubernetesList // {
-      labels."kubenix/build" = listHash;
+      labels."kubenix/build" = config.kubernetes.hash;
       items = map (resource: recursiveUpdate resource {
-        metadata.labels."kubenix/build" = listHash;
+        metadata.labels."kubenix/build" = config.kubernetes.hash;
       }) kubernetesList.items;
     };
   in hashedList;
+
+  options.kubernetes.hash = mkOption {
+    type = types.str;
+    description = "Output hash";
+  };
+
+  config.kubernetes.hash = builtins.hashString "sha1" (builtins.toJSON config.kubernetes.objects);
 }
