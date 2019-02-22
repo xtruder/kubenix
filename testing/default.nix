@@ -46,7 +46,7 @@ let
               allowedTCPPorts = [
                 10250 # kubelet
               ];
-              trustedInterfaces = ["docker0"];
+              trustedInterfaces = ["docker0" "cni0"];
 
               extraCommands = concatMapStrings  (node: ''
                 iptables -A INPUT -s ${node.config.networking.primaryIPAddress} -j ACCEPT
@@ -86,6 +86,28 @@ let
       kube = {
         roles = ["master" "node"];
         ip = "192.168.1.1";
+      };
+    };
+    extraConfiguration = {...}: {
+      services.kubernetes.flannel.enable = false;
+      services.kubernetes.kubelet = {
+        networkPlugin = "cni";
+        cni.config = [{
+          name = "mynet";
+          type = "bridge";
+          bridge = "cni0";
+          addIf = true;
+          ipMasq = true;
+          isGateway = true;
+          ipam = {
+            type = "host-local";
+            subnet = "10.1.0.0/16";
+            gateway = "10.1.0.1";
+            routes = [{
+              dst = "0.0.0.0/0";
+            }];
+          };
+        }];
       };
     };
   } // attrs // {
