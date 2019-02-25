@@ -66,7 +66,7 @@ let
       version = mkOption {
         description = "Module version";
         type = types.str;
-        default = null;
+        default = "1.0.0";
       };
 
       passthru = mkOption {
@@ -200,7 +200,7 @@ in {
 
           config = mkOption {
             description = "Submodule instance ${config.name} for ${submoduleDefinition.name}:${submoduleDefinition.version} config";
-            type =  submoduleWithSpecialArgs ({...}: {
+            type = submoduleWithSpecialArgs ({...}: {
               imports = submodule.modules ++ cfg.defaults ++ [submoduleOptions ./submodules.nix];
               _module.args.name = config.name;
             }) specialArgs;
