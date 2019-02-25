@@ -17,7 +17,7 @@ in {
       message = "should have group set";
       assertion = cfg.spec.group == "stable.example.com";
     }];
-    check = ''
+    testScript = ''
       $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
       $kube->succeed("kubectl get crds | grep -i crontabs");
       $kube->succeed("kubectl get crontabs | grep -i crontab");

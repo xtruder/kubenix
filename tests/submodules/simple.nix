@@ -10,7 +10,7 @@ in {
   ];
 
   test = {
-    name = "submodules/simple";
+    name = "submodules-simple";
     description = "Simple k8s submodule test";
     assertions = [{
       message = "Submodule name is set";

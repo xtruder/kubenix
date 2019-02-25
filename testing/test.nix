@@ -51,10 +51,16 @@ in {
       type = types.listOf types.package;
     };
 
-    check = mkOption {
-      description = "Script to run as part testing";
+    testScript = mkOption {
+      description = "Script to run as part of testing";
       type = types.nullOr types.lines;
       default = null;
+    };
+
+    extraConfig = mkOption {
+      description = "Extra configuration for running test";
+      type = types.unspecified;
+      default = {};
     };
   };
 }

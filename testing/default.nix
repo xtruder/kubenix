@@ -11,108 +11,100 @@ let
     system = "x86_64-linux";
   };
 
-  mkKubernetesBaseTest =
-    { name, domain ? "my.zyx", test, machines
-    , extraConfiguration ? null }:
-    let
-      masterName = head (filter (machineName: any (role: role == "master") machines.${machineName}.roles) (attrNames machines));
-      master = machines.${masterName};
-      extraHosts = ''
-        ${master.ip}  etcd.${domain}
-        ${master.ip}  api.${domain}
-        ${concatMapStringsSep "\n" (machineName: "${machines.${machineName}.ip}  ${machineName}.${domain}") (attrNames machines)}
-      '';
-      kubectl = with pkgs; runCommand "wrap-kubectl" { buildInputs = [ makeWrapper ]; } ''
-        mkdir -p $out/bin
-        makeWrapper ${pkgs.kubernetes}/bin/kubectl $out/bin/kubectl --set KUBECONFIG "/etc/kubernetes/cluster-admin.kubeconfig"
-      '';
-    in nixosTesting.makeTest {
+  kubernetesBaseConfig = { config, pkgs, lib, nodes, ... }: let
+    master = findFirst
+      (node: any (role: role == "master") node.config.services.kubernetes.roles)
+      (throw "no master node")
+      (attrValues nodes);
+    extraHosts = ''
+      ${master.config.networking.primaryIPAddress}  etcd.${config.networking.domain}
+      ${master.config.networking.primaryIPAddress}  api.${config.networking.domain}
+      ${concatMapStringsSep "\n"
+        (node: let n = node.config.networking; in "${n.primaryIPAddress}  ${n.hostName}.${n.domain}")
+        (attrValues nodes)}
+    '';
+  in {
+    imports = [ <nixpkgs/nixos/modules/profiles/minimal.nix> ];
+
+    config = mkMerge [{
+      boot.postBootCommands = "rm -fr /var/lib/kubernetes/secrets /tmp/shared/*";
+      virtualisation.memorySize = mkDefault 2048;
+      virtualisation.cores = mkDefault "all";
+      virtualisation.diskSize = mkDefault 4096;
+      networking = {
+        inherit extraHosts;
+        domain = "my.xzy";
+        nameservers = ["10.0.0.254"];
+        firewall = {
+          allowedTCPPorts = [
+            10250 # kubelet
+          ];
+          trustedInterfaces = ["docker0" "cni0"];
+
+          extraCommands = concatMapStrings  (node: ''
+            iptables -A INPUT -s ${node.config.networking.primaryIPAddress} -j ACCEPT
+          '') (attrValues nodes);
+        };
+      };
+      environment.systemPackages = [ pkgs.kubectl ];
+      environment.variables.KUBECONFIG = "/etc/kubernetes/cluster-admin.kubeconfig";
+      services.flannel.iface = "eth1";
+      services.kubernetes = {
+        easyCerts = true;
+        apiserver = {
+          securePort = 443;
+          advertiseAddress = master.config.networking.primaryIPAddress;
+        };
+        masterAddress = "${master.config.networking.hostName}.${master.config.networking.domain}";
+      };
+    }
+    (mkIf (any (role: role == "master") config.services.kubernetes.roles) {
+      networking.firewall.allowedTCPPorts = [
+        443 # kubernetes apiserver
+      ];
+    })];
+  };
+
+  mkKubernetesSingleNodeTest = { name, testScript, extraConfiguration ? {} }:
+    nixosTesting.makeTest {
       inherit name;
 
-      nodes = mapAttrs (machineName: machine: { config, pkgs, lib, nodes, ... }: {
-        imports = [<nixpkgs/nixos/modules/profiles/minimal.nix>];
-
-        config = mkMerge [{
-          boot.postBootCommands = "rm -fr /var/lib/kubernetes/secrets /tmp/shared/*";
-          virtualisation.memorySize = mkDefault 2048;
-          virtualisation.cores = mkDefault "all";
-          virtualisation.diskSize = mkDefault 4096;
-          networking = {
-            inherit domain extraHosts;
-            nameservers = ["10.0.0.254"];
-            primaryIPAddress = mkForce machine.ip;
-
-            firewall = {
-              allowedTCPPorts = [
-                10250 # kubelet
-              ];
-              trustedInterfaces = ["docker0" "cni0"];
-
-              extraCommands = concatMapStrings  (node: ''
-                iptables -A INPUT -s ${node.config.networking.primaryIPAddress} -j ACCEPT
-              '') (attrValues nodes);
-            };
+      nodes.kube = { config, pkgs, lib, nodes, ... }: {
+        imports = [ kubernetesBaseConfig ];
+        services.kubernetes = {
+          roles = ["master" "node"];
+          flannel.enable = false;
+          kubelet = {
+            networkPlugin = "cni";
+            cni.config = [{
+              name = "mynet";
+              type = "bridge";
+              bridge = "cni0";
+              addIf = true;
+              ipMasq = true;
+              isGateway = true;
+              ipam = {
+                type = "host-local";
+                subnet = "10.1.0.0/16";
+                gateway = "10.1.0.1";
+                routes = [{
+                  dst = "0.0.0.0/0";
+                }];
+              };
+            }];
           };
-          environment.systemPackages = [ kubectl ];
-          services.flannel.iface = "eth1";
-          services.kubernetes = {
-            easyCerts = true;
-            inherit (machine) roles;
-            apiserver = {
-              securePort = 443;
-              advertiseAddress = master.ip;
-            };
-            masterAddress = "${masterName}.${config.networking.domain}";
-          };
-        }
-        (optionalAttrs (any (role: role == "master") machine.roles) {
-          networking.firewall.allowedTCPPorts = [
-            443 # kubernetes apiserver
-          ];
-        })
-        (optionalAttrs (machine ? "extraConfiguration") (machine.extraConfiguration { inherit config pkgs lib nodes; }))
-        (optionalAttrs (extraConfiguration != null) (extraConfiguration { inherit config pkgs lib nodes; }))];
-      }) machines;
+        };
+        networking.primaryIPAddress = mkForce "192.168.1.1";
+      };
 
       testScript = ''
         startAll;
 
-        ${test}
+        $kube->waitUntilSucceeds("kubectl get node kube.my.xzy | grep -w Ready");
+
+        ${testScript}
       '';
     };
-
-  mkKubernetesSingleNodeTest = attrs: mkKubernetesBaseTest ({
-    machines = {
-      kube = {
-        roles = ["master" "node"];
-        ip = "192.168.1.1";
-      };
-    };
-    extraConfiguration = {...}: {
-      services.kubernetes.flannel.enable = false;
-      services.kubernetes.kubelet = {
-        networkPlugin = "cni";
-        cni.config = [{
-          name = "mynet";
-          type = "bridge";
-          bridge = "cni0";
-          addIf = true;
-          ipMasq = true;
-          isGateway = true;
-          ipam = {
-            type = "host-local";
-            subnet = "10.1.0.0/16";
-            gateway = "10.1.0.1";
-            routes = [{
-              dst = "0.0.0.0/0";
-            }];
-          };
-        }];
-      };
-    };
-  } // attrs // {
-    name = "kubernetes-${attrs.name}-singlenode";
-  });
 
   testOptions = {config, ...}: let
     modules = [config.module ./test.nix {
@@ -179,15 +171,10 @@ let
         default = [];
       };
 
-      script = mkOption {
-        description = "Test script";
+      test = mkOption {
+        description = "Test derivation to run";
         type = types.nullOr types.package;
         default = null;
-      };
-
-      driver = mkOption {
-        description = "Testing driver";
-        type = types.nullOr types.package;
       };
 
       generated = mkOption {
@@ -202,18 +189,14 @@ let
     } (mkIf config.evaled {
       inherit (evaled.config.test) assertions;
       success = all (el: el.assertion) config.assertions;
-      script =
-        if cfg.e2e && evaled.config.test.check != null
+      test =
+        if cfg.e2e && evaled.config.test.testScript != null
         then mkKubernetesSingleNodeTest {
+          inherit (evaled.config.test) testScript;
           name = config.name;
-          test = ''
-            $kube->waitUntilSucceeds("kubectl get node kube.my.zyx | grep -w Ready");
-            ${evaled.config.test.check}
-          '';
         } else null;
-      driver = mkIf (config.script != null) config.script.driver;
       generated = mkIf (hasAttr "kubernetes" evaled.config)
-        pkgs.writeText "${config.name}-gen.json" (builtins.toJSON evaled.config.kubernetes.generated);
+        (pkgs.writeText "${config.name}-gen.json" (builtins.toJSON evaled.config.kubernetes.generated));
     })];
   };
 in {
@@ -264,9 +247,8 @@ in {
       default = pkgs.writeText "testing-report.json" (builtins.toJSON {
         success = cfg.success;
         tests = map (test: {
-          inherit (test) name description evaled success;
+          inherit (test) name description evaled success test;
           assertions = moduleToAttrs test.assertions;
-          script = test.script;
         }) (filter (test: test.enable) cfg.tests);
       });
     };
