@@ -3,8 +3,6 @@
 with lib;
 
 let
-  isModule = hasAttr "module" config;
-
   removeKubenixOptions = filterAttrs (name: attr: name != "kubenix");
 
   moduleToAttrs = value:
@@ -166,12 +164,6 @@ in {
   config.kubernetes.api.resources = map (cr: {
     inherit (cr) group version kind plural;
   }) config.kubernetes.customResources;
-
-  options.kubernetes.propagateDefaults = mkOption {
-    description = "Whehter to propagate child defaults";
-    type = types.bool;
-    default = false;
-  };
 
   options.kubernetes.objects = mkOption {
     description = "Attribute set of kubernetes objects";
