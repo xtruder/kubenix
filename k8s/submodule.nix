@@ -9,7 +9,7 @@ in {
 
   options = {
     kubernetes.propagateDefaults = mkOption {
-      description = "Whehter to propagate child defaults to submodules";
+      description = "Whether to propagate child defaults to submodules";
       type = types.bool;
       default = true;
     };
@@ -25,25 +25,32 @@ in {
         };
 
         config.config = {
-          kubernetes.api.defaults.all.metadata.namespace =
-            mkDefault config.namespace;
+          kubernetes.api.defaults = [{
+            default.metadata.namespace = mkDefault config.namespace;
+          }];
         };
       }));
     };
   };
 
   config = {
-    submodules.defaults = mkMerge [{
-      imports = [ kubenix.k8s ];
-      kubernetes.version = mkDefault config.kubernetes.version;
-      kubernetes.api.defaults =
-        mkIf config.kubernetes.propagateDefaults config.kubernetes.api.defaults;
-      } ({config, ...}: {
-        kubernetes.api.defaults.all.metadata.labels = {
-          "kubenix/module-name" = config.submodule.name;
-          "kubenix/module-version" = config.submodule.version;
-        };
-      })];
+    submodules.defaults = [{
+      default = {
+        imports = [ kubenix.k8s ];
+        kubernetes.version = mkDefault config.kubernetes.version;
+        kubernetes.api.defaults =
+          mkIf config.kubernetes.propagateDefaults config.kubernetes.api.defaults;
+      };
+    } {
+      default = ({config, ...}: {
+        kubernetes.api.defaults = [{
+          default.metadata.labels = {
+            "kubenix/module-name" = config.submodule.name;
+            "kubenix/module-version" = config.submodule.version;
+          };
+        }];
+      });
+    }];
 
     kubernetes.objects = mkMerge (mapAttrsToList (_: submodule:
       submodule.config.kubernetes.objects

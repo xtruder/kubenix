@@ -5,6 +5,15 @@ with lib;
 let
   cfg = config.submodules;
 
+  getDefaults = name: tags:
+    catAttrs "default" (filter (submodule:
+      (submodule.name == null || submodule.name == name) &&
+      (
+        (length submodule.tags == 0) ||
+        (length (intersectLists submodule.tags tags)) > 0
+      )
+    ) config.submodules.defaults);
+
   submoduleWithSpecialArgs = opts: specialArgs:
     let
       opts' = toList opts;
@@ -69,9 +78,9 @@ let
         default = "1.0.0";
       };
 
-      passthru = mkOption {
-        description = "Submodule passthru";
-        type = types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs);
+      tags = mkOption {
+        description = "List of submodule tags";
+        type = types.listOf types.str;
         default = [];
       };
     };
@@ -114,24 +123,35 @@ in {
     };
 
     submodules.defaults = mkOption {
-      description = "Submodule defaults";
-      type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
-      example = literalExample ''{config, ...}: {
-        kubernetes.version = config.kubernetes.version;
-      }'';
-      default = [];
-    };
+      description = "List of defaults to apply to submodule instances";
+      type = types.listOf (types.submodule ({config, ...}: {
+        options = {
+          name = mkOption {
+            description = "Name of the submodule to apply defaults to";
+            type = types.nullOr types.str;
+            default = null;
+          };
 
-    submodules.propagateDefaults = mkOption {
-      description = "Whether to propagate defaults to submodules";
-      type = types.bool;
-      default = true;
+          tags = mkOption {
+            description = "List of tags to apply defaults to";
+            type = types.listOf types.str;
+            default = [];
+          };
+
+          default = mkOption {
+            description = "Default to apply to submodule instance";
+            type = types.unspecified;
+            default = {};
+          };
+        };
+      }));
+      default = [];
     };
 
     submodules.propagate = mkOption {
       description = "Whether to propagate defaults and imports to submodule's submodules";
       type = types.bool;
-      default = true;
+      default = false;
     };
 
     submodules.imports = mkOption {
@@ -150,6 +170,7 @@ in {
             options = {
               module = mkOption {
                 description = "Module defining submodule";
+                type = types.unspecified;
               };
 
               modules = mkOption {
@@ -172,12 +193,17 @@ in {
     submodules.instances = mkOption {
       description = "Attribute set of submodule instances";
       type = types.attrsOf (types.submodule ({name, config, ...}: let
+        # submodule associated with
         submodule = findModule {
           name = config.submodule;
           version = config.version;
         };
 
+        # definition of a submodule
         submoduleDefinition = submodule.definition;
+
+        # submodule defaults
+        defaults = getDefaults submoduleDefinition.name submoduleDefinition.tags;
       in {
         options = {
           name = mkOption {
@@ -201,7 +227,7 @@ in {
           config = mkOption {
             description = "Submodule instance ${config.name} for ${submoduleDefinition.name}:${submoduleDefinition.version} config";
             type = submoduleWithSpecialArgs ({...}: {
-              imports = submodule.modules ++ cfg.defaults ++ [submoduleOptions ./submodules.nix];
+              imports = submodule.modules ++ defaults ++ [submoduleOptions];
               _module.args.name = config.name;
             }) specialArgs;
             default = {};
@@ -214,9 +240,14 @@ in {
 
   config = {
     submodules.specialArgs.kubenix = kubenix;
-    submodules.defaults = mkIf cfg.propagate {
-      submodules.defaults = cfg.defaults;
-      submodules.imports = cfg.imports;
-    };
+    submodules.defaults = [(mkIf cfg.propagate {
+      default = {
+        imports = [./submodules.nix];
+        submodules = {
+          defaults = cfg.defaults;
+          imports = cfg.imports;
+        };
+      };
+    })];
   };
 }
