@@ -43,7 +43,7 @@ in {
     group = "stable.example.com";
     version = "v1";
     kind = "CronTab";
-    plural = "crontabs";
+    resource = "crontabs";
     description = "CronTabs resources";
     module = {
       options.schedule = mkOption {

@@ -4,6 +4,14 @@
 with lib;
 
 let
+  getDefaults = resource: group: version: kind:
+    catAttrs "default" (filter (default:
+      (default.resource == null || default.resource == resource) &&
+      (default.group == null || default.group == group) &&
+      (default.version == null || default.version == version) &&
+      (default.kind == null || default.kind == kind)
+    ) config.defaults);
+
   types = lib.types // rec {
     str = mkOptionType {
       name = "str";
@@ -80,8 +88,7 @@ let
           # metdata.name cannot use option default, due deep config
           metadata.name = mkOptionDefault name;
         }
-      ] ++ (config.defaults.${resource} or [])
-        ++ (config.defaults.all or []));
+      ] ++ (getDefaults resource group version kind));
     });
 
   coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
@@ -12700,292 +12707,292 @@ in {
       group = "apiregistration.k8s.io";
       version = "apiregistration.k8s.io/v1beta1";
       kind = "APIService";
-      plural = "apiservices";
+      resource = "apiservices";
     }{
       group = "core";
       version = "v1";
       kind = "Binding";
-      plural = "bindings";
+      resource = "bindings";
     }{
       group = "core";
       version = "v1";
       kind = "ConfigMap";
-      plural = "configmaps";
+      resource = "configmaps";
     }{
       group = "core";
       version = "v1";
       kind = "Endpoints";
-      plural = "endpoints";
+      resource = "endpoints";
     }{
       group = "core";
       version = "v1";
       kind = "Event";
-      plural = "events";
+      resource = "events";
     }{
       group = "core";
       version = "v1";
       kind = "LimitRange";
-      plural = "limitranges";
+      resource = "limitranges";
     }{
       group = "core";
       version = "v1";
       kind = "Namespace";
-      plural = "namespaces";
+      resource = "namespaces";
     }{
       group = "core";
       version = "v1";
       kind = "Node";
-      plural = "nodes";
+      resource = "nodes";
     }{
       group = "core";
       version = "v1";
       kind = "PersistentVolume";
-      plural = "persistentvolumes";
+      resource = "persistentvolumes";
     }{
       group = "core";
       version = "v1";
       kind = "PersistentVolumeClaim";
-      plural = "persistentvolumeclaims";
+      resource = "persistentvolumeclaims";
     }{
       group = "core";
       version = "v1";
       kind = "Pod";
-      plural = "pods";
+      resource = "pods";
     }{
       group = "core";
       version = "v1";
       kind = "PodTemplate";
-      plural = "podtemplates";
+      resource = "podtemplates";
     }{
       group = "core";
       version = "v1";
       kind = "ReplicationController";
-      plural = "replicationcontrollers";
+      resource = "replicationcontrollers";
     }{
       group = "core";
       version = "v1";
       kind = "ResourceQuota";
-      plural = "resourcequotas";
+      resource = "resourcequotas";
     }{
       group = "core";
       version = "v1";
       kind = "Secret";
-      plural = "secrets";
+      resource = "secrets";
     }{
       group = "core";
       version = "v1";
       kind = "Service";
-      plural = "services";
+      resource = "services";
     }{
       group = "core";
       version = "v1";
       kind = "ServiceAccount";
-      plural = "serviceaccounts";
+      resource = "serviceaccounts";
     }{
       group = "admissionregistration.k8s.io";
       version = "admissionregistration.k8s.io/v1alpha1";
       kind = "ExternalAdmissionHookConfiguration";
-      plural = "externaladmissionhookconfigurations";
+      resource = "externaladmissionhookconfigurations";
     }{
       group = "admissionregistration.k8s.io";
       version = "admissionregistration.k8s.io/v1alpha1";
       kind = "InitializerConfiguration";
-      plural = "initializerconfigurations";
+      resource = "initializerconfigurations";
     }{
       group = "apps";
       version = "apps/v1beta1";
       kind = "ControllerRevision";
-      plural = "controllerrevisions";
+      resource = "controllerrevisions";
     }{
       group = "apps";
       version = "apps/v1beta1";
       kind = "Deployment";
-      plural = "deployments";
+      resource = "deployments";
     }{
       group = "apps";
       version = "apps/v1beta1";
       kind = "DeploymentRollback";
-      plural = "rollback";
+      resource = "rollback";
     }{
       group = "apps";
       version = "apps/v1beta1";
       kind = "StatefulSet";
-      plural = "statefulsets";
+      resource = "statefulsets";
     }{
       group = "authentication.k8s.io";
       version = "authentication.k8s.io/v1";
       kind = "TokenReview";
-      plural = "tokenreviews";
+      resource = "tokenreviews";
     }{
       group = "authentication.k8s.io";
       version = "authentication.k8s.io/v1beta1";
       kind = "TokenReview";
-      plural = "tokenreviews";
+      resource = "tokenreviews";
     }{
       group = "authorization.k8s.io";
       version = "authorization.k8s.io/v1";
       kind = "LocalSubjectAccessReview";
-      plural = "localsubjectaccessreviews";
+      resource = "localsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
       version = "authorization.k8s.io/v1";
       kind = "SelfSubjectAccessReview";
-      plural = "selfsubjectaccessreviews";
+      resource = "selfsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
       version = "authorization.k8s.io/v1";
       kind = "SubjectAccessReview";
-      plural = "subjectaccessreviews";
+      resource = "subjectaccessreviews";
     }{
       group = "authorization.k8s.io";
       version = "authorization.k8s.io/v1beta1";
       kind = "LocalSubjectAccessReview";
-      plural = "localsubjectaccessreviews";
+      resource = "localsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
       version = "authorization.k8s.io/v1beta1";
       kind = "SelfSubjectAccessReview";
-      plural = "selfsubjectaccessreviews";
+      resource = "selfsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
       version = "authorization.k8s.io/v1beta1";
       kind = "SubjectAccessReview";
-      plural = "subjectaccessreviews";
+      resource = "subjectaccessreviews";
     }{
       group = "autoscaling";
       version = "autoscaling/v1";
       kind = "HorizontalPodAutoscaler";
-      plural = "horizontalpodautoscalers";
+      resource = "horizontalpodautoscalers";
     }{
       group = "autoscaling";
       version = "autoscaling/v2alpha1";
       kind = "HorizontalPodAutoscaler";
-      plural = "horizontalpodautoscalers";
+      resource = "horizontalpodautoscalers";
     }{
       group = "batch";
       version = "batch/v1";
       kind = "Job";
-      plural = "jobs";
+      resource = "jobs";
     }{
       group = "batch";
       version = "batch/v2alpha1";
       kind = "CronJob";
-      plural = "cronjobs";
+      resource = "cronjobs";
     }{
       group = "certificates.k8s.io";
       version = "certificates.k8s.io/v1beta1";
       kind = "CertificateSigningRequest";
-      plural = "certificatesigningrequests";
+      resource = "certificatesigningrequests";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "DaemonSet";
-      plural = "daemonsets";
+      resource = "daemonsets";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "Deployment";
-      plural = "deployments";
+      resource = "deployments";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "DeploymentRollback";
-      plural = "rollback";
+      resource = "rollback";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "Ingress";
-      plural = "ingresses";
+      resource = "ingresses";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "NetworkPolicy";
-      plural = "networkpolicies";
+      resource = "networkpolicies";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "PodSecurityPolicy";
-      plural = "podsecuritypolicies";
+      resource = "podsecuritypolicies";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "ReplicaSet";
-      plural = "replicasets";
+      resource = "replicasets";
     }{
       group = "extensions";
       version = "extensions/v1beta1";
       kind = "ThirdPartyResource";
-      plural = "thirdpartyresources";
+      resource = "thirdpartyresources";
     }{
       group = "networking.k8s.io";
       version = "networking.k8s.io/v1";
       kind = "NetworkPolicy";
-      plural = "networkpolicies";
+      resource = "networkpolicies";
     }{
       group = "policy";
       version = "policy/v1beta1";
       kind = "Eviction";
-      plural = "eviction";
+      resource = "eviction";
     }{
       group = "policy";
       version = "policy/v1beta1";
       kind = "PodDisruptionBudget";
-      plural = "poddisruptionbudgets";
+      resource = "poddisruptionbudgets";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1alpha1";
       kind = "ClusterRole";
-      plural = "clusterroles";
+      resource = "clusterroles";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1alpha1";
       kind = "ClusterRoleBinding";
-      plural = "clusterrolebindings";
+      resource = "clusterrolebindings";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1alpha1";
       kind = "Role";
-      plural = "roles";
+      resource = "roles";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1alpha1";
       kind = "RoleBinding";
-      plural = "rolebindings";
+      resource = "rolebindings";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1beta1";
       kind = "ClusterRole";
-      plural = "clusterroles";
+      resource = "clusterroles";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1beta1";
       kind = "ClusterRoleBinding";
-      plural = "clusterrolebindings";
+      resource = "clusterrolebindings";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1beta1";
       kind = "Role";
-      plural = "roles";
+      resource = "roles";
     }{
       group = "rbac.authorization.k8s.io";
       version = "rbac.authorization.k8s.io/v1beta1";
       kind = "RoleBinding";
-      plural = "rolebindings";
+      resource = "rolebindings";
     }{
       group = "settings.k8s.io";
       version = "settings.k8s.io/v1alpha1";
       kind = "PodPreset";
-      plural = "podpresets";
+      resource = "podpresets";
     }{
       group = "storage.k8s.io";
       version = "storage.k8s.io/v1";
       kind = "StorageClass";
-      plural = "storageclasses";
+      resource = "storageclasses";
     }{
       group = "storage.k8s.io";
       version = "storage.k8s.io/v1beta1";
       kind = "StorageClass";
-      plural = "storageclasses";
+      resource = "storageclasses";
     }];
   };
 }

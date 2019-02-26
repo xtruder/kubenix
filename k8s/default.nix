@@ -5,6 +5,14 @@ with lib;
 let
   removeKubenixOptions = filterAttrs (name: attr: name != "kubenix");
 
+  getDefaults = resource: group: version: kind:
+    catAttrs "default" (filter (default:
+      (default.resource == null || default.resource == resource) &&
+      (default.group == null || default.group == group) &&
+      (default.version == null || default.version == version) &&
+      (default.kind == null || default.kind == kind)
+    ) config.kubernetes.api.defaults);
+
   moduleToAttrs = value:
     if isAttrs value
     then mapAttrs (n: v: moduleToAttrs v) (filterAttrs (n: v: !(hasPrefix "_" n) && v != null) value)
@@ -35,32 +43,64 @@ let
       };
 
       defaults = mkOption {
-        description = "Kubernetes defaults";
-        type = types.attrsOf (types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified));
-        default = {};
+        description = "Kubernetes defaults to apply to resources";
+        type = types.listOf (types.submodule ({config, ...}: {
+          options = {
+            resource = mkOption {
+              description = "Resource to apply default to (all by default)";
+              type = types.nullOr types.str;
+              default = null;
+            };
+
+            group = mkOption {
+              description = "Group to apply default to (all by default)";
+              type = types.nullOr types.str;
+              default = null;
+            };
+
+            version = mkOption {
+              description = "Version to apply default to (all by default)";
+              type = types.nullOr types.str;
+              default = null;
+            };
+
+            kind = mkOption {
+              description = "Kind to apply default to (all by default)";
+              type = types.nullOr types.str;
+              default = null;
+            };
+
+            default = mkOption {
+              description = "Default to apply";
+              type = types.unspecified;
+              default = {};
+            };
+          };
+        }));
+        default = [];
       };
 
       resources = mkOption {
         type = types.listOf (types.submodule {
           options = {
             group = mkOption {
-              description = "Group name";
+              description = "Resoruce group";
               type = types.str;
             };
 
             version = mkOption {
-              description = "Version name";
+              description = "Resoruce version";
               type = types.str;
             };
 
             kind = mkOption {
-              description = "kind name";
+              description = "Resource kind";
               type = types.str;
             };
 
-            plural = mkOption {
-              description = "Plural name";
-              type = types.str;
+            resource = mkOption {
+              description = "Resource name";
+              type = type.str;
             };
           };
         });
@@ -113,8 +153,7 @@ in {
               apiVersion = mkOptionDefault "${cr.group}/${cr.version}";
               kind = mkOptionDefault cr.kind;
               metadata.name = mkOptionDefault name;
-            }]
-              ++ (config.kubernetes.defaults.all or []));
+            }] ++ (getDefaults cr.resource cr.group cr.version cr.kind));
           }));
           default = {};
         };
@@ -125,36 +164,37 @@ in {
 
   options.kubernetes.customResources = mkOption {
     default = [];
+    description = "List of custom resource definitions to make API for";
     type = types.listOf (types.submodule ({config, ...}: {
       options = {
         group = mkOption {
-          description = "CRD group";
+          description = "Custom resource definition group";
           type = types.str;
         };
 
         version = mkOption {
-          description = "CRD version";
+          description = "Custom resource definition version";
           type = types.str;
         };
 
         kind = mkOption {
-          description = "CRD kind";
+          description = "Custom resource definition kind";
           type = types.str;
         };
 
-        plural = mkOption {
-          description = "CRD plural name";
+        resource = mkOption {
+          description = "Custom resource definition resource name";
           type = types.str;
         };
 
         description = mkOption {
-          description = "CRD description";
+          description = "Custom resource definition description";
           type = types.str;
           default = "";
         };
 
         module = mkOption {
-          description = "CRD module";
+          description = "Custom resource definition module";
           default = types.unspecified;
         };
       };
@@ -162,7 +202,7 @@ in {
   };
 
   config.kubernetes.api.resources = map (cr: {
-    inherit (cr) group version kind plural;
+    inherit (cr) group version kind resource;
   }) config.kubernetes.customResources;
 
   options.kubernetes.objects = mkOption {

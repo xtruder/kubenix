@@ -207,7 +207,7 @@ let
 
     kind = path.post."x-kubernetes-group-version-kind".kind;
     version = if group' != "" then "${group'}/${version'}" else version';
-    plural = last (splitString "/" name);
+    resource = last (splitString "/" name);
     description = swagger.definitions.${ref}.description;
     group = if group' == "" then "core" else group';
     defintion = refDefinition (head path.post.parameters).schema;
@@ -238,7 +238,7 @@ let
   genResourceOptions = resource: with gen; let
     submoduleForDefinition' = definition: let
     in submoduleForDefinition
-      definition.ref definition.plural definition.kind definition.group definition.version;
+      definition.ref definition.resource definition.kind definition.group definition.version;
   in mkOption {
     description = resource.description;
     type = types.attrsOf (submoduleForDefinition' resource);
@@ -251,6 +251,14 @@ in pkgs.writeText "gen.nix"
 with lib;
 
 let
+  getDefaults = resource: group: version: kind:
+    catAttrs \"default\" (filter (default:
+      (default.resource == null || default.resource == resource) &&
+      (default.group == null || default.group == group) &&
+      (default.version == null || default.version == version) &&
+      (default.kind == null || default.kind == kind)
+    ) config.defaults);
+
   types = lib.types // rec {
     str = mkOptionType {
       name = \"str\";
@@ -327,8 +335,7 @@ let
           # metdata.name cannot use option default, due deep config
           metadata.name = mkOptionDefault name;
         }
-      ] ++ (config.defaults.\${resource} or [])
-        ++ (config.defaults.all or []));
+      ] ++ (getDefaults resource group version kind));
     });
 
   coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
@@ -354,11 +361,11 @@ in {
   options = {${concatStrings (mapAttrsToList (name: resource: "
     \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = ${genResourceOptions resource};
   ") resources)}} // {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.plural}\" = ${genResourceOptions resource};
+    \"${resource.resource}\" = ${genResourceOptions resource};
   ") latestResourcesByKind)}};
 
   config = {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = config.\"${resource.plural}\";
+    \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = config.\"${resource.resource}\";
   ") latestResourcesByKind)}} // {
     inherit definitions;
 
@@ -366,7 +373,7 @@ in {
       group = \"${resource.group}\";
       version = \"${resource.version}\";
       kind = \"${resource.kind}\";
-      plural = \"${resource.plural}\";
+      resource = \"${resource.resource}\";
     }") resources)}];
   };
 }
