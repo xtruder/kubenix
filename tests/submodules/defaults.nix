@@ -7,6 +7,7 @@ let
   instance2 = config.submodules.instances.instance2;
   instance3 = config.submodules.instances.instance3;
   instance4 = config.submodules.instances.instance4;
+  instance5 = config.submodules.instances.instance5;
 
   module = {name, ...}: {
     options.args.value = mkOption {
@@ -28,16 +29,16 @@ in {
     name = "submodules-defatuls";
     description = "Simple k8s submodule test";
     assertions = [{
-      message = "instance1 should have value of value1";
+      message = "should apply defaults by tag1";
       assertion = instance1.config.args.value == "value1";
     } {
-      message = "instance2 should have value of value2";
+      message = "should apply defaults by tag2";
       assertion = instance2.config.args.value == "value2";
     } {
-      message = "instance2 should have value of value2";
+      message = "should apply defaults by tag2";
       assertion = instance3.config.args.value == "value2";
     } {
-      message = "instance1 and instance2 should have value of value";
+      message = "should apply defaults to all";
       assertion =
         instance1.config.args.defaultValue == "value" &&
         instance2.config.args.defaultValue == "value";
@@ -45,8 +46,11 @@ in {
       message = "instance1 and instance3 should have value of default-value";
       assertion = instance3.config.args.defaultValue == "default-value";
     } {
-      message = "instance4 should have value of value4";
+      message = "should apply defaults by submodule name";
       assertion = instance4.config.args.value == "value4";
+    } {
+      message = "should apply defaults by custom condition";
+      assertion = instance5.config.args.defaultValue == "my-custom-value";
     }];
   };
 
@@ -77,6 +81,13 @@ in {
         name = "submodule4";
       };
     }];
+  } {
+    modules = [module {
+      submodule = {
+        name = "submodule5";
+      };
+      args.value = "custom-value";
+    }];
   }];
 
   submodules.defaults = [{
@@ -90,6 +101,10 @@ in {
   } {
     name = "submodule4";
     default.args.value = mkDefault "value4";
+  } {
+    default = {config, ...}: {
+      args.defaultValue = mkIf (config.args.value == "custom-value") "my-custom-value";
+    };
   }];
 
   submodules.instances.instance1.submodule = "submodule1";
@@ -99,4 +114,5 @@ in {
     config.args.defaultValue = "default-value";
   };
   submodules.instances.instance4.submodule = "submodule4";
+  submodules.instances.instance5.submodule = "submodule5";
 }
