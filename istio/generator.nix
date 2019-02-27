@@ -317,7 +317,7 @@ let
       ") value.config)}};
     "}};
     ") definitions)}
-  };
+  } // (import ./overrides.nix {inheirt definitions lib;}));
 in {
   kubernetes.customResources = [
   ${concatMapStrings (resource: ''{

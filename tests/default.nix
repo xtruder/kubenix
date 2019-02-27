@@ -32,6 +32,7 @@ let
           ./k8s/1.13/crd.nix
           ./k8s/submodule.nix
           ./k8s/defaults.nix
+          ./istio/bookinfo.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix
         ];

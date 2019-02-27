@@ -7,7 +7,7 @@ let
 
   getDefaults = resource: group: version: kind:
     catAttrs "default" (filter (default:
-      (default.resource == null || default.resource == resource) &&
+      (resource == null || default.resource == null || default.resource == resource) &&
       (default.group == null || default.group == group) &&
       (default.version == null || default.version == version) &&
       (default.kind == null || default.kind == kind)
@@ -185,7 +185,8 @@ in {
 
         resource = mkOption {
           description = "Custom resource definition resource name";
-          type = types.str;
+          type = types.nullOr types.str;
+          default = null;
         };
 
         description = mkOption {
