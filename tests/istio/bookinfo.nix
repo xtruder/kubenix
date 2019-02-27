@@ -51,5 +51,63 @@ with k8s;
         }];
       };
     };
+
+    DestinationRule.productpage = {
+      spec = {
+        host = "productpage";
+        subsets = [{
+          name = "v1";
+          labels.version = "v1";
+        }];
+      };
+    };
+
+    DestinationRule.reviews = {
+      spec = {
+        host = "reviews";
+        subsets = [{
+          name = "v1";
+          labels.version = "v1";
+        } {
+          name = "v2";
+          labels.version = "v2";
+        } {
+          name = "v3";
+          labels.version = "v3";
+        }];
+      };
+    };
+
+    DestinationRule.ratings = {
+      spec = {
+        host = "ratings";
+        subsets = [{
+          name = "v1";
+          labels.version = "v1";
+        } {
+          name = "v2";
+          labels.version = "v2";
+        } {
+          name = "v2-mysql";
+          labels.version = "v2-mysql";
+        } {
+          name = "v2-mysql-vm";
+          labels.version = "v2-mysql-vm";
+        }];
+      };
+    };
+
+    DestinationRule.details = {
+      spec = {
+        host = "details";
+        subsets = [{
+          name = "v1";
+          labels.version = "v1";
+        } {
+          name = "v2";
+          labels.version = "v2";
+        }];
+      };
+    };
   };
 }
