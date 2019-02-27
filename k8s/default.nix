@@ -126,6 +126,7 @@ in {
         options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
           description = cr.description;
           type = types.attrsOf (types.submodule ({name, ...}: {
+            imports = getDefaults cr.resource cr.group cr.version cr.kind;
             options = {
               apiVersion = mkOption {
                 description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources";
@@ -149,11 +150,11 @@ in {
               };
             };
 
-            config = mkMerge ([{
+            config = {
               apiVersion = mkOptionDefault "${cr.group}/${cr.version}";
               kind = mkOptionDefault cr.kind;
               metadata.name = mkOptionDefault name;
-            }] ++ (getDefaults cr.resource cr.group cr.version cr.kind));
+            };
           }));
           default = {};
         };

@@ -325,8 +325,9 @@ let
 
   submoduleForDefinition = ref: resource: kind: group: version:
     types.submodule ({name, ...}: {
+      imports = getDefaults resource group version kind;
       options = definitions.\"\${ref}\".options // extraOptions;
-      config = mkMerge ([
+      config = mkMerge [
         definitions.\"\${ref}\".config
         {
           kind = mkOptionDefault kind;
@@ -335,7 +336,7 @@ let
           # metdata.name cannot use option default, due deep config
           metadata.name = mkOptionDefault name;
         }
-      ] ++ (getDefaults resource group version kind));
+      ];
     });
 
   coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo

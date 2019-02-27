@@ -31,6 +31,7 @@ let
           ./k8s/crd.nix
           ./k8s/1.13/crd.nix
           ./k8s/submodule.nix
+          ./k8s/defaults.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix
         ];
