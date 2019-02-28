@@ -29,5 +29,6 @@ let
     k8s-submodules = ./k8s/submodule.nix;
     istio = ./istio;
     testing = ./testing;
+    helm = ./helm;
   };
 in kubenix
