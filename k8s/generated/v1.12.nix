@@ -76,21 +76,22 @@ let
     };
   });
 
-  submoduleForDefinition = ref: resource: kind: group: version:
-    types.submodule ({name, ...}: {
-      imports = getDefaults resource group version kind;
-      options = definitions."${ref}".options // extraOptions;
-      config = mkMerge [
-        definitions."${ref}".config
-        {
-          kind = mkOptionDefault kind;
-          apiVersion = mkOptionDefault version;
+  submoduleForDefinition = ref: resource: kind: group: version: let
+    apiVersion = if group == "core" then version else "${group}/${version}";
+  in types.submodule ({name, ...}: {
+    imports = getDefaults resource group version kind;
+    options = definitions."${ref}".options // extraOptions;
+    config = mkMerge [
+      definitions."${ref}".config
+      {
+        kind = mkOptionDefault kind;
+        apiVersion = mkOptionDefault apiVersion;
 
-          # metdata.name cannot use option default, due deep config
-          metadata.name = mkOptionDefault name;
-        }
-      ];
-    });
+        # metdata.name cannot use option default, due deep config
+        metadata.name = mkOptionDefault name;
+      }
+    ];
+  });
 
   coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
     (types.listOf (submoduleOf ref))
@@ -29998,213 +29999,213 @@ let
   };
 in {
   options = {
-    "admissionregistration.k8s.io"."admissionregistration.k8s.io/v1alpha1"."InitializerConfiguration" = mkOption {
+    "admissionregistration.k8s.io"."v1alpha1"."InitializerConfiguration" = mkOption {
       description = "InitializerConfiguration describes the configuration of initializers.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.InitializerConfiguration" "initializerconfigurations" "InitializerConfiguration" "admissionregistration.k8s.io" "admissionregistration.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.InitializerConfiguration" "initializerconfigurations" "InitializerConfiguration" "admissionregistration.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "admissionregistration.k8s.io"."admissionregistration.k8s.io/v1beta1"."MutatingWebhookConfiguration" = mkOption {
+    "admissionregistration.k8s.io"."v1beta1"."MutatingWebhookConfiguration" = mkOption {
       description = "MutatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and may change the object.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.MutatingWebhookConfiguration" "mutatingwebhookconfigurations" "MutatingWebhookConfiguration" "admissionregistration.k8s.io" "admissionregistration.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.MutatingWebhookConfiguration" "mutatingwebhookconfigurations" "MutatingWebhookConfiguration" "admissionregistration.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "admissionregistration.k8s.io"."admissionregistration.k8s.io/v1beta1"."ValidatingWebhookConfiguration" = mkOption {
+    "admissionregistration.k8s.io"."v1beta1"."ValidatingWebhookConfiguration" = mkOption {
       description = "ValidatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and object without changing it.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingWebhookConfiguration" "validatingwebhookconfigurations" "ValidatingWebhookConfiguration" "admissionregistration.k8s.io" "admissionregistration.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingWebhookConfiguration" "validatingwebhookconfigurations" "ValidatingWebhookConfiguration" "admissionregistration.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "apps"."apps/v1"."ControllerRevision" = mkOption {
+    "apps"."v1"."ControllerRevision" = mkOption {
       description = "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "apps/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "v1"));
       default = {};
     };
   
-    "apps"."apps/v1"."DaemonSet" = mkOption {
+    "apps"."v1"."DaemonSet" = mkOption {
       description = "DaemonSet represents the configuration of a daemon set.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "apps/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "v1"));
       default = {};
     };
   
-    "apps"."apps/v1"."Deployment" = mkOption {
+    "apps"."v1"."Deployment" = mkOption {
       description = "Deployment enables declarative updates for Pods and ReplicaSets.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "apps/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "v1"));
       default = {};
     };
   
-    "apps"."apps/v1"."ReplicaSet" = mkOption {
+    "apps"."v1"."ReplicaSet" = mkOption {
       description = "ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "apps/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "v1"));
       default = {};
     };
   
-    "apps"."apps/v1"."StatefulSet" = mkOption {
+    "apps"."v1"."StatefulSet" = mkOption {
       description = "StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n - Network: A single stable DNS and hostname.\n - Storage: As many VolumeClaims as requested.\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "apps/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1"));
       default = {};
     };
   
-    "apps"."apps/v1beta1"."ControllerRevision" = mkOption {
+    "apps"."v1beta1"."ControllerRevision" = mkOption {
       description = "DEPRECATED - This group version of ControllerRevision is deprecated by apps/v1beta2/ControllerRevision. See the release notes for more information. ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "apps/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "v1beta1"));
       default = {};
     };
   
-    "apps"."apps/v1beta1"."Deployment" = mkOption {
+    "apps"."v1beta1"."Deployment" = mkOption {
       description = "DEPRECATED - This group version of Deployment is deprecated by apps/v1beta2/Deployment. See the release notes for more information. Deployment enables declarative updates for Pods and ReplicaSets.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.Deployment" "deployments" "Deployment" "apps" "apps/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.Deployment" "deployments" "Deployment" "apps" "v1beta1"));
       default = {};
     };
   
-    "apps"."apps/v1beta1"."DeploymentRollback" = mkOption {
+    "apps"."v1beta1"."DeploymentRollback" = mkOption {
       description = "DEPRECATED. DeploymentRollback stores the information required to rollback a deployment.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.DeploymentRollback" "rollback" "DeploymentRollback" "apps" "apps/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.DeploymentRollback" "rollback" "DeploymentRollback" "apps" "v1beta1"));
       default = {};
     };
   
-    "apps"."apps/v1beta1"."StatefulSet" = mkOption {
+    "apps"."v1beta1"."StatefulSet" = mkOption {
       description = "DEPRECATED - This group version of StatefulSet is deprecated by apps/v1beta2/StatefulSet. See the release notes for more information. StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n - Network: A single stable DNS and hostname.\n - Storage: As many VolumeClaims as requested.\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.StatefulSet" "statefulsets" "StatefulSet" "apps" "apps/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1beta1"));
       default = {};
     };
   
-    "apps"."apps/v1beta2"."ControllerRevision" = mkOption {
+    "apps"."v1beta2"."ControllerRevision" = mkOption {
       description = "DEPRECATED - This group version of ControllerRevision is deprecated by apps/v1/ControllerRevision. See the release notes for more information. ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "apps/v1beta2"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "v1beta2"));
       default = {};
     };
   
-    "apps"."apps/v1beta2"."DaemonSet" = mkOption {
+    "apps"."v1beta2"."DaemonSet" = mkOption {
       description = "DEPRECATED - This group version of DaemonSet is deprecated by apps/v1/DaemonSet. See the release notes for more information. DaemonSet represents the configuration of a daemon set.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.DaemonSet" "daemonsets" "DaemonSet" "apps" "apps/v1beta2"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.DaemonSet" "daemonsets" "DaemonSet" "apps" "v1beta2"));
       default = {};
     };
   
-    "apps"."apps/v1beta2"."Deployment" = mkOption {
+    "apps"."v1beta2"."Deployment" = mkOption {
       description = "DEPRECATED - This group version of Deployment is deprecated by apps/v1/Deployment. See the release notes for more information. Deployment enables declarative updates for Pods and ReplicaSets.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.Deployment" "deployments" "Deployment" "apps" "apps/v1beta2"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.Deployment" "deployments" "Deployment" "apps" "v1beta2"));
       default = {};
     };
   
-    "apps"."apps/v1beta2"."ReplicaSet" = mkOption {
+    "apps"."v1beta2"."ReplicaSet" = mkOption {
       description = "DEPRECATED - This group version of ReplicaSet is deprecated by apps/v1/ReplicaSet. See the release notes for more information. ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.ReplicaSet" "replicasets" "ReplicaSet" "apps" "apps/v1beta2"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.ReplicaSet" "replicasets" "ReplicaSet" "apps" "v1beta2"));
       default = {};
     };
   
-    "apps"."apps/v1beta2"."StatefulSet" = mkOption {
+    "apps"."v1beta2"."StatefulSet" = mkOption {
       description = "DEPRECATED - This group version of StatefulSet is deprecated by apps/v1/StatefulSet. See the release notes for more information. StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n - Network: A single stable DNS and hostname.\n - Storage: As many VolumeClaims as requested.\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.StatefulSet" "statefulsets" "StatefulSet" "apps" "apps/v1beta2"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta2.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1beta2"));
       default = {};
     };
   
-    "authentication.k8s.io"."authentication.k8s.io/v1"."TokenReview" = mkOption {
+    "authentication.k8s.io"."v1"."TokenReview" = mkOption {
       description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "authentication.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1"));
       default = {};
     };
   
-    "authentication.k8s.io"."authentication.k8s.io/v1beta1"."TokenReview" = mkOption {
+    "authentication.k8s.io"."v1beta1"."TokenReview" = mkOption {
       description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1beta1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "authentication.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1beta1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."LocalSubjectAccessReview" = mkOption {
+    "authorization.k8s.io"."v1"."LocalSubjectAccessReview" = mkOption {
       description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."SelfSubjectAccessReview" = mkOption {
+    "authorization.k8s.io"."v1"."SelfSubjectAccessReview" = mkOption {
       description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."SelfSubjectRulesReview" = mkOption {
+    "authorization.k8s.io"."v1"."SelfSubjectRulesReview" = mkOption {
       description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."SubjectAccessReview" = mkOption {
+    "authorization.k8s.io"."v1"."SubjectAccessReview" = mkOption {
       description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1beta1"."LocalSubjectAccessReview" = mkOption {
+    "authorization.k8s.io"."v1beta1"."LocalSubjectAccessReview" = mkOption {
       description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1beta1"."SelfSubjectAccessReview" = mkOption {
+    "authorization.k8s.io"."v1beta1"."SelfSubjectAccessReview" = mkOption {
       description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1beta1"."SelfSubjectRulesReview" = mkOption {
+    "authorization.k8s.io"."v1beta1"."SelfSubjectRulesReview" = mkOption {
       description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "authorization.k8s.io"."authorization.k8s.io/v1beta1"."SubjectAccessReview" = mkOption {
+    "authorization.k8s.io"."v1beta1"."SubjectAccessReview" = mkOption {
       description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "autoscaling"."autoscaling/v1"."HorizontalPodAutoscaler" = mkOption {
+    "autoscaling"."v1"."HorizontalPodAutoscaler" = mkOption {
       description = "configuration of a horizontal pod autoscaler.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "autoscaling/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v1"));
       default = {};
     };
   
-    "autoscaling"."autoscaling/v2beta1"."HorizontalPodAutoscaler" = mkOption {
+    "autoscaling"."v2beta1"."HorizontalPodAutoscaler" = mkOption {
       description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "autoscaling/v2beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v2beta1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v2beta1"));
       default = {};
     };
   
-    "autoscaling"."autoscaling/v2beta2"."HorizontalPodAutoscaler" = mkOption {
+    "autoscaling"."v2beta2"."HorizontalPodAutoscaler" = mkOption {
       description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "autoscaling/v2beta2"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v2beta2.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v2beta2"));
       default = {};
     };
   
-    "batch"."batch/v1"."Job" = mkOption {
+    "batch"."v1"."Job" = mkOption {
       description = "Job represents the configuration of a single job.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "batch/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "v1"));
       default = {};
     };
   
-    "batch"."batch/v1beta1"."CronJob" = mkOption {
+    "batch"."v1beta1"."CronJob" = mkOption {
       description = "CronJob represents the configuration of a single cron job.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1beta1.CronJob" "cronjobs" "CronJob" "batch" "batch/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1beta1.CronJob" "cronjobs" "CronJob" "batch" "v1beta1"));
       default = {};
     };
   
-    "batch"."batch/v2alpha1"."CronJob" = mkOption {
+    "batch"."v2alpha1"."CronJob" = mkOption {
       description = "CronJob represents the configuration of a single cron job.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v2alpha1.CronJob" "cronjobs" "CronJob" "batch" "batch/v2alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v2alpha1.CronJob" "cronjobs" "CronJob" "batch" "v2alpha1"));
       default = {};
     };
   
-    "certificates.k8s.io"."certificates.k8s.io/v1beta1"."CertificateSigningRequest" = mkOption {
+    "certificates.k8s.io"."v1beta1"."CertificateSigningRequest" = mkOption {
       description = "Describes a certificate signing request";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1beta1.CertificateSigningRequest" "certificatesigningrequests" "CertificateSigningRequest" "certificates.k8s.io" "certificates.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1beta1.CertificateSigningRequest" "certificatesigningrequests" "CertificateSigningRequest" "certificates.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "coordination.k8s.io"."coordination.k8s.io/v1beta1"."Lease" = mkOption {
+    "coordination.k8s.io"."v1beta1"."Lease" = mkOption {
       description = "Lease defines a lease concept.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.coordination.v1beta1.Lease" "leases" "Lease" "coordination.k8s.io" "coordination.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.coordination.v1beta1.Lease" "leases" "Lease" "coordination.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -30304,213 +30305,213 @@ in {
       default = {};
     };
   
-    "events.k8s.io"."events.k8s.io/v1beta1"."Event" = mkOption {
+    "events.k8s.io"."v1beta1"."Event" = mkOption {
       description = "Event is a report of an event somewhere in the cluster. It generally denotes some state change in the system.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.events.v1beta1.Event" "events" "Event" "events.k8s.io" "events.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.events.v1beta1.Event" "events" "Event" "events.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."DaemonSet" = mkOption {
+    "extensions"."v1beta1"."DaemonSet" = mkOption {
       description = "DEPRECATED - This group version of DaemonSet is deprecated by apps/v1beta2/DaemonSet. See the release notes for more information. DaemonSet represents the configuration of a daemon set.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.DaemonSet" "daemonsets" "DaemonSet" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.DaemonSet" "daemonsets" "DaemonSet" "extensions" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."Deployment" = mkOption {
+    "extensions"."v1beta1"."Deployment" = mkOption {
       description = "DEPRECATED - This group version of Deployment is deprecated by apps/v1beta2/Deployment. See the release notes for more information. Deployment enables declarative updates for Pods and ReplicaSets.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.Deployment" "deployments" "Deployment" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.Deployment" "deployments" "Deployment" "extensions" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."DeploymentRollback" = mkOption {
+    "extensions"."v1beta1"."DeploymentRollback" = mkOption {
       description = "DEPRECATED. DeploymentRollback stores the information required to rollback a deployment.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.DeploymentRollback" "rollback" "DeploymentRollback" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.DeploymentRollback" "rollback" "DeploymentRollback" "extensions" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."Ingress" = mkOption {
+    "extensions"."v1beta1"."Ingress" = mkOption {
       description = "Ingress is a collection of rules that allow inbound connections to reach the endpoints defined by a backend. An Ingress can be configured to give services externally-reachable urls, load balance traffic, terminate SSL, offer name based virtual hosting etc.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.Ingress" "ingresses" "Ingress" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.Ingress" "ingresses" "Ingress" "extensions" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."NetworkPolicy" = mkOption {
+    "extensions"."v1beta1"."NetworkPolicy" = mkOption {
       description = "DEPRECATED 1.9 - This group version of NetworkPolicy is deprecated by networking/v1/NetworkPolicy. NetworkPolicy describes what network traffic is allowed for a set of Pods";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "extensions" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."PodSecurityPolicy" = mkOption {
+    "extensions"."v1beta1"."PodSecurityPolicy" = mkOption {
       description = "PodSecurityPolicy governs the ability to make requests that affect the Security Context that will be applied to a pod and container. Deprecated: use PodSecurityPolicy from policy API Group instead.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.PodSecurityPolicy" "podsecuritypolicies" "PodSecurityPolicy" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.PodSecurityPolicy" "podsecuritypolicies" "PodSecurityPolicy" "extensions" "v1beta1"));
       default = {};
     };
   
-    "extensions"."extensions/v1beta1"."ReplicaSet" = mkOption {
+    "extensions"."v1beta1"."ReplicaSet" = mkOption {
       description = "DEPRECATED - This group version of ReplicaSet is deprecated by apps/v1beta2/ReplicaSet. See the release notes for more information. ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.ReplicaSet" "replicasets" "ReplicaSet" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.ReplicaSet" "replicasets" "ReplicaSet" "extensions" "v1beta1"));
       default = {};
     };
   
-    "networking.k8s.io"."networking.k8s.io/v1"."NetworkPolicy" = mkOption {
+    "networking.k8s.io"."v1"."NetworkPolicy" = mkOption {
       description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "networking.k8s.io" "networking.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "networking.k8s.io" "v1"));
       default = {};
     };
   
-    "policy"."policy/v1beta1"."Eviction" = mkOption {
+    "policy"."v1beta1"."Eviction" = mkOption {
       description = "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/u003cpod nameu003e/evictions.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.Eviction" "eviction" "Eviction" "policy" "policy/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.Eviction" "eviction" "Eviction" "policy" "v1beta1"));
       default = {};
     };
   
-    "policy"."policy/v1beta1"."PodDisruptionBudget" = mkOption {
+    "policy"."v1beta1"."PodDisruptionBudget" = mkOption {
       description = "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodDisruptionBudget" "poddisruptionbudgets" "PodDisruptionBudget" "policy" "policy/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodDisruptionBudget" "poddisruptionbudgets" "PodDisruptionBudget" "policy" "v1beta1"));
       default = {};
     };
   
-    "policy"."policy/v1beta1"."PodSecurityPolicy" = mkOption {
+    "policy"."v1beta1"."PodSecurityPolicy" = mkOption {
       description = "PodSecurityPolicy governs the ability to make requests that affect the Security Context that will be applied to a pod and container.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodSecurityPolicy" "podsecuritypolicies" "PodSecurityPolicy" "policy" "policy/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodSecurityPolicy" "podsecuritypolicies" "PodSecurityPolicy" "policy" "v1beta1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."ClusterRole" = mkOption {
+    "rbac.authorization.k8s.io"."v1"."ClusterRole" = mkOption {
       description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."ClusterRoleBinding" = mkOption {
+    "rbac.authorization.k8s.io"."v1"."ClusterRoleBinding" = mkOption {
       description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."Role" = mkOption {
+    "rbac.authorization.k8s.io"."v1"."Role" = mkOption {
       description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."RoleBinding" = mkOption {
+    "rbac.authorization.k8s.io"."v1"."RoleBinding" = mkOption {
       description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1alpha1"."ClusterRole" = mkOption {
+    "rbac.authorization.k8s.io"."v1alpha1"."ClusterRole" = mkOption {
       description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1alpha1"."ClusterRoleBinding" = mkOption {
+    "rbac.authorization.k8s.io"."v1alpha1"."ClusterRoleBinding" = mkOption {
       description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1alpha1"."Role" = mkOption {
+    "rbac.authorization.k8s.io"."v1alpha1"."Role" = mkOption {
       description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.Role" "roles" "Role" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1alpha1"."RoleBinding" = mkOption {
+    "rbac.authorization.k8s.io"."v1alpha1"."RoleBinding" = mkOption {
       description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1beta1"."ClusterRole" = mkOption {
+    "rbac.authorization.k8s.io"."v1beta1"."ClusterRole" = mkOption {
       description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1beta1"."ClusterRoleBinding" = mkOption {
+    "rbac.authorization.k8s.io"."v1beta1"."ClusterRoleBinding" = mkOption {
       description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1beta1"."Role" = mkOption {
+    "rbac.authorization.k8s.io"."v1beta1"."Role" = mkOption {
       description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.Role" "roles" "Role" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1beta1"."RoleBinding" = mkOption {
+    "rbac.authorization.k8s.io"."v1beta1"."RoleBinding" = mkOption {
       description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1beta1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "scheduling.k8s.io"."scheduling.k8s.io/v1alpha1"."PriorityClass" = mkOption {
+    "scheduling.k8s.io"."v1alpha1"."PriorityClass" = mkOption {
       description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1alpha1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "scheduling.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1alpha1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "scheduling.k8s.io"."scheduling.k8s.io/v1beta1"."PriorityClass" = mkOption {
+    "scheduling.k8s.io"."v1beta1"."PriorityClass" = mkOption {
       description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1beta1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "scheduling.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1beta1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "settings.k8s.io"."settings.k8s.io/v1alpha1"."PodPreset" = mkOption {
+    "settings.k8s.io"."v1alpha1"."PodPreset" = mkOption {
       description = "PodPreset is a policy resource that defines additional runtime requirements for a Pod.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.settings.v1alpha1.PodPreset" "podpresets" "PodPreset" "settings.k8s.io" "settings.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.settings.v1alpha1.PodPreset" "podpresets" "PodPreset" "settings.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "storage.k8s.io"."storage.k8s.io/v1"."StorageClass" = mkOption {
+    "storage.k8s.io"."v1"."StorageClass" = mkOption {
       description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "storage.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1"));
       default = {};
     };
   
-    "storage.k8s.io"."storage.k8s.io/v1alpha1"."VolumeAttachment" = mkOption {
+    "storage.k8s.io"."v1alpha1"."VolumeAttachment" = mkOption {
       description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "storage.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "v1alpha1"));
       default = {};
     };
   
-    "storage.k8s.io"."storage.k8s.io/v1beta1"."StorageClass" = mkOption {
+    "storage.k8s.io"."v1beta1"."StorageClass" = mkOption {
       description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1beta1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "storage.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1beta1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "storage.k8s.io"."storage.k8s.io/v1beta1"."VolumeAttachment" = mkOption {
+    "storage.k8s.io"."v1beta1"."VolumeAttachment" = mkOption {
       description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1beta1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "storage.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1beta1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "apiextensions.k8s.io"."apiextensions.k8s.io/v1beta1"."CustomResourceDefinition" = mkOption {
+    "apiextensions.k8s.io"."v1beta1"."CustomResourceDefinition" = mkOption {
       description = "CustomResourceDefinition represents a resource that should be exposed on the API server.  Its name MUST be in the format u003c.spec.nameu003e.u003c.spec.groupu003e.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1beta1.CustomResourceDefinition" "customresourcedefinitions" "CustomResourceDefinition" "apiextensions.k8s.io" "apiextensions.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1beta1.CustomResourceDefinition" "customresourcedefinitions" "CustomResourceDefinition" "apiextensions.k8s.io" "v1beta1"));
       default = {};
     };
   
-    "apiregistration.k8s.io"."apiregistration.k8s.io/v1"."APIService" = mkOption {
+    "apiregistration.k8s.io"."v1"."APIService" = mkOption {
       description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "apiregistration.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "v1"));
       default = {};
     };
   
-    "apiregistration.k8s.io"."apiregistration.k8s.io/v1beta1"."APIService" = mkOption {
+    "apiregistration.k8s.io"."v1beta1"."APIService" = mkOption {
       description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "apiregistration.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "v1beta1"));
       default = {};
     };
   } // {
     "apiservices" = mkOption {
       description = "APIService represents a server for a particular GroupVersion. Name must be \"version.group\".";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "apiregistration.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIService" "apiservices" "APIService" "apiregistration.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -30522,19 +30523,19 @@ in {
   
     "certificatesigningrequests" = mkOption {
       description = "Describes a certificate signing request";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1beta1.CertificateSigningRequest" "certificatesigningrequests" "CertificateSigningRequest" "certificates.k8s.io" "certificates.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.certificates.v1beta1.CertificateSigningRequest" "certificatesigningrequests" "CertificateSigningRequest" "certificates.k8s.io" "v1beta1"));
       default = {};
     };
   
     "clusterroles" = mkOption {
       description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
     "clusterrolebindings" = mkOption {
       description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
@@ -30545,38 +30546,38 @@ in {
     };
   
     "controllerrevisions" = mkOption {
-      description = "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "apps/v1"));
+      description = "DEPRECATED - This group version of ControllerRevision is deprecated by apps/v1beta2/ControllerRevision. See the release notes for more information. ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.ControllerRevision" "controllerrevisions" "ControllerRevision" "apps" "v1beta1"));
       default = {};
     };
   
     "cronjobs" = mkOption {
       description = "CronJob represents the configuration of a single cron job.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1beta1.CronJob" "cronjobs" "CronJob" "batch" "batch/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1beta1.CronJob" "cronjobs" "CronJob" "batch" "v1beta1"));
       default = {};
     };
   
     "customresourcedefinitions" = mkOption {
       description = "CustomResourceDefinition represents a resource that should be exposed on the API server.  Its name MUST be in the format u003c.spec.nameu003e.u003c.spec.groupu003e.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1beta1.CustomResourceDefinition" "customresourcedefinitions" "CustomResourceDefinition" "apiextensions.k8s.io" "apiextensions.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1beta1.CustomResourceDefinition" "customresourcedefinitions" "CustomResourceDefinition" "apiextensions.k8s.io" "v1beta1"));
       default = {};
     };
   
     "daemonsets" = mkOption {
-      description = "DaemonSet represents the configuration of a daemon set.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.DaemonSet" "daemonsets" "DaemonSet" "apps" "apps/v1"));
+      description = "DEPRECATED - This group version of DaemonSet is deprecated by apps/v1beta2/DaemonSet. See the release notes for more information. DaemonSet represents the configuration of a daemon set.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.DaemonSet" "daemonsets" "DaemonSet" "extensions" "v1beta1"));
       default = {};
     };
   
     "deployments" = mkOption {
-      description = "Deployment enables declarative updates for Pods and ReplicaSets.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.Deployment" "deployments" "Deployment" "apps" "apps/v1"));
+      description = "DEPRECATED - This group version of Deployment is deprecated by apps/v1beta2/Deployment. See the release notes for more information. Deployment enables declarative updates for Pods and ReplicaSets.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.Deployment" "deployments" "Deployment" "apps" "v1beta1"));
       default = {};
     };
   
     "rollback" = mkOption {
       description = "DEPRECATED. DeploymentRollback stores the information required to rollback a deployment.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.DeploymentRollback" "rollback" "DeploymentRollback" "apps" "apps/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.DeploymentRollback" "rollback" "DeploymentRollback" "apps" "v1beta1"));
       default = {};
     };
   
@@ -30588,43 +30589,43 @@ in {
   
     "events" = mkOption {
       description = "Event is a report of an event somewhere in the cluster. It generally denotes some state change in the system.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.events.v1beta1.Event" "events" "Event" "events.k8s.io" "events.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.events.v1beta1.Event" "events" "Event" "events.k8s.io" "v1beta1"));
       default = {};
     };
   
     "eviction" = mkOption {
       description = "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/u003cpod nameu003e/evictions.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.Eviction" "eviction" "Eviction" "policy" "policy/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.Eviction" "eviction" "Eviction" "policy" "v1beta1"));
       default = {};
     };
   
     "horizontalpodautoscalers" = mkOption {
       description = "configuration of a horizontal pod autoscaler.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "autoscaling/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.autoscaling.v1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v1"));
       default = {};
     };
   
     "ingresses" = mkOption {
       description = "Ingress is a collection of rules that allow inbound connections to reach the endpoints defined by a backend. An Ingress can be configured to give services externally-reachable urls, load balance traffic, terminate SSL, offer name based virtual hosting etc.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.Ingress" "ingresses" "Ingress" "extensions" "extensions/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.Ingress" "ingresses" "Ingress" "extensions" "v1beta1"));
       default = {};
     };
   
     "initializerconfigurations" = mkOption {
       description = "InitializerConfiguration describes the configuration of initializers.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.InitializerConfiguration" "initializerconfigurations" "InitializerConfiguration" "admissionregistration.k8s.io" "admissionregistration.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1alpha1.InitializerConfiguration" "initializerconfigurations" "InitializerConfiguration" "admissionregistration.k8s.io" "v1alpha1"));
       default = {};
     };
   
     "jobs" = mkOption {
       description = "Job represents the configuration of a single job.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "batch/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.batch.v1.Job" "jobs" "Job" "batch" "v1"));
       default = {};
     };
   
     "leases" = mkOption {
       description = "Lease defines a lease concept.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.coordination.v1beta1.Lease" "leases" "Lease" "coordination.k8s.io" "coordination.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.coordination.v1beta1.Lease" "leases" "Lease" "coordination.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -30636,13 +30637,13 @@ in {
   
     "localsubjectaccessreviews" = mkOption {
       description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
     "mutatingwebhookconfigurations" = mkOption {
       description = "MutatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and may change the object.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.MutatingWebhookConfiguration" "mutatingwebhookconfigurations" "MutatingWebhookConfiguration" "admissionregistration.k8s.io" "admissionregistration.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.MutatingWebhookConfiguration" "mutatingwebhookconfigurations" "MutatingWebhookConfiguration" "admissionregistration.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -30653,8 +30654,8 @@ in {
     };
   
     "networkpolicies" = mkOption {
-      description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "networking.k8s.io" "networking.k8s.io/v1"));
+      description = "DEPRECATED 1.9 - This group version of NetworkPolicy is deprecated by networking/v1/NetworkPolicy. NetworkPolicy describes what network traffic is allowed for a set of Pods";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "extensions" "v1beta1"));
       default = {};
     };
   
@@ -30684,19 +30685,19 @@ in {
   
     "poddisruptionbudgets" = mkOption {
       description = "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodDisruptionBudget" "poddisruptionbudgets" "PodDisruptionBudget" "policy" "policy/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodDisruptionBudget" "poddisruptionbudgets" "PodDisruptionBudget" "policy" "v1beta1"));
       default = {};
     };
   
     "podpresets" = mkOption {
       description = "PodPreset is a policy resource that defines additional runtime requirements for a Pod.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.settings.v1alpha1.PodPreset" "podpresets" "PodPreset" "settings.k8s.io" "settings.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.settings.v1alpha1.PodPreset" "podpresets" "PodPreset" "settings.k8s.io" "v1alpha1"));
       default = {};
     };
   
     "podsecuritypolicies" = mkOption {
-      description = "PodSecurityPolicy governs the ability to make requests that affect the Security Context that will be applied to a pod and container.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.policy.v1beta1.PodSecurityPolicy" "podsecuritypolicies" "PodSecurityPolicy" "policy" "policy/v1beta1"));
+      description = "PodSecurityPolicy governs the ability to make requests that affect the Security Context that will be applied to a pod and container. Deprecated: use PodSecurityPolicy from policy API Group instead.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.PodSecurityPolicy" "podsecuritypolicies" "PodSecurityPolicy" "extensions" "v1beta1"));
       default = {};
     };
   
@@ -30708,13 +30709,13 @@ in {
   
     "priorityclasses" = mkOption {
       description = "PriorityClass defines mapping from a priority class name to the priority integer value. The value can be any valid integer.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1alpha1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "scheduling.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.scheduling.v1alpha1.PriorityClass" "priorityclasses" "PriorityClass" "scheduling.k8s.io" "v1alpha1"));
       default = {};
     };
   
     "replicasets" = mkOption {
-      description = "ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.ReplicaSet" "replicasets" "ReplicaSet" "apps" "apps/v1"));
+      description = "DEPRECATED - This group version of ReplicaSet is deprecated by apps/v1beta2/ReplicaSet. See the release notes for more information. ReplicaSet ensures that a specified number of pod replicas are running at any given time.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.extensions.v1beta1.ReplicaSet" "replicasets" "ReplicaSet" "extensions" "v1beta1"));
       default = {};
     };
   
@@ -30732,13 +30733,13 @@ in {
   
     "roles" = mkOption {
       description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.Role" "roles" "Role" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
     "rolebindings" = mkOption {
       description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "rbac.authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.rbac.v1alpha1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1alpha1"));
       default = {};
     };
   
@@ -30750,13 +30751,13 @@ in {
   
     "selfsubjectaccessreviews" = mkOption {
       description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
     "selfsubjectrulesreviews" = mkOption {
       description = "SelfSubjectRulesReview enumerates the set of actions the current user can perform within a namespace. The returned list of actions may be incomplete depending on the server's authorization mode, and any errors experienced during the evaluation. SelfSubjectRulesReview should be used by UIs to show/hide actions, or to quickly let an end user reason about their permissions. It should NOT Be used by external systems to drive authorization decisions as this raises confused deputy, cache lifetime/revocation, and correctness concerns. SubjectAccessReview, and LocalAccessReview are the correct way to defer authorization decisions to the API server.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SelfSubjectRulesReview" "selfsubjectrulesreviews" "SelfSubjectRulesReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -30773,92 +30774,92 @@ in {
     };
   
     "statefulsets" = mkOption {
-      description = "StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n - Network: A single stable DNS and hostname.\n - Storage: As many VolumeClaims as requested.\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1.StatefulSet" "statefulsets" "StatefulSet" "apps" "apps/v1"));
+      description = "DEPRECATED - This group version of StatefulSet is deprecated by apps/v1beta2/StatefulSet. See the release notes for more information. StatefulSet represents a set of pods with consistent identities. Identities are defined as:\n - Network: A single stable DNS and hostname.\n - Storage: As many VolumeClaims as requested.\nThe StatefulSet guarantees that a given network identity will always map to the same storage identity.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.apps.v1beta1.StatefulSet" "statefulsets" "StatefulSet" "apps" "v1beta1"));
       default = {};
     };
   
     "storageclasses" = mkOption {
       description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "storage.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1beta1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1beta1"));
       default = {};
     };
   
     "subjectaccessreviews" = mkOption {
       description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "authorization.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authorization.v1beta1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
     "tokenreviews" = mkOption {
       description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "authentication.k8s.io/v1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.authentication.v1beta1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1beta1"));
       default = {};
     };
   
     "validatingwebhookconfigurations" = mkOption {
       description = "ValidatingWebhookConfiguration describes the configuration of and admission webhook that accept or reject and object without changing it.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingWebhookConfiguration" "validatingwebhookconfigurations" "ValidatingWebhookConfiguration" "admissionregistration.k8s.io" "admissionregistration.k8s.io/v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.admissionregistration.v1beta1.ValidatingWebhookConfiguration" "validatingwebhookconfigurations" "ValidatingWebhookConfiguration" "admissionregistration.k8s.io" "v1beta1"));
       default = {};
     };
   
     "volumeattachments" = mkOption {
       description = "VolumeAttachment captures the intent to attach or detach the specified volume to/from the specified node.\n\nVolumeAttachment objects are non-namespaced.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "storage.k8s.io/v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.api.storage.v1alpha1.VolumeAttachment" "volumeattachments" "VolumeAttachment" "storage.k8s.io" "v1alpha1"));
       default = {};
     };
   };
 
   config = {
-    "apiregistration.k8s.io"."apiregistration.k8s.io/v1"."APIService" = config."apiservices";
+    "apiregistration.k8s.io"."v1beta1"."APIService" = config."apiservices";
   
     "core"."v1"."Binding" = config."bindings";
   
-    "certificates.k8s.io"."certificates.k8s.io/v1beta1"."CertificateSigningRequest" = config."certificatesigningrequests";
+    "certificates.k8s.io"."v1beta1"."CertificateSigningRequest" = config."certificatesigningrequests";
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."ClusterRole" = config."clusterroles";
+    "rbac.authorization.k8s.io"."v1alpha1"."ClusterRole" = config."clusterroles";
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."ClusterRoleBinding" = config."clusterrolebindings";
+    "rbac.authorization.k8s.io"."v1alpha1"."ClusterRoleBinding" = config."clusterrolebindings";
   
     "core"."v1"."ConfigMap" = config."configmaps";
   
-    "apps"."apps/v1"."ControllerRevision" = config."controllerrevisions";
+    "apps"."v1beta1"."ControllerRevision" = config."controllerrevisions";
   
-    "batch"."batch/v1beta1"."CronJob" = config."cronjobs";
+    "batch"."v1beta1"."CronJob" = config."cronjobs";
   
-    "apiextensions.k8s.io"."apiextensions.k8s.io/v1beta1"."CustomResourceDefinition" = config."customresourcedefinitions";
+    "apiextensions.k8s.io"."v1beta1"."CustomResourceDefinition" = config."customresourcedefinitions";
   
-    "apps"."apps/v1"."DaemonSet" = config."daemonsets";
+    "extensions"."v1beta1"."DaemonSet" = config."daemonsets";
   
-    "apps"."apps/v1"."Deployment" = config."deployments";
+    "apps"."v1beta1"."Deployment" = config."deployments";
   
-    "apps"."apps/v1beta1"."DeploymentRollback" = config."rollback";
+    "apps"."v1beta1"."DeploymentRollback" = config."rollback";
   
     "core"."v1"."Endpoints" = config."endpoints";
   
-    "events.k8s.io"."events.k8s.io/v1beta1"."Event" = config."events";
+    "events.k8s.io"."v1beta1"."Event" = config."events";
   
-    "policy"."policy/v1beta1"."Eviction" = config."eviction";
+    "policy"."v1beta1"."Eviction" = config."eviction";
   
-    "autoscaling"."autoscaling/v1"."HorizontalPodAutoscaler" = config."horizontalpodautoscalers";
+    "autoscaling"."v1"."HorizontalPodAutoscaler" = config."horizontalpodautoscalers";
   
-    "extensions"."extensions/v1beta1"."Ingress" = config."ingresses";
+    "extensions"."v1beta1"."Ingress" = config."ingresses";
   
-    "admissionregistration.k8s.io"."admissionregistration.k8s.io/v1alpha1"."InitializerConfiguration" = config."initializerconfigurations";
+    "admissionregistration.k8s.io"."v1alpha1"."InitializerConfiguration" = config."initializerconfigurations";
   
-    "batch"."batch/v1"."Job" = config."jobs";
+    "batch"."v1"."Job" = config."jobs";
   
-    "coordination.k8s.io"."coordination.k8s.io/v1beta1"."Lease" = config."leases";
+    "coordination.k8s.io"."v1beta1"."Lease" = config."leases";
   
     "core"."v1"."LimitRange" = config."limitranges";
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."LocalSubjectAccessReview" = config."localsubjectaccessreviews";
+    "authorization.k8s.io"."v1beta1"."LocalSubjectAccessReview" = config."localsubjectaccessreviews";
   
-    "admissionregistration.k8s.io"."admissionregistration.k8s.io/v1beta1"."MutatingWebhookConfiguration" = config."mutatingwebhookconfigurations";
+    "admissionregistration.k8s.io"."v1beta1"."MutatingWebhookConfiguration" = config."mutatingwebhookconfigurations";
   
     "core"."v1"."Namespace" = config."namespaces";
   
-    "networking.k8s.io"."networking.k8s.io/v1"."NetworkPolicy" = config."networkpolicies";
+    "extensions"."v1beta1"."NetworkPolicy" = config."networkpolicies";
   
     "core"."v1"."Node" = config."nodes";
   
@@ -30868,223 +30869,223 @@ in {
   
     "core"."v1"."Pod" = config."pods";
   
-    "policy"."policy/v1beta1"."PodDisruptionBudget" = config."poddisruptionbudgets";
+    "policy"."v1beta1"."PodDisruptionBudget" = config."poddisruptionbudgets";
   
-    "settings.k8s.io"."settings.k8s.io/v1alpha1"."PodPreset" = config."podpresets";
+    "settings.k8s.io"."v1alpha1"."PodPreset" = config."podpresets";
   
-    "policy"."policy/v1beta1"."PodSecurityPolicy" = config."podsecuritypolicies";
+    "extensions"."v1beta1"."PodSecurityPolicy" = config."podsecuritypolicies";
   
     "core"."v1"."PodTemplate" = config."podtemplates";
   
-    "scheduling.k8s.io"."scheduling.k8s.io/v1alpha1"."PriorityClass" = config."priorityclasses";
+    "scheduling.k8s.io"."v1alpha1"."PriorityClass" = config."priorityclasses";
   
-    "apps"."apps/v1"."ReplicaSet" = config."replicasets";
+    "extensions"."v1beta1"."ReplicaSet" = config."replicasets";
   
     "core"."v1"."ReplicationController" = config."replicationcontrollers";
   
     "core"."v1"."ResourceQuota" = config."resourcequotas";
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."Role" = config."roles";
+    "rbac.authorization.k8s.io"."v1alpha1"."Role" = config."roles";
   
-    "rbac.authorization.k8s.io"."rbac.authorization.k8s.io/v1"."RoleBinding" = config."rolebindings";
+    "rbac.authorization.k8s.io"."v1alpha1"."RoleBinding" = config."rolebindings";
   
     "core"."v1"."Secret" = config."secrets";
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."SelfSubjectAccessReview" = config."selfsubjectaccessreviews";
+    "authorization.k8s.io"."v1beta1"."SelfSubjectAccessReview" = config."selfsubjectaccessreviews";
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."SelfSubjectRulesReview" = config."selfsubjectrulesreviews";
+    "authorization.k8s.io"."v1beta1"."SelfSubjectRulesReview" = config."selfsubjectrulesreviews";
   
     "core"."v1"."Service" = config."services";
   
     "core"."v1"."ServiceAccount" = config."serviceaccounts";
   
-    "apps"."apps/v1"."StatefulSet" = config."statefulsets";
+    "apps"."v1beta1"."StatefulSet" = config."statefulsets";
   
-    "storage.k8s.io"."storage.k8s.io/v1"."StorageClass" = config."storageclasses";
+    "storage.k8s.io"."v1beta1"."StorageClass" = config."storageclasses";
   
-    "authorization.k8s.io"."authorization.k8s.io/v1"."SubjectAccessReview" = config."subjectaccessreviews";
+    "authorization.k8s.io"."v1beta1"."SubjectAccessReview" = config."subjectaccessreviews";
   
-    "authentication.k8s.io"."authentication.k8s.io/v1"."TokenReview" = config."tokenreviews";
+    "authentication.k8s.io"."v1beta1"."TokenReview" = config."tokenreviews";
   
-    "admissionregistration.k8s.io"."admissionregistration.k8s.io/v1beta1"."ValidatingWebhookConfiguration" = config."validatingwebhookconfigurations";
+    "admissionregistration.k8s.io"."v1beta1"."ValidatingWebhookConfiguration" = config."validatingwebhookconfigurations";
   
-    "storage.k8s.io"."storage.k8s.io/v1alpha1"."VolumeAttachment" = config."volumeattachments";
+    "storage.k8s.io"."v1alpha1"."VolumeAttachment" = config."volumeattachments";
   } // {
     inherit definitions;
 
     resources = [{
       group = "admissionregistration.k8s.io";
-      version = "admissionregistration.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "InitializerConfiguration";
       resource = "initializerconfigurations";
     }{
       group = "admissionregistration.k8s.io";
-      version = "admissionregistration.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "MutatingWebhookConfiguration";
       resource = "mutatingwebhookconfigurations";
     }{
       group = "admissionregistration.k8s.io";
-      version = "admissionregistration.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "ValidatingWebhookConfiguration";
       resource = "validatingwebhookconfigurations";
     }{
       group = "apps";
-      version = "apps/v1";
+      version = "v1";
       kind = "ControllerRevision";
       resource = "controllerrevisions";
     }{
       group = "apps";
-      version = "apps/v1";
+      version = "v1";
       kind = "DaemonSet";
       resource = "daemonsets";
     }{
       group = "apps";
-      version = "apps/v1";
+      version = "v1";
       kind = "Deployment";
       resource = "deployments";
     }{
       group = "apps";
-      version = "apps/v1";
+      version = "v1";
       kind = "ReplicaSet";
       resource = "replicasets";
     }{
       group = "apps";
-      version = "apps/v1";
+      version = "v1";
       kind = "StatefulSet";
       resource = "statefulsets";
     }{
       group = "apps";
-      version = "apps/v1beta1";
+      version = "v1beta1";
       kind = "ControllerRevision";
       resource = "controllerrevisions";
     }{
       group = "apps";
-      version = "apps/v1beta1";
+      version = "v1beta1";
       kind = "Deployment";
       resource = "deployments";
     }{
       group = "apps";
-      version = "apps/v1beta1";
+      version = "v1beta1";
       kind = "DeploymentRollback";
       resource = "rollback";
     }{
       group = "apps";
-      version = "apps/v1beta1";
+      version = "v1beta1";
       kind = "StatefulSet";
       resource = "statefulsets";
     }{
       group = "apps";
-      version = "apps/v1beta2";
+      version = "v1beta2";
       kind = "ControllerRevision";
       resource = "controllerrevisions";
     }{
       group = "apps";
-      version = "apps/v1beta2";
+      version = "v1beta2";
       kind = "DaemonSet";
       resource = "daemonsets";
     }{
       group = "apps";
-      version = "apps/v1beta2";
+      version = "v1beta2";
       kind = "Deployment";
       resource = "deployments";
     }{
       group = "apps";
-      version = "apps/v1beta2";
+      version = "v1beta2";
       kind = "ReplicaSet";
       resource = "replicasets";
     }{
       group = "apps";
-      version = "apps/v1beta2";
+      version = "v1beta2";
       kind = "StatefulSet";
       resource = "statefulsets";
     }{
       group = "authentication.k8s.io";
-      version = "authentication.k8s.io/v1";
+      version = "v1";
       kind = "TokenReview";
       resource = "tokenreviews";
     }{
       group = "authentication.k8s.io";
-      version = "authentication.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "TokenReview";
       resource = "tokenreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1";
+      version = "v1";
       kind = "LocalSubjectAccessReview";
       resource = "localsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1";
+      version = "v1";
       kind = "SelfSubjectAccessReview";
       resource = "selfsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1";
+      version = "v1";
       kind = "SelfSubjectRulesReview";
       resource = "selfsubjectrulesreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1";
+      version = "v1";
       kind = "SubjectAccessReview";
       resource = "subjectaccessreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "LocalSubjectAccessReview";
       resource = "localsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "SelfSubjectAccessReview";
       resource = "selfsubjectaccessreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "SelfSubjectRulesReview";
       resource = "selfsubjectrulesreviews";
     }{
       group = "authorization.k8s.io";
-      version = "authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "SubjectAccessReview";
       resource = "subjectaccessreviews";
     }{
       group = "autoscaling";
-      version = "autoscaling/v1";
+      version = "v1";
       kind = "HorizontalPodAutoscaler";
       resource = "horizontalpodautoscalers";
     }{
       group = "autoscaling";
-      version = "autoscaling/v2beta1";
+      version = "v2beta1";
       kind = "HorizontalPodAutoscaler";
       resource = "horizontalpodautoscalers";
     }{
       group = "autoscaling";
-      version = "autoscaling/v2beta2";
+      version = "v2beta2";
       kind = "HorizontalPodAutoscaler";
       resource = "horizontalpodautoscalers";
     }{
       group = "batch";
-      version = "batch/v1";
+      version = "v1";
       kind = "Job";
       resource = "jobs";
     }{
       group = "batch";
-      version = "batch/v1beta1";
+      version = "v1beta1";
       kind = "CronJob";
       resource = "cronjobs";
     }{
       group = "batch";
-      version = "batch/v2alpha1";
+      version = "v2alpha1";
       kind = "CronJob";
       resource = "cronjobs";
     }{
       group = "certificates.k8s.io";
-      version = "certificates.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "CertificateSigningRequest";
       resource = "certificatesigningrequests";
     }{
       group = "coordination.k8s.io";
-      version = "coordination.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "Lease";
       resource = "leases";
     }{
@@ -31169,172 +31170,172 @@ in {
       resource = "serviceaccounts";
     }{
       group = "events.k8s.io";
-      version = "events.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "Event";
       resource = "events";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "DaemonSet";
       resource = "daemonsets";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "Deployment";
       resource = "deployments";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "DeploymentRollback";
       resource = "rollback";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "Ingress";
       resource = "ingresses";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "NetworkPolicy";
       resource = "networkpolicies";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "PodSecurityPolicy";
       resource = "podsecuritypolicies";
     }{
       group = "extensions";
-      version = "extensions/v1beta1";
+      version = "v1beta1";
       kind = "ReplicaSet";
       resource = "replicasets";
     }{
       group = "networking.k8s.io";
-      version = "networking.k8s.io/v1";
+      version = "v1";
       kind = "NetworkPolicy";
       resource = "networkpolicies";
     }{
       group = "policy";
-      version = "policy/v1beta1";
+      version = "v1beta1";
       kind = "Eviction";
       resource = "eviction";
     }{
       group = "policy";
-      version = "policy/v1beta1";
+      version = "v1beta1";
       kind = "PodDisruptionBudget";
       resource = "poddisruptionbudgets";
     }{
       group = "policy";
-      version = "policy/v1beta1";
+      version = "v1beta1";
       kind = "PodSecurityPolicy";
       resource = "podsecuritypolicies";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1";
+      version = "v1";
       kind = "ClusterRole";
       resource = "clusterroles";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1";
+      version = "v1";
       kind = "ClusterRoleBinding";
       resource = "clusterrolebindings";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1";
+      version = "v1";
       kind = "Role";
       resource = "roles";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1";
+      version = "v1";
       kind = "RoleBinding";
       resource = "rolebindings";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "ClusterRole";
       resource = "clusterroles";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "ClusterRoleBinding";
       resource = "clusterrolebindings";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "Role";
       resource = "roles";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "RoleBinding";
       resource = "rolebindings";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "ClusterRole";
       resource = "clusterroles";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "ClusterRoleBinding";
       resource = "clusterrolebindings";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "Role";
       resource = "roles";
     }{
       group = "rbac.authorization.k8s.io";
-      version = "rbac.authorization.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "RoleBinding";
       resource = "rolebindings";
     }{
       group = "scheduling.k8s.io";
-      version = "scheduling.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "PriorityClass";
       resource = "priorityclasses";
     }{
       group = "scheduling.k8s.io";
-      version = "scheduling.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "PriorityClass";
       resource = "priorityclasses";
     }{
       group = "settings.k8s.io";
-      version = "settings.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "PodPreset";
       resource = "podpresets";
     }{
       group = "storage.k8s.io";
-      version = "storage.k8s.io/v1";
+      version = "v1";
       kind = "StorageClass";
       resource = "storageclasses";
     }{
       group = "storage.k8s.io";
-      version = "storage.k8s.io/v1alpha1";
+      version = "v1alpha1";
       kind = "VolumeAttachment";
       resource = "volumeattachments";
     }{
       group = "storage.k8s.io";
-      version = "storage.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "StorageClass";
       resource = "storageclasses";
     }{
       group = "storage.k8s.io";
-      version = "storage.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "VolumeAttachment";
       resource = "volumeattachments";
     }{
       group = "apiextensions.k8s.io";
-      version = "apiextensions.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "CustomResourceDefinition";
       resource = "customresourcedefinitions";
     }{
       group = "apiregistration.k8s.io";
-      version = "apiregistration.k8s.io/v1";
+      version = "v1";
       kind = "APIService";
       resource = "apiservices";
     }{
       group = "apiregistration.k8s.io";
-      version = "apiregistration.k8s.io/v1beta1";
+      version = "v1beta1";
       kind = "APIService";
       resource = "apiservices";
     }];

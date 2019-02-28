@@ -206,7 +206,7 @@ let
     inherit ref;
 
     kind = path.post."x-kubernetes-group-version-kind".kind;
-    version = if group' != "" then "${group'}/${version'}" else version';
+    version = version';
     resource = last (splitString "/" name);
     description = swagger.definitions.${ref}.description;
     group = if group' == "" then "core" else group';
@@ -323,21 +323,22 @@ let
     };
   });
 
-  submoduleForDefinition = ref: resource: kind: group: version:
-    types.submodule ({name, ...}: {
-      imports = getDefaults resource group version kind;
-      options = definitions.\"\${ref}\".options // extraOptions;
-      config = mkMerge [
-        definitions.\"\${ref}\".config
-        {
-          kind = mkOptionDefault kind;
-          apiVersion = mkOptionDefault version;
+  submoduleForDefinition = ref: resource: kind: group: version: let
+    apiVersion = if group == \"core\" then version else \"\${group}/\${version}\";
+  in types.submodule ({name, ...}: {
+    imports = getDefaults resource group version kind;
+    options = definitions.\"\${ref}\".options // extraOptions;
+    config = mkMerge [
+      definitions.\"\${ref}\".config
+      {
+        kind = mkOptionDefault kind;
+        apiVersion = mkOptionDefault apiVersion;
 
-          # metdata.name cannot use option default, due deep config
-          metadata.name = mkOptionDefault name;
-        }
-      ];
-    });
+        # metdata.name cannot use option default, due deep config
+        metadata.name = mkOptionDefault name;
+      }
+    ];
+  });
 
   coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
     (types.listOf (submoduleOf ref))
