@@ -12361,13 +12361,13 @@ in {
   
     "clusterroles" = mkOption {
       description = "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1alpha1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1beta1.ClusterRole" "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
     "clusterrolebindings" = mkOption {
       description = "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1alpha1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1beta1.ClusterRoleBinding" "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -12432,8 +12432,8 @@ in {
     };
   
     "horizontalpodautoscalers" = mkOption {
-      description = "configuration of a horizontal pod autoscaler.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.autoscaling.v1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v1"));
+      description = "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.autoscaling.v2alpha1.HorizontalPodAutoscaler" "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v2alpha1"));
       default = {};
     };
   
@@ -12463,7 +12463,7 @@ in {
   
     "localsubjectaccessreviews" = mkOption {
       description = "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authorization.v1beta1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authorization.v1.LocalSubjectAccessReview" "localsubjectaccessreviews" "LocalSubjectAccessReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
@@ -12475,7 +12475,7 @@ in {
   
     "networkpolicies" = mkOption {
       description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.extensions.v1beta1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "extensions" "v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.networking.v1.NetworkPolicy" "networkpolicies" "NetworkPolicy" "networking.k8s.io" "v1"));
       default = {};
     };
   
@@ -12547,13 +12547,13 @@ in {
   
     "roles" = mkOption {
       description = "Role is a namespaced, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1alpha1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1beta1.Role" "roles" "Role" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
     "rolebindings" = mkOption {
       description = "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1alpha1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1alpha1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.rbac.v1beta1.RoleBinding" "rolebindings" "RoleBinding" "rbac.authorization.k8s.io" "v1beta1"));
       default = {};
     };
   
@@ -12565,7 +12565,7 @@ in {
   
     "selfsubjectaccessreviews" = mkOption {
       description = "SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means \"in all namespaces\".  Self is a special case, because users should always be able to check whether they can perform an action";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authorization.v1beta1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authorization.v1.SelfSubjectAccessReview" "selfsubjectaccessreviews" "SelfSubjectAccessReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
@@ -12589,13 +12589,13 @@ in {
   
     "storageclasses" = mkOption {
       description = "StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.\n\nStorageClasses are non-namespaced; the name of the storage class according to etcd is in ObjectMeta.Name.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.storage.v1beta1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.storage.v1.StorageClass" "storageclasses" "StorageClass" "storage.k8s.io" "v1"));
       default = {};
     };
   
     "subjectaccessreviews" = mkOption {
       description = "SubjectAccessReview checks whether or not a user or group can perform an action.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authorization.v1beta1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authorization.v1.SubjectAccessReview" "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1"));
       default = {};
     };
   
@@ -12607,7 +12607,7 @@ in {
   
     "tokenreviews" = mkOption {
       description = "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
-      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authentication.v1beta1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1beta1"));
+      type = (types.attrsOf (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.authentication.v1.TokenReview" "tokenreviews" "TokenReview" "authentication.k8s.io" "v1"));
       default = {};
     };
   };
@@ -12619,9 +12619,9 @@ in {
   
     "certificates.k8s.io"."v1beta1"."CertificateSigningRequest" = config."certificatesigningrequests";
   
-    "rbac.authorization.k8s.io"."v1alpha1"."ClusterRole" = config."clusterroles";
+    "rbac.authorization.k8s.io"."v1beta1"."ClusterRole" = config."clusterroles";
   
-    "rbac.authorization.k8s.io"."v1alpha1"."ClusterRoleBinding" = config."clusterrolebindings";
+    "rbac.authorization.k8s.io"."v1beta1"."ClusterRoleBinding" = config."clusterrolebindings";
   
     "core"."v1"."ConfigMap" = config."configmaps";
   
@@ -12643,7 +12643,7 @@ in {
   
     "admissionregistration.k8s.io"."v1alpha1"."ExternalAdmissionHookConfiguration" = config."externaladmissionhookconfigurations";
   
-    "autoscaling"."v1"."HorizontalPodAutoscaler" = config."horizontalpodautoscalers";
+    "autoscaling"."v2alpha1"."HorizontalPodAutoscaler" = config."horizontalpodautoscalers";
   
     "extensions"."v1beta1"."Ingress" = config."ingresses";
   
@@ -12653,11 +12653,11 @@ in {
   
     "core"."v1"."LimitRange" = config."limitranges";
   
-    "authorization.k8s.io"."v1beta1"."LocalSubjectAccessReview" = config."localsubjectaccessreviews";
+    "authorization.k8s.io"."v1"."LocalSubjectAccessReview" = config."localsubjectaccessreviews";
   
     "core"."v1"."Namespace" = config."namespaces";
   
-    "extensions"."v1beta1"."NetworkPolicy" = config."networkpolicies";
+    "networking.k8s.io"."v1"."NetworkPolicy" = config."networkpolicies";
   
     "core"."v1"."Node" = config."nodes";
   
@@ -12681,13 +12681,13 @@ in {
   
     "core"."v1"."ResourceQuota" = config."resourcequotas";
   
-    "rbac.authorization.k8s.io"."v1alpha1"."Role" = config."roles";
+    "rbac.authorization.k8s.io"."v1beta1"."Role" = config."roles";
   
-    "rbac.authorization.k8s.io"."v1alpha1"."RoleBinding" = config."rolebindings";
+    "rbac.authorization.k8s.io"."v1beta1"."RoleBinding" = config."rolebindings";
   
     "core"."v1"."Secret" = config."secrets";
   
-    "authorization.k8s.io"."v1beta1"."SelfSubjectAccessReview" = config."selfsubjectaccessreviews";
+    "authorization.k8s.io"."v1"."SelfSubjectAccessReview" = config."selfsubjectaccessreviews";
   
     "core"."v1"."Service" = config."services";
   
@@ -12695,13 +12695,13 @@ in {
   
     "apps"."v1beta1"."StatefulSet" = config."statefulsets";
   
-    "storage.k8s.io"."v1beta1"."StorageClass" = config."storageclasses";
+    "storage.k8s.io"."v1"."StorageClass" = config."storageclasses";
   
-    "authorization.k8s.io"."v1beta1"."SubjectAccessReview" = config."subjectaccessreviews";
+    "authorization.k8s.io"."v1"."SubjectAccessReview" = config."subjectaccessreviews";
   
     "extensions"."v1beta1"."ThirdPartyResource" = config."thirdpartyresources";
   
-    "authentication.k8s.io"."v1beta1"."TokenReview" = config."tokenreviews";
+    "authentication.k8s.io"."v1"."TokenReview" = config."tokenreviews";
   } // {
     inherit definitions;
 

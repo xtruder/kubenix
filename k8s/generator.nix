@@ -227,8 +227,7 @@ let
 
   resourcesByKindOrderedByVersion = mapAttrs (kind: resources:
     reverseList (sort (r1: r2:
-      if compareVersions r1.version r2.version < 0
-      then true else false
+      compareVersions r1.version r2.version > 0
     ) resources)
   ) resourcesByKind;
 
