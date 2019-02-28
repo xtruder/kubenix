@@ -16,7 +16,7 @@ in {
     assertions = [{
       message = "should have generated resources";
       assertion =
-        appsv1beta2.StatefulSet ? "app-psql-postgreql-master" &&
+        appsv1beta2.StatefulSet ? "app-psql-postgresql-master" &&
         appsv1beta2.StatefulSet ? "app-psql-postgresql-slave" &&
         corev1.ConfigMap ? "app-psql-postgresql-init-scripts" &&
         corev1.Secret ? "app-psql-postgresql" &&
