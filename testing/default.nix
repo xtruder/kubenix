@@ -57,6 +57,8 @@ let
         };
         masterAddress = "${master.config.networking.hostName}.${master.config.networking.domain}";
       };
+
+      systemd.extraConfig = "DefaultLimitNOFILE=1048576";
     }
     (mkIf (any (role: role == "master") config.services.kubernetes.roles) {
       networking.firewall.allowedTCPPorts = [
