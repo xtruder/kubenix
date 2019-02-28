@@ -3,6 +3,8 @@
 with lib;
 
 let
+  cfg = config.kubernetes;
+
   removeKubenixOptions = filterAttrs (name: attr: name != "kubenix");
 
   getDefaults = resource: group: version: kind:
@@ -11,7 +13,7 @@ let
       (default.group == null || default.group == group) &&
       (default.version == null || default.version == version) &&
       (default.kind == null || default.kind == kind)
-    ) config.kubernetes.api.defaults);
+    ) cfg.api.defaults);
 
   moduleToAttrs = value:
     if isAttrs value
@@ -120,7 +122,7 @@ in {
   options.kubernetes.api = mkOption {
     type = types.submodule {
       imports = [
-        (./generated + ''/v'' + config.kubernetes.version + ".nix")
+        (./generated + ''/v'' + cfg.version + ".nix")
         apiOptions
       ] ++ (map (cr: {config, ...}: {
         options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
@@ -158,7 +160,7 @@ in {
           }));
           default = {};
         };
-      }) config.kubernetes.customResources);
+      }) cfg.customResources);
     };
     default = {};
   };
@@ -219,8 +221,8 @@ in {
   config.kubernetes.objects = flatten (map (gvk:
     mapAttrsToList (name: resource:
       removeKubenixOptions (moduleToAttrs resource)
-    ) config.kubernetes.api.${gvk.group}.${gvk.version}.${gvk.kind}
-  ) config.kubernetes.api.resources);
+    ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
+  ) cfg.api.resources);
 
   options.kubernetes.generated = mkOption {
     type = types.attrs;
@@ -228,12 +230,12 @@ in {
   };
 
   config.kubernetes.generated = let
-    kubernetesList = toKubernetesList config.kubernetes.objects;
+    kubernetesList = toKubernetesList cfg.objects;
 
     hashedList = kubernetesList // {
-      labels."kubenix/build" = config.kubernetes.hash;
+      labels."kubenix/build" = cfg.hash;
       items = map (resource: recursiveUpdate resource {
-        metadata.labels."kubenix/build" = config.kubernetes.hash;
+        metadata.labels."kubenix/build" = cfg.hash;
       }) kubernetesList.items;
     };
   in hashedList;
@@ -243,5 +245,5 @@ in {
     description = "Output hash";
   };
 
-  config.kubernetes.hash = builtins.hashString "sha1" (builtins.toJSON config.kubernetes.objects);
+  config.kubernetes.hash = builtins.hashString "sha1" (builtins.toJSON cfg.objects);
 }
