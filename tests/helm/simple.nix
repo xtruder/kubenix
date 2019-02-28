@@ -16,14 +16,18 @@ in {
     assertions = [{
       message = "should have generated resources";
       assertion =
-        appsv1beta2.StatefulSet ? "app-psql-postgreql" &&
+        appsv1beta2.StatefulSet ? "app-psql-postgreql-master" &&
+        appsv1beta2.StatefulSet ? "app-psql-postgresql-slave" &&
         corev1.ConfigMap ? "app-psql-postgresql-init-scripts" &&
         corev1.Secret ? "app-psql-postgresql" &&
         corev1.Service ? "app-psql-postgresql-headless" ;
     } {
+      message = "should have values passed";
+      assertion = appsv1beta2.StatefulSet.app-psql-postgresql-slave.spec.replicas == 2;
+    } {
       message = "should have namespace defined";
       assertion =
-        appsv1beta2.StatefulSet.app-psql-postgresql.metadata.namespace == "test-namespace";
+        appsv1beta2.StatefulSet.app-psql-postgresql-master.metadata.namespace == "test-namespace";
     }];
   };
 
@@ -35,6 +39,11 @@ in {
       chart = "stable/postgresql";
       version = "3.0.0";
       sha256 = "0icnnpcqvf1hqn7fc9niyifd0amlm9jfrx3iks0y360rk8wndbch";
+    };
+
+    values = {
+      replication.enabled = true;
+      replication.slaveReplicas = 2;
     };
   };
 }
