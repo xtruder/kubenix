@@ -110,6 +110,9 @@ let
       };
     };
   };
+
+  indexOf = lst: value:
+    head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
 in {
   imports = [./lib.nix];
 
@@ -117,6 +120,15 @@ in {
     description = "Kubernetes version to use";
     type = types.enum ["1.7" "1.8" "1.9" "1.10" "1.11" "1.12" "1.13"];
     default = "1.13";
+  };
+
+  options.kubernetes.resourceOrder = mkOption {
+    description = "Preffered resource order";
+    type = types.listOf types.str;
+    default = [
+      "CustomResourceDefinition"
+      "Namespace"
+    ];
   };
 
   options.kubernetes.api = mkOption {
@@ -207,13 +219,15 @@ in {
 
   config.kubernetes.api.resources = map (cr: {
     inherit (cr) group version kind resource;
-  }) config.kubernetes.customResources;
+  }) cfg.customResources;
 
   options.kubernetes.objects = mkOption {
     description = "Attribute set of kubernetes objects";
     type = types.listOf types.attrs;
     apply = items: sort (r1: r2:
-      if r1.kind == "CustomResourceDefinition" || r2.kind == "CustomResourceDefinition" then true else false
+      if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
+      then indexOf cfg.resourceOrder r1.kind < indexOf cfg.resourceOrder r2.kind
+      else if elem r1.kind cfg.resourceOrder then true else false
     ) (moduleToAttrs (unique items));
     default = [];
   };
