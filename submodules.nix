@@ -93,9 +93,11 @@ let
   };
 
   findModule = {name, version ? null, latest ? true}: let
+    versionPrefix = head (splitString [".x"] version);
+
     matchingSubmodules = filter (el:
       el.definition.name == name &&
-      (if version != null then el.definition.version == version else true)
+      (if version != null then hasPrefix versionPrefix el.definition.version else true)
     ) cfg.imports;
 
     versionSortedSubmodules = sort (s1: s2:
