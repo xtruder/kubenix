@@ -231,6 +231,7 @@ in {
             type = submoduleWithSpecialArgs ({...}: {
               imports = submodule.modules ++ defaults ++ [submoduleOptions];
               _module.args.name = config.name;
+              _module.args.submodule = config;
             }) specialArgs;
             default = {};
           };
