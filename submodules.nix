@@ -60,38 +60,32 @@ let
     };
 
   submoduleDefinitionOptions = {
-    options = {
-      name = mkOption {
-        description = "Module name";
-        type = types.str;
-      };
+    name = mkOption {
+      description = "Module name";
+      type = types.str;
+    };
 
-      description = mkOption {
-        description = "Module description";
-        type = types.str;
-        default = "";
-      };
+    description = mkOption {
+      description = "Module description";
+      type = types.str;
+      default = "";
+    };
 
-      version = mkOption {
-        description = "Module version";
-        type = types.str;
-        default = "1.0.0";
-      };
+    version = mkOption {
+      description = "Module version";
+      type = types.str;
+      default = "1.0.0";
+    };
 
-      tags = mkOption {
-        description = "List of submodule tags";
-        type = types.listOf types.str;
-        default = [];
-      };
+    tags = mkOption {
+      description = "List of submodule tags";
+      type = types.listOf types.str;
+      default = [];
     };
   };
 
   submoduleOptions = {
-    options.submodule = mkOption {
-      description = "Submodule options";
-      type = types.submodule submoduleDefinitionOptions;
-      default = {};
-    };
+    options.submodule = submoduleDefinitionOptions;
   };
 
   specialArgs = cfg.specialArgs // {
@@ -179,10 +173,11 @@ in {
                 default = [config.module];
               };
 
-              definition = mkOption {
-                type = types.submodule submoduleDefinitionOptions;
-                default = submoduleDefinition;
-              };
+              definition = submoduleDefinitionOptions;
+            };
+
+            config.definition = {
+              inherit (submoduleDefinition) name description version tags;
             };
           })
         )
