@@ -92,12 +92,14 @@ let
     parentConfig = config;
   };
 
-  findModule = {name, version ? null, latest ? true}: let
-    versionPrefix = head (splitString [".x"] version);
-
+  findSubmodule = {name, version ? null, latest ? true}: let
     matchingSubmodules = filter (el:
       el.definition.name == name &&
-      (if version != null then hasPrefix versionPrefix el.definition.version else true)
+      (if version != null then
+        if hasPrefix "~" version
+        then (builtins.match (removePrefix "~" version) el.definition.version) != null
+        else el.definition.version == version
+      else true)
     ) cfg.imports;
 
     versionSortedSubmodules = sort (s1: s2:
@@ -191,7 +193,7 @@ in {
       description = "Attribute set of submodule instances";
       type = types.attrsOf (types.submodule ({name, config, ...}: let
         # submodule associated with
-        submodule = findModule {
+        submodule = findSubmodule {
           name = config.submodule;
           version = config.version;
         };
@@ -216,7 +218,10 @@ in {
           };
 
           version = mkOption {
-            description = "Version of submodule to use";
+            description = ''
+              Version of submodule to use, if version starts with "~" it is
+              threated as regex pattern for example "~1.0.*"
+            '';
             type = types.nullOr types.str;
             default = null;
           };

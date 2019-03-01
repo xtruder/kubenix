@@ -37,6 +37,7 @@ let
           ./istio/bookinfo.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix
+          ./submodules/versioning.nix
         ];
         testing.defaults = ({kubenix, ...}: {
           imports = [kubenix.k8s];
