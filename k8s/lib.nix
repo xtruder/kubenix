@@ -4,7 +4,7 @@ with lib;
 
 let
   k8s = {
-    mkSecretOption = {description ? "", default ? {}}: mkOption {
+    mkSecretOption = {description ? "", default ? null}: mkOption {
       inherit description;
       type = types.nullOr (types.submodule {
         options = {
@@ -19,7 +19,7 @@ let
           };
         };
 
-        config = mkDefault default;
+        config = mkDefault (if default == null then {} else default);
       });
       default = {};
     };
