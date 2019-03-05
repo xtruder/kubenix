@@ -20,15 +20,11 @@ let
   buildResources = args:
     (evalKubernetesModules args).config.kubernetes.generated;
 
+  modules = import ./modules;
+
   kubenix = {
     inherit evalKubernetesModules buildResources kubenix;
 
     lib = lib';
-    submodules = ./submodules.nix;
-    k8s = ./k8s;
-    k8s-submodules = ./k8s/submodule.nix;
-    istio = ./istio;
-    testing = ./testing;
-    helm = ./helm;
-  };
+  } // modules;
 in kubenix
