@@ -2,10 +2,13 @@
 
 with lib;
 
-{
+let
+  globalConfig = config;
+in {
   options.docker.registry.url = mkOption {
     description = "Default registry url where images are published";
     type = types.str;
+    default = "";
   };
 
   options.docker.images = mkOption {
@@ -33,19 +36,28 @@ with lib;
         registry = mkOption {
           description = "Docker registry url where image is published";
           type = types.str;
-          default = config.docker.registry.url;
+          default = globalConfig.docker.registry.url;
+        };
+
+        path = mkOption {
+          description = "Full docker image path";
+          type = types.str;
+          default =
+            if config.registry != ""
+            then "${config.registry}/${config.name}:${config.tag}"
+            else "${config.name}:${config.tag}";
         };
       };
     }));
     default = {};
   };
 
-  options.docker.push = mkOption {
-    description = "List of images to push";
+  options.docker.export = mkOption {
+    description = "List of images to export";
     type = types.listOf (types.package);
     default = [];
   };
 
-  config.docker.push = mapAttrsToList (_: i: i.image)
+  config.docker.export = mapAttrsToList (_: i: i.image)
     (filterAttrs (_: i: i.registry != null)config.docker.images);
 }

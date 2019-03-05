@@ -5,7 +5,6 @@ with lib;
 let
   cfg = config.submodules.instances.test.config;
   deployment = cfg.kubernetes.api.deployments.nginx;
-  image = images.nginx;
 in {
   imports = [
     kubenix.all
@@ -20,6 +19,9 @@ in {
     } {
       message = "Version not propagated";
       assertion = cfg.kubernetes.version == config.kubernetes.version;
+    } {
+      message = "docker image should be added to exported images";
+      assertion = (head config.docker.export) == images.nginx;
     }];
     testScript = ''
       $kube->waitUntilSucceeds("docker load < ${image}");
@@ -44,12 +46,14 @@ in {
           template.metadata.labels.app = "nginx";
           template.spec = {
             containers.nginx = {
-              image = "${image.imageName}:${image.imageTag}";
+              image = config.docker.images.nginx.path;
               imagePullPolicy = "Never";
             };
           };
         };
       };
+
+      docker.images.nginx.image = images.nginx;
     };
   }];
 

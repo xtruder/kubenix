@@ -64,8 +64,8 @@ in {
       submodule.config.kubernetes.objects
     ) config.submodules.instances);
 
-    docker.push = mkMerge (mapAttrsToList (_: submodule:
-      submodule.config.docker.push
+    docker.export = mkMerge (mapAttrsToList (_: submodule:
+      submodule.config.docker.export
     ) config.submodules.instances);
   };
 }
