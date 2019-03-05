@@ -8,12 +8,12 @@ let
   image = images.nginx;
 in {
   imports = [
-    kubenix.k8s-submodules
+    kubenix.all
   ];
 
   test = {
-    name = "k8s-submodules";
-    description = "Simple k8s submodule test";
+    name = "all";
+    description = "Test testing all submodule";
     assertions = [{
       message = "Namespace not propagated";
       assertion = deployment.metadata.namespace == "test";

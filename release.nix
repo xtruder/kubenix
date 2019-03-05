@@ -1,4 +1,4 @@
-{pkgs ? import <nixpkgs> {}}:
+{ pkgs ? import <nixpkgs> {} }:
 
 let
   kubenix = import ./. { inherit pkgs; };

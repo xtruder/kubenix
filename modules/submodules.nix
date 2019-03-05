@@ -191,6 +191,7 @@ in {
 
     submodules.instances = mkOption {
       description = "Attribute set of submodule instances";
+      default = {};
       type = types.attrsOf (types.submodule ({name, config, ...}: let
         # submodule associated with
         submodule = findSubmodule {

@@ -30,7 +30,6 @@ let
           ./k8s/deployment.nix
           ./k8s/crd.nix
           ./k8s/1.13/crd.nix
-          ./k8s/submodule.nix
           ./k8s/defaults.nix
           ./k8s/order.nix
           ./helm/simple.nix
@@ -38,6 +37,7 @@ let
           ./submodules/simple.nix
           ./submodules/defaults.nix
           ./submodules/versioning.nix
+          ./all.nix
         ];
         testing.defaults = ({kubenix, ...}: {
           imports = [kubenix.k8s];
