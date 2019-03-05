@@ -5,4 +5,5 @@
   istio = ./istio;
   testing = ./testing;
   helm = ./helm;
+  docker = ./docker;
 }
