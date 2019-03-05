@@ -44,27 +44,4 @@ in rec {
       i = acc.i + 1;
       value = acc.value + (toInt char) * (exp 8 acc.i);
     }) {i = 0; value = 0;} (stringToCharacters value)).value;
-
-  importModule = {module ? null, modules ? [module], config}: let
-    specialArgs = {
-      kubenix = import ./. { inherit pkgs lib; };
-      parentConfig = config;
-    };
-
-    isModule = hasAttr "module" config;
-
-    moduleDefinition = (evalModules {
-      inherit modules specialArgs;
-      check = false;
-    }).config.module.definition;
-  in mkOption {
-    description = "Module ${moduleDefinition.name} version ${moduleDefinition.version}";
-    type = submoduleWithSpecialArgs ({name, ...}: let
-      name' = if isModule then "${config.module.name}-${name}" else name;
-    in {
-      imports = modules;
-      module.name = mkOptionDefault name';
-    }) specialArgs;
-    default = {};
-  };
 }
