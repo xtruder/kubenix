@@ -1,2 +1,2 @@
 language: nix
-script: nix-build release.nix -A tests -A generate.istio -A generate.k8s
+script: nix build -f ./tests v1_13.testing.result --arg e2e false
