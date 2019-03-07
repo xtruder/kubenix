@@ -119,10 +119,9 @@ let
     }).config.test;
 
     evaled =
-      if test.enable
-      then builtins.trace "testing ${test.name}" (kubenix.evalModules {
+      if test.enable then kubenix.evalModules {
         inherit modules;
-      })
+      }
       else {success = false;};
   in {
     options = {
