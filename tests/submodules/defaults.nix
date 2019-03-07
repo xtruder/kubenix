@@ -21,9 +21,7 @@ let
     };
   };
 in {
-  imports = [
-    kubenix.submodules
-  ];
+  imports = with kubenix.modules; [ test submodules ];
 
   test = {
     name = "submodules-defatuls";

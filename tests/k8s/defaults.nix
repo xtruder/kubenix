@@ -1,15 +1,12 @@
-{ config, lib, test, kubenix, k8s, ... }:
+{ config, lib, kubenix, ... }:
 
 with lib;
-with k8s;
 
 let
   pod1 = config.kubernetes.api.pods.pod1;
   pod2 = config.kubernetes.api.pods.pod2;
 in {
-  imports = [
-    kubenix.k8s
-  ];
+  imports = with kubenix.modules; [ test k8s ];
 
   test = {
     name = "k8s-defaults";

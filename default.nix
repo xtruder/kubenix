@@ -10,6 +10,8 @@ let
     inherit kubenix;
   };
 
+  # evalModules with same interface as lib.evalModules and kubenix as
+  # special argument
   evalModules = {
     module ? null,
     modules ? [module],
@@ -27,8 +29,9 @@ let
   modules = import ./modules;
 
   kubenix = {
-    inherit evalModules kubenix;
+    inherit evalModules modules;
 
     lib = kubenixLib;
-  } // modules;
+    module = modules.module;
+  };
 in kubenix

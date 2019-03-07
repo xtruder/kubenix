@@ -6,9 +6,7 @@ let
   cfg = config.submodules.instances.test.config;
   deployment = cfg.kubernetes.api.deployments.nginx;
 in {
-  imports = [
-    kubenix.module
-  ];
+  imports = [ kubenix.modules.test kubenix.module ];
 
   test = {
     name = "module";

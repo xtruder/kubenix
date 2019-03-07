@@ -1,12 +1,7 @@
-{ config, test, kubenix, k8s, ... }:
-
-with k8s;
+{ config, kubenix, ... }:
 
 {
-  imports = [
-    kubenix.k8s
-    kubenix.istio
-  ];
+  imports = with kubenix.modules; [ test k8s istio ];
 
   test = {
     name = "istio-bookinfo";

@@ -1,3 +1,5 @@
+# K8S module defines kubernetes definitions for kubenix
+
 { config, lib, pkgs, k8s, ... }:
 
 with lib;
@@ -108,8 +110,8 @@ let
   indexOf = lst: value:
     head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
 in {
-  # expose k8s helper methods through arg in modules
-  config._module.args.k8s = import ../../lib/k8s.nix { inherit lib; };
+  # expose k8s helper methods as module argument
+  config._module.args.k8s = import ../lib/k8s.nix { inherit lib; };
 
   options.kubernetes.version = mkOption {
     description = "Kubernetes version to use";

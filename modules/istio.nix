@@ -4697,7 +4697,7 @@ let
       };
     };
 
-  } // (import ./overrides.nix {inherit definitions lib;});
+  } // (import ./istio-overrides.nix {inherit definitions lib;});
 in {
   kubernetes.customResources = [
   {

@@ -1,11 +1,15 @@
-{ config, lib, kubenix, ... }:
+# module.nix defines default kubenix module with additional helper options
+# and preincluded kubenix module definitions for kubernetes, docker and
+# kubenix submodules
+
+{ config, lib, ... }:
 
 with lib;
 
 let
   parentConfig = config;
 in {
-  imports = with kubenix; [ submodules k8s docker ];
+  imports = [ ./k8s.nix ./docker.nix ./submodules.nix ];
 
   options = {
     kubenix.release = mkOption {
@@ -42,7 +46,7 @@ in {
   config = {
     submodules.defaults = [{
       default = {
-        imports = [ kubenix.module ];
+        imports = [ ./module.nix ];
         kubernetes.version = mkDefault config.kubernetes.version;
         kubernetes.api.defaults =
           mkIf config.kubernetes.propagateDefaults config.kubernetes.api.defaults;

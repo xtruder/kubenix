@@ -1,4 +1,4 @@
-{ config, lib, test, pkgs, kubenix, helm, ... }:
+{ config, lib, pkgs, kubenix, helm, ... }:
 
 with lib;
 with kubenix.lib;
@@ -29,9 +29,7 @@ let
     finalImageTag = "latest";
   };
 in {
-  imports = [
-    kubenix.helm
-  ];
+  imports = [ kubenix.modules.test kubenix.modules.helm ];
 
   test = {
     name = "helm-simple";

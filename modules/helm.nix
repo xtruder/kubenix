@@ -1,4 +1,7 @@
-{ config, lib, pkgs, kubenix, ... }:
+# helm defines kubenix module with options for using helm charts
+# with kubenix
+
+{ config, lib, pkgs, helm, ... }:
 
 with lib;
 
@@ -21,13 +24,11 @@ let
     version = last splitted;
   };
 
-  chart2json = pkgs.callPackage ./chart2json.nix {  };
-  fetchhelm = pkgs.callPackage ./fetchhelm.nix {  };
-
 in {
-  imports = [
-    kubenix.k8s
-  ];
+  imports = [ ./k8s.nix ];
+
+  # expose helm helper methods as module argument
+  config._module.args.helm = import ../lib/helm { inherit pkgs; };
 
   options.kubernetes.helm = {
     instances = mkOption {
@@ -86,17 +87,11 @@ in {
           metadata.namespace = mkDefault config.namespace;
         }];
 
-        config.objects = importJSON (chart2json {
+        config.objects = importJSON (helm.chart2json {
           inherit (config) chart name namespace values kubeVersion;
         });
       }));
     };
-  };
-
-  # include helper helm methods as args
-  config._module.args.helm = {
-    fetch = fetchhelm;
-    chart2json = chart2json;
   };
 
   config.kubernetes.api = mkMerge (flatten (mapAttrsToList (_: instance:

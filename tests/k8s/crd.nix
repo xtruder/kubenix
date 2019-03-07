@@ -5,9 +5,7 @@ with lib;
 let
   cfg = config.kubernetes.api.customresourcedefinitions.crontabs;
 in {
-  imports = [
-    kubenix.k8s
-  ];
+  imports = with kubenix.modules; [ test k8s ];
 
   test = {
     name = "k8s-crd";

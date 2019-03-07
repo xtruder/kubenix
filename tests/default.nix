@@ -16,13 +16,9 @@ let
     version' = replaceStrings ["."] ["_"] version;
   in nameValuePair "v${version'}" (kubenix.evalModules {
     modules = [
-      kubenix.testing
+      kubenix.modules.testing
 
       {
-        imports = [kubenix.k8s kubenix.submodules];
-
-        kubernetes.version = version;
-
         testing.throwError = throwError;
         testing.e2e = e2e;
         testing.tests = [
@@ -40,7 +36,7 @@ let
           ./module.nix
         ];
         testing.defaults = ({kubenix, ...}: {
-          imports = [kubenix.k8s];
+          imports = [kubenix.modules.k8s];
           kubernetes.version = version;
           _module.args.images = images;
         });

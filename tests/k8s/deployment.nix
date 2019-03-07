@@ -1,4 +1,4 @@
-{ config, lib, pkgs, test, kubenix, images, ... }:
+{ config, lib, pkgs, kubenix, images, ... }:
 
 with lib;
 
@@ -6,9 +6,7 @@ let
   cfg = config.kubernetes.api.deployments.nginx;
   image = images.nginx;
 in {
-  imports = [
-    kubenix.k8s
-  ];
+  imports = [ kubenix.modules.test kubenix.modules.k8s ];
 
   test = {
     name = "k8s-deployment";
