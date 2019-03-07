@@ -12,8 +12,16 @@ in {
     name = "k8s-deployment";
     description = "Simple k8s testing a simple deployment";
     assertions = [{
-      message = "should have correct apiVersion and kind set";
-      assertion = cfg.apiVersion == "apps/v1" && cfg.kind == "Deployment";
+      message = "should have correct apiVersion and kind set for 1.8+";
+      assertion =
+        if ((builtins.compareVersions config.kubernetes.version "1.7") <= 0)
+        then cfg.apiVersion == "apps/v1beta1"
+        else if ((builtins.compareVersions config.kubernetes.version "1.8") <= 0)
+        then cfg.apiVersion == "apps/v1beta2"
+        else cfg.apiVersion == "apps/v1";
+    } {
+      message = "should have corrent kind set";
+      assertion = cfg.kind == "Deployment";
     } {
       message = "should have replicas set";
       assertion = cfg.spec.replicas == 10;

@@ -1,4 +1,6 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {}, lib ? pkgs.lib, e2e ? true, throwError ? true }:
+
+with lib;
 
 let
   kubenix = import ./. { inherit pkgs; };
@@ -15,7 +17,11 @@ let
     inherit pkgs;
     inherit (pkgs) lib;
   };
-in {
+
+  runK8STests = k8sVersion: pkgs.recurseIntoAttrs (import ./tests {
+    inherit pkgs lib kubenix k8sVersion e2e throwError;
+  });
+in rec {
   generate.k8s = pkgs.linkFarm "k8s-generated.nix" [{
     name = "v1.7.nix";
     path = generateK8S "${pkgs.fetchFromGitHub {
@@ -79,9 +85,25 @@ in {
     path = generateIstio;
   }];
 
-  tests = import ./tests {
-    inherit pkgs lib kubenix;
+  tests = {
+    k8s-1_7 = runK8STests "1.7";
+    k8s-1_8 = runK8STests "1.8";
+    k8s-1_9 = runK8STests "1.9";
+    k8s-1_10 = runK8STests "1.10";
+    k8s-1_11 = runK8STests "1.11";
+    k8s-1_12 = runK8STests "1.12";
+    k8s-1_13 = runK8STests "1.13";
   };
+
+  test-results = pkgs.writeText "kubenix-test-result.json" (builtins.toJSON {
+    success = all (test: test.success) (attrValues tests);
+    results = mapAttrs (_: test: test.result) tests;
+  });
+
+  tests-check =
+    if !(all (test: test.success) (attrValues tests))
+    then throw "tests failed"
+    else true;
 
   examples = import ./examples {};
 }

@@ -245,14 +245,14 @@ in {
 
     testing.result = mkOption {
       description = "Testing result";
-      type = types.package;
-      default = pkgs.writeText "testing-report.json" (builtins.toJSON {
+      type = types.attrs;
+      default = {
         success = cfg.success;
         tests = map (test: {
           inherit (test) name description evaled success test;
           assertions = moduleToAttrs test.assertions;
         }) (filter (test: test.enable) cfg.tests);
-      });
+      };
     };
   };
 }

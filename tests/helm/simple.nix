@@ -29,11 +29,12 @@ let
     finalImageTag = "latest";
   };
 in {
-  imports = [ kubenix.modules.test kubenix.modules.helm ];
+  imports = [ kubenix.modules.test kubenix.modules.helm kubenix.modules.k8s ];
 
   test = {
     name = "helm-simple";
     description = "Simple k8s testing wheter name, apiVersion and kind are preset";
+    enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
       message = "should have generated resources";
       assertion =

@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {}
 , lib ? pkgs.lib
 , kubenix ? import ../. { inherit pkgs lib; }
-, k8sVersions ? ["1.7" "1.8" "1.9" "1.10" "1.11" "1.12" "1.13"]
+, k8sVersion ? "1.13"
 
 # whether any testing error should throw an error
 , throwError ? true
@@ -12,9 +12,7 @@ with lib;
 let
   images = pkgs.callPackage ./images.nix {};
 
-  tests = listToAttrs (map (version: let
-    version' = replaceStrings ["."] ["_"] version;
-  in nameValuePair "v${version'}" (kubenix.evalModules {
+  test = (kubenix.evalModules {
     modules = [
       kubenix.modules.testing
 
@@ -37,7 +35,7 @@ let
         ];
         testing.defaults = ({kubenix, ...}: {
           imports = [kubenix.modules.k8s];
-          kubernetes.version = version;
+          kubernetes.version = k8sVersion;
           _module.args.images = images;
         });
       }
@@ -48,5 +46,5 @@ let
     specialArgs = {
       inherit kubenix;
     };
-  }).config) k8sVersions);
-in tests
+  }).config;
+in test.testing

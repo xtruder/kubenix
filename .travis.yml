@@ -1,2 +1,6 @@
 language: nix
-script: nix build -f ./tests v1_13.testing.result --arg e2e false
+script:
+- nix-env -iA nixpkgs.jq
+- nix build -f ./release.nix test-results --arg e2e false
+- cat result | jq '.'
+- nix eval -f ./release.nix --arg e2e false tests-check
