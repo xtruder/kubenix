@@ -5,14 +5,24 @@ image
 
 ## Usage
 
-### Building and applying kubernetes yaml file
+### Building and applying kubernetes configuration
 
 ```
-nix-instantiate --eval --strict  --json  -A listObject | kubectl apply -f -
+nix-instantiate --eval --strict  --json  -A result | kubectl apply -f -
 ```
 
 ### Building and pushing docker images
 
 ```
 nix run -f ./. pushDockerImages -c copy-docker-images
+```
+
+### Running tests
+
+Test will spawn vm with kubernetes and run test script, which checks if everyting
+works as expected.
+
+```
+nix build -f ./. test
+cat result | jq '.'
 ```

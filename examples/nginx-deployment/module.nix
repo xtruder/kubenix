@@ -1,9 +1,9 @@
-{ config, lib, pkgs, test, kubenix, ... }:
+{ config, lib, pkgs, kubenix, ... }:
 
 with lib;
 
 let
-  nginx = pkgs.callPackage ./image.nix {  };
+  nginx = pkgs.callPackage ./image.nix { };
 in {
   imports = [ kubenix.module ];
 
@@ -23,8 +23,8 @@ in {
             volumeMounts."/etc/nginx".name = "config";
             volumeMounts."/var/lib/html".name = "static";
           };
-          volumes.config.persistentVolumeClaim.claimName = "config";
-          volumes.static.persistentVolumeClaim.claimName = "static";
+          volumes.config.configMap.name = "nginx-config";
+          volumes.static.configMap.name = "nginx-static";
         };
       };
     };
