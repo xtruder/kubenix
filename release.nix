@@ -82,4 +82,6 @@ in {
   tests = import ./tests {
     inherit pkgs lib kubenix;
   };
+
+  examples = import ./examples {};
 }
