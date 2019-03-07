@@ -3,13 +3,13 @@
 with kubenix.lib;
 
 let
-  registy = "docker.io/gatehub";
+  registry = "docker.io/gatehub";
 in rec {
   # evaluated configuration
   config = (kubenix.evalModules {
     modules = [
       ./module.nix
-      { docker.registry.url = registy; }
+      { docker.registry.url = registry; }
     ];
   }).config;
 
@@ -28,6 +28,6 @@ in rec {
   # script to push docker images to registry
   pushDockerImages = docker.copyDockerImages {
     inherit images;
-    dest = "docker://${registy}";
+    dest = "docker://${registry}";
   };
 }
