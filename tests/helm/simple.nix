@@ -1,7 +1,7 @@
-{ config, lib, test, pkgs, kubenix, k8s, helm, ... }:
+{ config, lib, test, pkgs, kubenix, helm, ... }:
 
 with lib;
-with k8s;
+with kubenix.lib;
 with pkgs.dockerTools;
 
 let
@@ -56,7 +56,7 @@ in {
       $kube->waitUntilSucceeds("docker load < ${postgresql}");
       $kube->waitUntilSucceeds("docker load < ${postgresqlExporter}");
       $kube->waitUntilSucceeds("docker load < ${minideb}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.objects}");
       $kube->waitUntilSucceeds("PGPASSWORD=postgres ${pkgs.postgresql}/bin/psql -h app-psql-postgresql.test.svc.cluster.local -U postgres -l");
     '';
   };

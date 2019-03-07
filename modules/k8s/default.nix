@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, k8s, ... }:
 
 with lib;
 
@@ -31,12 +31,6 @@ let
       ) versions
     ) resources
   );
-
-  toKubernetesList = resources: {
-    kind = "List";
-    apiVersion = "v1";
-    items = resources;
-  };
 
   apiOptions = { config, ... }: {
     options = {
@@ -114,7 +108,8 @@ let
   indexOf = lst: value:
     head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
 in {
-  imports = [./lib.nix];
+  # expose k8s helper methods through arg in modules
+  config._module.args.k8s = import ../../lib/k8s.nix { inherit lib; };
 
   options.kubernetes.version = mkOption {
     description = "Kubernetes version to use";
@@ -222,7 +217,7 @@ in {
   }) cfg.customResources;
 
   options.kubernetes.objects = mkOption {
-    description = "Attribute set of kubernetes objects";
+    description = "List of generated kubernetes objects";
     type = types.listOf types.attrs;
     apply = items: sort (r1: r2:
       if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
@@ -239,25 +234,11 @@ in {
   ) cfg.api.resources);
 
   options.kubernetes.generated = mkOption {
+    description = "Generated kubernetes list object";
     type = types.attrs;
-    description = "Generated json file";
   };
 
-  config.kubernetes.generated = let
-    kubernetesList = toKubernetesList cfg.objects;
-
-    hashedList = kubernetesList // {
-      labels."kubenix/build" = cfg.hash;
-      items = map (resource: recursiveUpdate resource {
-        metadata.labels."kubenix/build" = cfg.hash;
-      }) kubernetesList.items;
-    };
-  in hashedList;
-
-  options.kubernetes.hash = mkOption {
-    type = types.str;
-    description = "Output hash";
+  config.kubernetes.generated = k8s.mkHashedList {
+    items = config.kubernetes.objects;
   };
-
-  config.kubernetes.hash = builtins.hashString "sha1" (builtins.toJSON cfg.objects);
 }

@@ -71,7 +71,7 @@ let
     nixosTesting.makeTest {
       inherit name;
 
-      nodes.kube = { config, pkgs, lib, nodes, ... }: {
+      nodes.kube = { config, pkgs, nodes, ... }: {
         imports = [ kubernetesBaseConfig ];
         services.kubernetes = {
           roles = ["master" "node"];
@@ -113,14 +113,14 @@ let
       config._module.args.test = config;
     }] ++ cfg.defaults;
 
-    test = (kubenix.evalKubernetesModules {
+    test = (kubenix.evalModules {
       check = false;
       inherit modules;
     }).config.test;
 
     evaled =
       if test.enable
-      then builtins.trace "testing ${test.name}" (kubenix.evalKubernetesModules {
+      then builtins.trace "testing ${test.name}" (kubenix.evalModules {
         inherit modules;
       })
       else {success = false;};

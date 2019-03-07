@@ -1,9 +1,8 @@
-{lib, pkgs}:
+{ lib, pkgs }:
 
 with lib;
 
-let
-in rec {
+rec {
   moduleToAttrs = value:
     if isAttrs value
     then mapAttrs (n: v: moduleToAttrs v) (filterAttrs (n: v: !(hasPrefix "_" n) && v != null) value)
@@ -39,9 +38,8 @@ in rec {
 
   exp = base: exp: foldr (value: acc: acc * base) 1 (range 1 exp);
 
-  octalToDecimal = value:
-    (foldr (char: acc: {
-      i = acc.i + 1;
-      value = acc.value + (toInt char) * (exp 8 acc.i);
-    }) {i = 0; value = 0;} (stringToCharacters value)).value;
+  octalToDecimal = value: (foldr (char: acc: {
+    i = acc.i + 1;
+    value = acc.value + (toInt char) * (exp 8 acc.i);
+  }) {i = 0; value = 0;} (stringToCharacters value)).value;
 }
