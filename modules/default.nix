@@ -5,5 +5,5 @@
   testing = ./testing;
   helm = ./helm;
   docker = ./docker;
-  all = ./all.nix;
+  module = ./module.nix;
 }

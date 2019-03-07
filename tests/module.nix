@@ -7,12 +7,12 @@ let
   deployment = cfg.kubernetes.api.deployments.nginx;
 in {
   imports = [
-    kubenix.all
+    kubenix.module
   ];
 
   test = {
-    name = "all";
-    description = "Test testing all submodule";
+    name = "module";
+    description = "Test testing kubenix module";
     assertions = [{
       message = "Namespace not propagated";
       assertion = deployment.metadata.namespace == "test";

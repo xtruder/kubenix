@@ -37,7 +37,7 @@ let
           ./submodules/simple.nix
           ./submodules/defaults.nix
           ./submodules/versioning.nix
-          ./all.nix
+          ./module.nix
         ];
         testing.defaults = ({kubenix, ...}: {
           imports = [kubenix.k8s];

@@ -42,7 +42,7 @@ in {
   config = {
     submodules.defaults = [{
       default = {
-        imports = [ kubenix.all ];
+        imports = [ kubenix.module ];
         kubernetes.version = mkDefault config.kubernetes.version;
         kubernetes.api.defaults =
           mkIf config.kubernetes.propagateDefaults config.kubernetes.api.defaults;
