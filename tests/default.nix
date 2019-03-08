@@ -32,6 +32,7 @@ let
           ./submodules/defaults.nix
           ./submodules/versioning.nix
           ./module.nix
+          ./metacontroller/compositecontroller.nix
         ];
         testing.defaults = ({kubenix, ...}: {
           imports = [kubenix.modules.k8s];
