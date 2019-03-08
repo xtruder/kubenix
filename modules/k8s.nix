@@ -109,6 +109,60 @@ let
 
   indexOf = lst: value:
     head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
+
+  customResourceModules = map (cr: {config, ...}: let
+    module = {name, ...}: {
+      imports = getDefaults cr.resource cr.group cr.version cr.kind;
+      options = {
+        apiVersion = mkOption {
+          description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources";
+          type = types.nullOr types.str;
+        };
+
+        kind = mkOption {
+          description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds";
+          type = types.nullOr types.str;
+        };
+
+        metadata = mkOption {
+          description = "Standard object metadata; More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata.";
+          type = types.nullOr (types.submodule config.definitions."io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta");
+        };
+
+        spec = mkOption {
+          description = "Module spec";
+          type = types.submodule cr.module;
+          default = {};
+        };
+      };
+
+      config = {
+        apiVersion = mkOptionDefault "${cr.group}/${cr.version}";
+        kind = mkOptionDefault cr.kind;
+        metadata.name = mkOptionDefault name;
+      };
+    };
+  in if cr.alias != null then {
+    options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
+      description = cr.description;
+      type = types.attrsOf (types.submodule module);
+      default = {};
+    };
+
+    options.${cr.alias} = mkOption {
+      description = cr.description;
+      type = types.attrsOf (types.submodule module);
+      default = {};
+    };
+
+    config.${cr.group}.${cr.version}.${cr.kind} = config.${cr.alias};
+  } else {
+    options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
+      description = cr.description;
+      type = types.attrsOf (types.submodule module);
+      default = {};
+    };
+  }) cfg.customResources;
 in {
   # expose k8s helper methods as module argument
   config._module.args.k8s = import ../lib/k8s.nix { inherit lib; };
@@ -133,43 +187,7 @@ in {
       imports = [
         (./generated + ''/v'' + cfg.version + ".nix")
         apiOptions
-      ] ++ (map (cr: {config, ...}: {
-        options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
-          description = cr.description;
-          type = types.attrsOf (types.submodule ({name, ...}: {
-            imports = getDefaults cr.resource cr.group cr.version cr.kind;
-            options = {
-              apiVersion = mkOption {
-                description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources";
-                type = types.nullOr types.str;
-              };
-
-              kind = mkOption {
-                description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds";
-                type = types.nullOr types.str;
-              };
-
-              metadata = mkOption {
-                description = "Standard object metadata; More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata.";
-                type = types.nullOr (types.submodule config.definitions."io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta");
-              };
-
-              spec = mkOption {
-                description = "Module spec";
-                type = types.submodule cr.module;
-                default = {};
-              };
-            };
-
-            config = {
-              apiVersion = mkOptionDefault "${cr.group}/${cr.version}";
-              kind = mkOptionDefault cr.kind;
-              metadata.name = mkOptionDefault name;
-            };
-          }));
-          default = {};
-        };
-      }) cfg.customResources);
+      ] ++ customResourceModules;
     };
     default = {};
   };
@@ -209,6 +227,12 @@ in {
         module = mkOption {
           description = "Custom resource definition module";
           default = types.unspecified;
+        };
+
+        alias = mkOption {
+          description = "Alias to create for API";
+          type = types.nullOr types.str;
+          default = null;
         };
       };
     }));
