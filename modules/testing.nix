@@ -118,11 +118,13 @@ let
       inherit modules;
     }).config.test;
 
+    evaled' = kubenix.evalModules {
+      inherit modules;
+    };
+
     evaled =
-      if test.enable then kubenix.evalModules {
-        inherit modules;
-      }
-      else {success = false;};
+      if cfg.throwError then evaled'
+      else if (builtins.tryEval evaled'.config.test.assertions).success then evaled' else null;
   in {
     options = {
       name = mkOption {
@@ -150,11 +152,7 @@ let
 
       evaled = mkOption {
         description = "Wheter test was evaled";
-        type = types.bool;
-        default =
-          if cfg.throwError
-          then if evaled.config.test.assertions != [] then true else true
-          else (builtins.tryEval evaled.config.test.assertions).success;
+        type = types.nullOr types.attrs;
         internal = true;
       };
 
@@ -249,7 +247,7 @@ in {
       default = {
         success = cfg.success;
         tests = map (test: {
-          inherit (test) name description evaled success test;
+          inherit (test) name description success test;
           assertions = moduleToAttrs test.assertions;
         }) (filter (test: test.enable) cfg.tests);
       };
