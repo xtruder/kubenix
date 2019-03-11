@@ -56,9 +56,9 @@ in {
         kubenix.release = parentConfig.kubenix.release;
         kubernetes.api.defaults = [{
           default.metadata.labels = {
+            "kubenix/release-name" = config.kubenix.release;
             "kubenix/module-name" = config.submodule.name;
             "kubenix/module-version" = config.submodule.version;
-            "kubenix/release" = config.kubenix.release;
           };
         }];
       });
