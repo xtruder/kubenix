@@ -72,7 +72,7 @@ let
       inherit name;
 
       nodes.kube = { config, pkgs, nodes, ... }: {
-        imports = [ kubernetesBaseConfig ];
+        imports = [ kubernetesBaseConfig extraConfiguration ];
         services.kubernetes = {
           roles = ["master" "node"];
           flannel.enable = false;
@@ -186,15 +186,16 @@ let
     };
 
     config = mkMerge [{
+      inherit evaled;
       inherit (test) name description enable;
-    } (mkIf config.evaled {
+    } (mkIf (config.evaled != null) {
       inherit (evaled.config.test) assertions;
       success = all (el: el.assertion) config.assertions;
       test =
         if cfg.e2e && evaled.config.test.testScript != null
         then mkKubernetesSingleNodeTest {
-          inherit (evaled.config.test) testScript;
           name = config.name;
+          inherit (evaled.config.test) testScript extraConfiguration;
         } else null;
       generated = mkIf (hasAttr "kubernetes" evaled.config)
         (pkgs.writeText "${config.name}-gen.json" (builtins.toJSON evaled.config.kubernetes.generated));

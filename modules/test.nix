@@ -57,7 +57,7 @@ in {
       default = null;
     };
 
-    extraConfig = mkOption {
+    extraConfiguration = mkOption {
       description = "Extra configuration for running test";
       type = types.unspecified;
       default = {};
