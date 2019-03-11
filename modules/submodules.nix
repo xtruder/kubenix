@@ -231,6 +231,7 @@ in {
             description = "Submodule instance ${config.name} for ${submoduleDefinition.name}:${submoduleDefinition.version} config";
             type = submoduleWithSpecialArgs ({...}: {
               imports = submodule.modules ++ defaults ++ [submoduleOptions];
+              _module.args.pkgs = pkgs;
               _module.args.name = config.name;
               _module.args.submodule = config;
             }) specialArgs;
