@@ -22,7 +22,7 @@ in {
       assertion = (head config.docker.export) == images.nginx;
     }];
     testScript = ''
-      $kube->waitUntilSucceeds("docker load < ${image}");
+      $kube->waitUntilSucceeds("docker load < ${images.nginx}");
       $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
 
       $kube->succeed("kubectl get deployment -n test | grep -i test-nginx");
