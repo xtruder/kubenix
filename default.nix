@@ -18,13 +18,13 @@ let
     specialArgs ? defaultSpecialArgs, ...
   }@attrs: let
     attrs' = filterAttrs (n: _: n != "module") attrs;
-  in lib'.evalModules (attrs' // {
+  in lib'.evalModules (recursiveUpdate {
     inherit specialArgs modules;
     args = {
       inherit pkgs;
       name = "default";
     };
-  });
+  } attrs');
 
   modules = import ./modules;
 
