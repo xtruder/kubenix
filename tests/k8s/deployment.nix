@@ -6,13 +6,13 @@ let
   cfg = config.kubernetes.api.deployments.nginx;
   image = images.nginx;
 in {
-  imports = [ kubenix.modules.test kubenix.modules.k8s ];
+  imports = [ kubenix.modules.test kubenix.modules.k8s kubenix.modules.docker ];
 
   test = {
     name = "k8s-deployment";
     description = "Simple k8s testing a simple deployment";
     assertions = [{
-      message = "should have correct apiVersion and kind set for 1.8+";
+      message = "should have correct apiVersion and kind set";
       assertion =
         if ((builtins.compareVersions config.kubernetes.version "1.7") <= 0)
         then cfg.apiVersion == "apps/v1beta1"
@@ -26,15 +26,20 @@ in {
       message = "should have replicas set";
       assertion = cfg.spec.replicas == 10;
     }];
+    extraConfiguration = {
+      environment.systemPackages = [ pkgs.curl ];
+      services.kubernetes.kubelet.seedDockerImages = config.docker.export;
+    };
     testScript = ''
-      $kube->waitUntilSucceeds("docker load < ${image}");
       $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
 
       $kube->succeed("kubectl get deployment | grep -i nginx");
       $kube->waitUntilSucceeds("kubectl get deployment -o go-template nginx --template={{.status.readyReplicas}} | grep 10");
-      $kube->waitUntilSucceeds("${pkgs.curl}/bin/curl http://nginx.default.svc.cluster.local | grep -i hello");
+      $kube->waitUntilSucceeds("curl http://nginx.default.svc.cluster.local | grep -i hello");
     '';
   };
+
+  docker.images.nginx.image = image;
 
   kubernetes.api.deployments.nginx = {
     spec = {
@@ -43,7 +48,7 @@ in {
       template.metadata.labels.app = "nginx";
       template.spec = {
         containers.nginx = {
-          image = "${image.imageName}:${image.imageTag}";
+          image = config.docker.images.nginx.path;
           imagePullPolicy = "Never";
         };
       };
