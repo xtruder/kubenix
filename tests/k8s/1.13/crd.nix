@@ -1,4 +1,4 @@
-{ config, lib, kubenix, ... }:
+{ config, lib, kubenix, k8sVersion, ... }:
 
 with lib;
 
@@ -16,6 +16,8 @@ in {
       assertion = (head cfg.spec.versions).name == "v1";
     }];
   };
+
+  kubernetes.version = k8sVersion;
 
   kubernetes.api.customresourcedefinitions.crontabs = {
     metadata.name = "crontabs.stable.example.com";

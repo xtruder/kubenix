@@ -9,23 +9,27 @@ let
   instance4 = config.submodules.instances.instance4;
   instance5 = config.submodules.instances.instance5;
 
-  module = {name, ...}: {
-    options.args.value = mkOption {
-      description = "Submodule value";
-      type = types.str;
-    };
+  submodule = {name, ...}: {
+    imports = [ kubenix.modules.submodule ];
 
-    options.args.defaultValue = mkOption {
-      description = "Submodule default value";
-      type = types.str;
+    options = {
+      args.value = mkOption {
+        description = "Submodule value";
+        type = types.str;
+      };
+
+      args.defaultValue = mkOption {
+        description = "Submodule default value";
+        type = types.str;
+      };
     };
   };
 in {
   imports = with kubenix.modules; [ test submodules ];
 
   test = {
-    name = "submodules-defatuls";
-    description = "Simple k8s submodule test";
+    name = "submodules-defaults";
+    description = "Simple submodule test";
     assertions = [{
       message = "should apply defaults by tag1";
       assertion = instance1.config.args.value == "value1";
@@ -53,34 +57,34 @@ in {
   };
 
   submodules.imports = [{
-    modules = [module {
+    modules = [submodule {
       submodule = {
         name = "submodule1";
         tags = ["tag1"];
       };
     }];
   } {
-    modules = [module {
+    modules = [submodule {
       submodule = {
         name = "submodule2";
         tags = ["tag2"];
       };
     }];
   } {
-    modules = [module {
+    modules = [submodule {
       submodule = {
         name = "submodule3";
         tags = ["tag2"];
       };
     }];
   } {
-    modules = [module {
+    modules = [submodule {
       submodule = {
         name = "submodule4";
       };
     }];
   } {
-    modules = [module {
+    modules = [submodule {
       submodule = {
         name = "submodule5";
       };

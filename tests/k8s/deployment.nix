@@ -1,4 +1,4 @@
-{ config, lib, pkgs, kubenix, images, ... }:
+{ config, lib, pkgs, kubenix, images, k8sVersion, ... }:
 
 with lib;
 
@@ -40,6 +40,8 @@ in {
   };
 
   docker.images.nginx.image = image;
+
+  kubernetes.version = k8sVersion;
 
   kubernetes.api.deployments.nginx = {
     spec = {

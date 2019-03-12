@@ -12,8 +12,6 @@ rec {
 
     else value;
 
-  mkOptionDefault = mkOverride 1001;
-
   mkAllDefault = value: priority:
     if isAttrs value
     then mapAttrs (n: v: mkAllDefault v priority) value

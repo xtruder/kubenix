@@ -100,7 +100,7 @@ in rec {
     results = mapAttrs (_: test: test.result) tests;
   });
 
-  tests-check =
+  test-check =
     if !(all (test: test.success) (attrValues tests))
     then throw "tests failed"
     else true;

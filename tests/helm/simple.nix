@@ -1,4 +1,4 @@
-{ config, lib, pkgs, kubenix, helm, ... }:
+{ config, lib, pkgs, kubenix, helm, k8sVersion, ... }:
 
 with lib;
 with kubenix.lib;
@@ -59,6 +59,8 @@ in {
       $kube->waitUntilSucceeds("PGPASSWORD=postgres ${pkgs.postgresql}/bin/psql -h app-psql-postgresql.test.svc.cluster.local -U postgres -l");
     '';
   };
+
+  kubernetes.version = k8sVersion;
 
   kubernetes.api.namespaces.test = {};
 

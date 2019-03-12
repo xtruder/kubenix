@@ -26,19 +26,16 @@ let
           ./k8s/1.13/crd.nix
           ./k8s/defaults.nix
           ./k8s/order.nix
+          ./k8s/submodule.nix
           ./helm/simple.nix
           ./istio/bookinfo.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix
           ./submodules/versioning.nix
-          ./module.nix
-          ./metacontroller/compositecontroller.nix
         ];
-        testing.defaults = ({kubenix, ...}: {
-          imports = [kubenix.modules.k8s];
-          kubernetes.version = k8sVersion;
-          _module.args.images = images;
-        });
+        testing.args = {
+          inherit images k8sVersion;
+        };
       }
     ];
     args = {

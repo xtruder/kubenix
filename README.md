@@ -13,19 +13,20 @@ kubernetes resources very easyly.
 ### Building tests
 
 ```shell
-nix-build release.nix -A tests.results --show-trace
+nix-build release.nix -A tests-results --show-trace
 ```
 
 **Building single e2e test**
 
 ```
-nix-build release.nix  -A tests.tests.v1_10.testing.testsByName.<name>.script
+cd tests
+nix-build release.nix -A tests.k8s-1_10.testsByName.<test-name>.test
 ```
 
 **Debugging e2e test**
 
 ```
-nix-build release.nix  -A tests.tests.v1_10.testing.testsByName.<name>.script.driver
+nix-build release.nix -A tests.k8s-1_10.testsByName.<test-name>.test.driver
 resut/bin/nixos-test-driver
 testScript;
 ```

@@ -5,7 +5,7 @@ with lib;
 let
   nginx = pkgs.callPackage ./image.nix { };
 in {
-  imports = [ kubenix.module ];
+  imports = with kubenix.modules; [ k8s docker ];
 
   docker.images.nginx.image = nginx;
 

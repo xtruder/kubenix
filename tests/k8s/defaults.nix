@@ -1,4 +1,4 @@
-{ config, lib, kubenix, ... }:
+{ config, lib, kubenix, k8sVersion, ... }:
 
 with lib;
 
@@ -22,6 +22,8 @@ in {
       assertion = pod2.metadata.annotations.conditional-annotation == "value";
     }];
   };
+
+  kubernetes.version = k8sVersion;
 
   kubernetes.api.pods.pod1 = {};
 

@@ -25,20 +25,30 @@ in {
     } {
       message = "Should have submodule name set";
       assertion = cfg.config.args.name == "instance";
+    } {
+      message = "should have tag set";
+      assertion = elem "tag" (cfg.config.submodule.tags);
     }];
   };
 
+  submodules.propagate.enable = true;
   submodules.imports = [{
     module = {name, ...}: {
-      config.submodule.name = "submodule";
-      options.args.value = mkOption {
-        description = "Submodule argument";
-        type = types.str;
+      imports = [ kubenix.modules.submodule ];
+      config = {
+        submodule.name = "submodule";
+        submodule.tags = ["tag"];
       };
-      options.args.name = mkOption {
-        description = "Submodule name";
-        type = types.str;
-        default = name;
+      options = {
+        args.value = mkOption {
+          description = "Submodule argument";
+          type = types.str;
+        };
+        args.name = mkOption {
+          description = "Submodule name";
+          type = types.str;
+          default = name;
+        };
       };
     };
   }];

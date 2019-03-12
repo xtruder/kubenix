@@ -27,9 +27,6 @@ let
 in {
   imports = [ ./k8s.nix ];
 
-  # expose helm helper methods as module argument
-  config._module.args.helm = import ../lib/helm { inherit pkgs; };
-
   options.kubernetes.helm = {
     instances = mkOption {
       description = "Attribute set of helm instances";
@@ -84,7 +81,7 @@ in {
         };
 
         config.overrides = mkIf (config.overrideNamespace && config.namespace != null) [{
-          metadata.namespace = mkDefault config.namespace;
+          metadata.namespace = config.namespace;
         }];
 
         config.objects = importJSON (helm.chart2json {
@@ -94,14 +91,19 @@ in {
     };
   };
 
-  config.kubernetes.api = mkMerge (flatten (mapAttrsToList (_: instance:
-    map (object: let
-      apiVersion = parseApiVersion object.apiVersion;
-      name = object.metadata.name;
-    in {
-      "${apiVersion.group}"."${apiVersion.version}".${object.kind}."${name}" = mkMerge ([
-        object
-      ] ++ instance.overrides);
-    }) instance.objects
-  ) cfg.instances));
+  config = {
+    # expose helm helper methods as module argument
+    _module.args.helm = import ../lib/helm { inherit pkgs; };
+
+    kubernetes.api = mkMerge (flatten (mapAttrsToList (_: instance:
+      map (object: let
+        apiVersion = parseApiVersion object.apiVersion;
+        name = object.metadata.name;
+      in {
+        "${apiVersion.group}"."${apiVersion.version}".${object.kind}."${name}" = mkMerge ([
+          object
+        ] ++ instance.overrides);
+      }) instance.objects
+    ) cfg.instances));
+  };
 }

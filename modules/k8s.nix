@@ -68,6 +68,12 @@ let
               default = null;
             };
 
+            propagate = mkOption {
+              description = "Whether to propagate default";
+              type = types.bool;
+              default = false;
+            };
+
             default = mkOption {
               description = "Default to apply";
               type = types.unspecified;
@@ -164,107 +170,162 @@ let
     };
   }) cfg.customResources;
 in {
-  # expose k8s helper methods as module argument
-  config._module.args.k8s = import ../lib/k8s.nix { inherit lib; };
+  imports = [ ./base.nix ./submodules.nix ];
 
-  options.kubernetes.version = mkOption {
-    description = "Kubernetes version to use";
-    type = types.enum ["1.7" "1.8" "1.9" "1.10" "1.11" "1.12" "1.13"];
-    default = "1.13";
-  };
-
-  options.kubernetes.resourceOrder = mkOption {
-    description = "Preffered resource order";
-    type = types.listOf types.str;
-    default = [
-      "CustomResourceDefinition"
-      "Namespace"
-    ];
-  };
-
-  options.kubernetes.api = mkOption {
-    type = types.submodule {
-      imports = [
-        (./generated + ''/v'' + cfg.version + ".nix")
-        apiOptions
-      ] ++ customResourceOptions;
+  options.kubernetes = {
+    version = mkOption {
+      description = "Kubernetes version to use";
+      type = types.enum ["1.7" "1.8" "1.9" "1.10" "1.11" "1.12" "1.13"];
+      default = "1.13";
     };
-    default = {};
-  };
 
-  options.kubernetes.customResources = mkOption {
-    default = [];
-    description = "List of custom resource definitions to make API for";
-    type = types.listOf (types.submodule ({config, ...}: {
-      options = {
-        group = mkOption {
-          description = "Custom resource definition group";
-          type = types.str;
-        };
+    namespace = mkOption {
+      description = "Default namespace where to deploy kubernetes resources";
+      type = types.str;
+      default = "default";
+    };
 
-        version = mkOption {
-          description = "Custom resource definition version";
-          type = types.str;
-        };
+    resourceOrder = mkOption {
+      description = "Preffered resource order";
+      type = types.listOf types.str;
+      default = [
+        "CustomResourceDefinition"
+        "Namespace"
+      ];
+    };
 
-        kind = mkOption {
-          description = "Custom resource definition kind";
-          type = types.str;
-        };
-
-        resource = mkOption {
-          description = "Custom resource definition resource name";
-          type = types.nullOr types.str;
-          default = null;
-        };
-
-        description = mkOption {
-          description = "Custom resource definition description";
-          type = types.str;
-          default = "";
-        };
-
-        module = mkOption {
-          description = "Custom resource definition module";
-          default = types.unspecified;
-        };
-
-        alias = mkOption {
-          description = "Alias to create for API";
-          type = types.nullOr types.str;
-          default = null;
-        };
+    api = mkOption {
+      type = types.submodule {
+        imports = [
+          (./generated + ''/v'' + cfg.version + ".nix")
+          apiOptions
+        ] ++ customResourceOptions;
       };
-    }));
+      default = {};
+    };
+
+    customResources = mkOption {
+      default = [];
+      description = "List of custom resource definitions to make API for";
+      type = types.listOf (types.submodule ({config, ...}: {
+        options = {
+          group = mkOption {
+            description = "Custom resource definition group";
+            type = types.str;
+          };
+
+          version = mkOption {
+            description = "Custom resource definition version";
+            type = types.str;
+          };
+
+          kind = mkOption {
+            description = "Custom resource definition kind";
+            type = types.str;
+          };
+
+          resource = mkOption {
+            description = "Custom resource definition resource name";
+            type = types.nullOr types.str;
+            default = null;
+          };
+
+          description = mkOption {
+            description = "Custom resource definition description";
+            type = types.str;
+            default = "";
+          };
+
+          module = mkOption {
+            description = "Custom resource definition module";
+            default = types.unspecified;
+          };
+
+          alias = mkOption {
+            description = "Alias to create for API";
+            type = types.nullOr types.str;
+            default = null;
+          };
+        };
+      }));
+    };
+
+    objects = mkOption {
+      description = "List of generated kubernetes objects";
+      type = types.listOf types.attrs;
+      apply = items: sort (r1: r2:
+        if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
+        then indexOf cfg.resourceOrder r1.kind < indexOf cfg.resourceOrder r2.kind
+        else if elem r1.kind cfg.resourceOrder then true else false
+      ) (moduleToAttrs (unique items));
+      default = [];
+    };
+
+    generated = mkOption {
+      description = "Generated kubernetes list object";
+      type = types.attrs;
+    };
   };
 
-  config.kubernetes.api.resources = map (cr: {
-    inherit (cr) group version kind resource;
-  }) cfg.customResources;
+  config = {
+    # expose k8s helper methods as module argument
+    _module.args.k8s = import ../lib/k8s.nix { inherit lib; };
 
-  options.kubernetes.objects = mkOption {
-    description = "List of generated kubernetes objects";
-    type = types.listOf types.attrs;
-    apply = items: sort (r1: r2:
-      if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
-      then indexOf cfg.resourceOrder r1.kind < indexOf cfg.resourceOrder r2.kind
-      else if elem r1.kind cfg.resourceOrder then true else false
-    ) (moduleToAttrs (unique items));
-    default = [];
-  };
+    _module.features = [ "k8s" ];
 
-  config.kubernetes.objects = flatten (map (gvk:
-    mapAttrsToList (name: resource:
-      removeKubenixOptions (moduleToAttrs resource)
-    ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
-  ) cfg.api.resources);
+    kubernetes.api.resources = map (cr: {
+      inherit (cr) group version kind resource;
+    }) cfg.customResources;
 
-  options.kubernetes.generated = mkOption {
-    description = "Generated kubernetes list object";
-    type = types.attrs;
-  };
+    kubernetes.objects = mkMerge [
+      # gvk resources
+      (flatten (map (gvk:
+        mapAttrsToList (name: resource:
+          removeKubenixOptions (moduleToAttrs resource)
+        ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
+      ) cfg.api.resources))
 
-  config.kubernetes.generated = k8s.mkHashedList {
-    items = config.kubernetes.objects;
+      # passthru of child kubernetes objects if passthru is enabled on submodule
+      # and submodule has k8s module loaded
+      (flatten (mapAttrsToList (_: submodule:
+        optionals
+          (submodule.passthru.enable && (elem "k8s" submodule.config._module.features))
+          submodule.config.kubernetes.objects
+      ) config.submodules.instances))
+    ];
+
+    kubernetes.generated = k8s.mkHashedList {
+      items = config.kubernetes.objects;
+      labels."kubenix/project-name" = config.kubenix.project;
+    };
+
+    kubernetes.api.defaults = [{
+      default = {
+        metadata.namespace = mkDefault config.kubernetes.namespace;
+        metadata.labels = mkMerge [
+          {
+            "kubenix/project-name" = config.kubenix.project;
+          }
+
+          # if we are inside submodule, define additional labels
+          (mkIf (elem "submodule" config._module.features) {
+            "kubenix/module-name" = config.submodule.name;
+            "kubenix/module-version" = config.submodule.version;
+          })
+        ];
+      };
+    }];
+
+    submodules.defaults = [{
+      features = [ "k8s" ];
+      default = { config, name, ... }: {
+        # propagate kubernetes version and namespace
+        kubernetes.version = mkDefault cfg.version;
+        kubernetes.namespace = mkDefault cfg.namespace;
+
+        # propagate defaults if default propagation is enabled
+        kubernetes.api.defaults = filter (default: default.propagate) cfg.api.defaults;
+      };
+    }];
   };
 }

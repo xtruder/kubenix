@@ -4,7 +4,6 @@ with lib;
 
 let
   cfg = config.testing;
-  parentConfig = config;
 
   nixosTesting = import <nixpkgs/nixos/lib/testing.nix> {
     inherit pkgs;
@@ -110,7 +109,9 @@ let
 
   testOptions = {config, ...}: let
     modules = [config.module ./test.nix {
-      config._module.args.test = config;
+      config._module.args = {
+        test = config;
+      } // cfg.args;
     }] ++ cfg.defaults;
 
     test = (kubenix.evalModules {
@@ -229,6 +230,12 @@ in {
       apply = tests: filter (test: test.enable) tests;
     };
 
+    testing.args = mkOption {
+      description = "Attribute set of extra args passed to tests";
+      type = types.attrs;
+      default = {};
+    };
+
     testing.testsByName = mkOption {
       description = "Tests by name";
       type = types.attrsOf types.attrs;
@@ -249,6 +256,7 @@ in {
         tests = map (test: {
           inherit (test) name description success test;
           assertions = moduleToAttrs test.assertions;
+          generated = test.generated;
         }) (filter (test: test.enable) cfg.tests);
       };
     };

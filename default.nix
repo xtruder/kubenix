@@ -32,6 +32,5 @@ let
     inherit evalModules modules;
 
     lib = kubenixLib;
-    module = modules.module;
   };
 in kubenix

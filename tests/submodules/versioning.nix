@@ -8,12 +8,14 @@ let
   inst-latest = config.submodules.instances.inst-latest.config;
 
   submodule = {
-    config.submodule.name = "subm";
+    imports = [ kubenix.modules.submodule ];
 
     options.version = mkOption {
       type = types.str;
       default = "undefined";
     };
+
+    config.submodule.name = "subm";
   };
 in {
   imports = with kubenix.modules; [ test submodules ];
