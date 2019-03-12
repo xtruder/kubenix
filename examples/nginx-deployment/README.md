@@ -23,6 +23,6 @@ Test will spawn vm with kubernetes and run test script, which checks if everytin
 works as expected.
 
 ```
-nix build -f ./. test
+nix build -f ./. test-script
 cat result | jq '.'
 ```
