@@ -8,7 +8,7 @@ image
 ### Building and applying kubernetes configuration
 
 ```
-nix-instantiate --eval --strict  --json  -A result | kubectl apply -f -
+nix eval -f ./. --json result | kubectl apply -f -
 ```
 
 ### Building and pushing docker images
