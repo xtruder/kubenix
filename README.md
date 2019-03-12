@@ -2,6 +2,8 @@
 
 > Kubernetes resource builder written in nix
 
+[![Build Status](https://travis-ci.com/xtruder/kubenix.svg?branch=master)](https://travis-ci.com/xtruder/kubenix)
+
 ## About
 
 KubeNix is a kubernetes resource builder, that uses nix module system for
