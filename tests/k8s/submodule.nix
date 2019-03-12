@@ -19,8 +19,6 @@ in {
     }];
   };
 
-  kubenix.project = "test-release";
-
   kubernetes.namespace = "test-namespace";
 
   submodules.imports = [{

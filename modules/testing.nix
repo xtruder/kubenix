@@ -107,11 +107,14 @@ let
       '';
     };
 
-  testOptions = {config, ...}: let
-    modules = [config.module ./test.nix {
-      config._module.args = {
-        test = config;
-      } // cfg.args;
+  testOptions = { config, ... }: let
+    modules = [config.module ./test.nix ./base.nix {
+      config = {
+        kubenix.project = mkDefault config.name;
+        _module.args = {
+          test = config;
+        } // cfg.args;
+      };
     }] ++ cfg.defaults;
 
     test = (kubenix.evalModules {
