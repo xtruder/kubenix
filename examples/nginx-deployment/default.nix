@@ -36,8 +36,5 @@ rec {
   images = config.docker.export;
 
   # script to push docker images to registry
-  pushDockerImages = docker.copyDockerImages {
-    inherit images;
-    dest = "docker://${registry}";
-  };
+  pushDockerImages = config.docker.copyScript;
 }
