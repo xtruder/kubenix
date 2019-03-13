@@ -74,6 +74,14 @@ in {
 
     _module.args.docker = import ../lib/docker.nix { inherit lib pkgs; };
 
+    submodules.defaults = [{
+      features = [ "docker" ];
+      default = { config, name, ... }: {
+        # propagate registry options
+        docker.registry = cfg.registry;
+      };
+    }];
+
     docker.export = mkMerge [
       (mapAttrsToList (_: i: i.image)
         (filterAttrs (_: i: i.registry != null) config.docker.images))
