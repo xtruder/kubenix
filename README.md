@@ -6,7 +6,7 @@
 
 KubeNix is a kubernetes resource builder, that uses nix module system for
 definition of kubernetes resources and nix build system for building complex
-kubernetes resources very easyly.
+kubernetes resources very easily.
 
 ### Features
 
