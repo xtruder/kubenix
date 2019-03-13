@@ -102,7 +102,7 @@ let
 
             resource = mkOption {
               description = "Resource name";
-              type = type.str;
+              type = types.str;
             };
           };
         });
