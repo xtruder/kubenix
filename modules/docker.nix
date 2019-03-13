@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, docker, ... }:
 
 with lib;
 
@@ -58,10 +58,21 @@ in {
       type = types.listOf (types.package);
       default = [];
     };
+
+    copyScript = mkOption {
+      description = "Image copy script";
+      type = types.package;
+      default = docker.copyDockerImages {
+        dest = "docker://${cfg.registry.url}";
+        images = cfg.export;
+      };
+    };
   };
 
   config = {
     _module.features = ["docker"];
+
+    _module.args.docker = import ../lib/docker.nix { inherit lib pkgs; };
 
     docker.export = mkMerge [
       (mapAttrsToList (_: i: i.image)
