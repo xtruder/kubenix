@@ -7,8 +7,6 @@ with lib;
 let
   cfg = config.kubernetes;
 
-  removeKubenixOptions = filterAttrs (name: attr: name != "kubenix");
-
   getDefaults = resource: group: version: kind:
     catAttrs "default" (filter (default:
       (resource == null || default.resource == null || default.resource == resource) &&
@@ -281,7 +279,7 @@ in {
       # gvk resources
       (flatten (map (gvk:
         mapAttrsToList (name: resource:
-          removeKubenixOptions (moduleToAttrs resource)
+          moduleToAttrs resource
         ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
       ) cfg.api.resources))
 
