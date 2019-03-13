@@ -19,7 +19,7 @@ let
 
   moduleToAttrs = value:
     if isAttrs value
-    then mapAttrs (n: v: moduleToAttrs v) (filterAttrs (n: v: !(hasPrefix "_" n) && v != null) value)
+    then mapAttrs (n: v: moduleToAttrs v) (filterAttrs (n: v: v != null && !(hasPrefix "_" n)) value)
 
     else if isList value
     then map (v: moduleToAttrs v) value
@@ -257,7 +257,7 @@ in {
         if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
         then indexOf cfg.resourceOrder r1.kind < indexOf cfg.resourceOrder r2.kind
         else if elem r1.kind cfg.resourceOrder then true else false
-      ) (moduleToAttrs (unique items));
+      ) (unique items);
       default = [];
     };
 
@@ -283,6 +283,12 @@ in {
         mapAttrsToList (name: resource:
           removeKubenixOptions (moduleToAttrs resource)
         ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
+      ) cfg.api.resources))
+
+      (flatten (map (gvk:
+        mapAttrsToList (name: resource:
+          moduleToAttrs resource
+        ) cfg.api.${gvk.resource}
       ) cfg.api.resources))
 
       # passthru of child kubernetes objects if passthru is enabled on submodule

@@ -365,9 +365,7 @@ in {
     \"${resource.resource}\" = ${genResourceOptions resource};
   ") latestResourcesByKind)}};
 
-  config = {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = config.\"${resource.resource}\";
-  ") latestResourcesByKind)}} // {
+  config = {
     inherit definitions;
 
     resources = [${concatStrings (mapAttrsToList (name: resource: "{
