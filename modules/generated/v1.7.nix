@@ -56,8 +56,8 @@ let
     values);
 
   submoduleOf = ref: types.submodule ({name, ...}: {
-    options = definitions."${ref}".options;
-    config = definitions."${ref}".config;
+    options = definitions."${ref}".options or {};
+    config = definitions."${ref}".config or {};
   });
 
   submoduleWithMergeOf = ref: mergeKey: types.submodule ({name, ...}: let
