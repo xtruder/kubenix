@@ -236,7 +236,8 @@ in {
 
           module = mkOption {
             description = "Custom resource definition module";
-            default = types.unspecified;
+            type = types.unspecified;
+            default = {};
           };
 
           alias = mkOption {
