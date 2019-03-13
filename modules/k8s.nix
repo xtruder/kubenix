@@ -115,7 +115,7 @@ let
     head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
 
   customResourceOptions = map (cr: {config, ...}: let
-    module = {name, ...}: {
+    module = { name, ... }: {
       imports = getDefaults cr.resource cr.group cr.version cr.kind;
       options = {
         apiVersion = mkOption {
