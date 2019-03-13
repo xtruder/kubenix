@@ -55,7 +55,7 @@ in {
 
     export = mkOption {
       description = "List of images to export";
-      type = types.listOf (types.package);
+      type = types.listOf types.package;
       default = [];
     };
 
