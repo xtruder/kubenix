@@ -46,10 +46,6 @@ let
 
   mkOptionDefault = mkOverride 1001;
 
-  extraOptions = {
-    kubenix = {};
-  };
-
   mergeValuesByKey = mergeKey: values:
     listToAttrs (map
       (value: nameValuePair (
@@ -80,7 +76,7 @@ let
     apiVersion = if group == "core" then version else "${group}/${version}";
   in types.submodule ({name, ...}: {
     imports = getDefaults resource group version kind;
-    options = definitions."${ref}".options // extraOptions;
+    options = definitions."${ref}".options;
     config = mkMerge [
       definitions."${ref}".config
       {
