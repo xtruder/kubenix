@@ -135,7 +135,7 @@ let
 
         spec = mkOption {
           description = "Module spec";
-          type = types.submodule cr.module;
+          type = types.either types.attrs (types.submodule cr.module);
           default = {};
         };
       };
