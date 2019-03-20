@@ -12,13 +12,13 @@ let
   submodule = {name, ...}: {
     imports = [ kubenix.modules.submodule ];
 
-    options = {
-      args.value = mkOption {
+    options.submodule.args = {
+      value = mkOption {
         description = "Submodule value";
         type = types.str;
       };
 
-      args.defaultValue = mkOption {
+      defaultValue = mkOption {
         description = "Submodule default value";
         type = types.str;
       };
@@ -32,27 +32,27 @@ in {
     description = "Simple submodule test";
     assertions = [{
       message = "should apply defaults by tag1";
-      assertion = instance1.config.args.value == "value1";
+      assertion = instance1.config.submodule.args.value == "value1";
     } {
       message = "should apply defaults by tag2";
-      assertion = instance2.config.args.value == "value2";
+      assertion = instance2.config.submodule.args.value == "value2";
     } {
       message = "should apply defaults by tag2";
-      assertion = instance3.config.args.value == "value2";
+      assertion = instance3.config.submodule.args.value == "value2";
     } {
       message = "should apply defaults to all";
       assertion =
-        instance1.config.args.defaultValue == "value" &&
-        instance2.config.args.defaultValue == "value";
+        instance1.config.submodule.args.defaultValue == "value" &&
+        instance2.config.submodule.args.defaultValue == "value";
     } {
       message = "instance1 and instance3 should have value of default-value";
-      assertion = instance3.config.args.defaultValue == "default-value";
+      assertion = instance3.config.submodule.args.defaultValue == "default-value";
     } {
       message = "should apply defaults by submodule name";
-      assertion = instance4.config.args.value == "value4";
+      assertion = instance4.config.submodule.args.value == "value4";
     } {
       message = "should apply defaults by custom condition";
-      assertion = instance5.config.args.defaultValue == "my-custom-value";
+      assertion = instance5.config.submodule.args.defaultValue == "my-custom-value";
     }];
   };
 
@@ -88,24 +88,24 @@ in {
       submodule = {
         name = "submodule5";
       };
-      args.value = "custom-value";
+      submodule.args.value = "custom-value";
     }];
   }];
 
   submodules.defaults = [{
-    default.args.defaultValue = mkDefault "value";
+    default.submodule.args.defaultValue = mkDefault "value";
   } {
     tags = ["tag1"];
-    default.args.value = mkDefault "value1";
+    default.submodule.args.value = mkDefault "value1";
   } {
     tags = ["tag2"];
-    default.args.value = mkDefault "value2";
+    default.submodule.args.value = mkDefault "value2";
   } {
     name = "submodule4";
-    default.args.value = mkDefault "value4";
+    default.submodule.args.value = mkDefault "value4";
   } {
     default = {config, ...}: {
-      args.defaultValue = mkIf (config.args.value == "custom-value") "my-custom-value";
+      submodule.args.defaultValue = mkIf (config.submodule.args.value == "custom-value") "my-custom-value";
     };
   }];
 
@@ -113,7 +113,7 @@ in {
   submodules.instances.instance2.submodule = "submodule2";
   submodules.instances.instance3 = {
     submodule = "submodule3";
-    config.args.defaultValue = "default-value";
+    args.defaultValue = "default-value";
   };
   submodules.instances.instance4.submodule = "submodule4";
   submodules.instances.instance5.submodule = "submodule5";

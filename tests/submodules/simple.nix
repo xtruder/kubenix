@@ -4,6 +4,7 @@ with lib;
 
 let
   cfg = config.submodules.instances.instance;
+  args = cfg.config.submodule.args;
 in {
   imports = with kubenix.modules; [ test submodules ];
 
@@ -21,10 +22,10 @@ in {
       assertion = cfg.config.submodule.name == "submodule";
     } {
       message = "Should have argument set";
-      assertion = cfg.config.args.value == "test";
+      assertion = args.value == "test";
     } {
       message = "Should have submodule name set";
-      assertion = cfg.config.args.name == "instance";
+      assertion = args.name == "instance";
     } {
       message = "should have tag set";
       assertion = elem "tag" (cfg.config.submodule.tags);
@@ -33,30 +34,32 @@ in {
 
   submodules.propagate.enable = true;
   submodules.imports = [{
-    module = {name, ...}: {
+    module = { submodule, ... }: {
       imports = [ kubenix.modules.submodule ];
-      config = {
-        submodule.name = "submodule";
-        submodule.tags = ["tag"];
-      };
-      options = {
-        args.value = mkOption {
+
+      options.submodule.args = {
+        name = mkOption {
+          description = "Submodule name";
+          type = types.str;
+          default = submodule.name;
+        };
+        value = mkOption {
           description = "Submodule argument";
           type = types.str;
         };
-        args.name = mkOption {
-          description = "Submodule name";
-          type = types.str;
-          default = name;
-        };
+      };
+
+      config = {
+        submodule.name = "submodule";
+        submodule.tags = ["tag"];
       };
     };
   }];
 
   submodules.instances.instance = {
     submodule = "submodule";
-    config = {name, ...}: {
-      config.args.value = "test";
+    args = {
+      value = "test";
     };
   };
 }

@@ -21,8 +21,8 @@ in {
   imports = with kubenix.modules; [ test submodules ];
 
   test = {
-    name = "submodules-imports";
-    description = "Submodules imports tests";
+    name = "submodules-versioning";
+    description = "Submodules versioning test";
     assertions = [{
       message = "should select exact version";
       assertion = inst-exact.version == "1.1.0";
