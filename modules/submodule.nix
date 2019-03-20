@@ -34,7 +34,10 @@ with lib;
       default = {};
       type = types.attrs;
     };
+
+    args._empty = mkOption {};
   };
 
   config._module.features = ["submodule"];
+  config._module.args.args = config.submodule.args;
 }
