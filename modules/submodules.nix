@@ -143,14 +143,14 @@ in {
           types.path
           (module: {inherit module;})
           (types.submodule ({name, config, ...}: let
-            evaledSubmodule' = (evalModules {
+            evaledSubmodule' = evalModules {
               inherit specialArgs;
               modules = config.modules ++ [ ./base.nix ];
               check = false;
-            }).config;
+            };
 
             evaledSubmodule =
-              if (!(elem "submodule" evaledSubmodule'._module.features))
+              if (!(elem "submodule" evaledSubmodule'.config._module.features))
               then throw "no submodule defined"
               else evaledSubmodule';
           in {
@@ -179,10 +179,10 @@ in {
 
             config = {
               definition = {
-                inherit (evaledSubmodule.submodule) name description version tags;
+                inherit (evaledSubmodule.config.submodule) name description version tags;
               };
 
-              features = evaledSubmodule._module.features;
+              features = evaledSubmodule.config._module.features;
             };
           })
         )
