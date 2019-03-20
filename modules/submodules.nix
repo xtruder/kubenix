@@ -193,7 +193,7 @@ in {
     submodules.instances = mkOption {
       description = "Attribute set of submodule instances";
       default = {};
-      type = types.attrsOf (types.submodule ({name, config, ...}: let
+      type = types.attrsOf (types.submodule ({name, config, options, ...}: let
         # submodule associated with
         submodule = findSubmodule {
           name = config.submodule;
@@ -245,8 +245,13 @@ in {
               _module.args.pkgs = pkgs;
               _module.args.name = config.name;
               _module.args.submodule = config;
+              submodule.args = mkAliasDefinitions options.args;
             }) specialArgs;
             default = {};
+          };
+
+          args = mkOption {
+            description = "Submodule arguments (alias of config.submodule.args)";
           };
         };
       }));
