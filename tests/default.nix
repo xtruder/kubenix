@@ -27,6 +27,7 @@ let
           ./k8s/defaults.nix
           ./k8s/order.nix
           ./k8s/submodule.nix
+          ./k8s/imports.nix
           ./helm/simple.nix
           ./istio/bookinfo.nix
           ./submodules/simple.nix

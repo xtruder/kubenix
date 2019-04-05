@@ -202,6 +202,12 @@ in {
       default = {};
     };
 
+    imports = mkOption {
+      type = types.listOf (types.either types.package types.path);
+      description = "List of resources to import";
+      default = [];
+    };
+
     customResources = mkOption {
       default = [];
       description = "List of custom resource definitions to make API for";
@@ -272,9 +278,39 @@ in {
 
     _module.features = [ "k8s" ];
 
-    kubernetes.api.resources = map (cr: {
-      inherit (cr) group version kind resource;
-    }) cfg.customResources;
+    kubernetes.api = mkMerge ([{
+      resources = map (cr: {
+        inherit (cr) group version kind resource;
+      }) cfg.customResources;
+
+      defaults = [{
+        default = {
+          metadata.namespace = mkDefault config.kubernetes.namespace;
+          metadata.labels = mkMerge [
+            {
+              "kubenix/project-name" = config.kubenix.project;
+            }
+
+            # if we are inside submodule, define additional labels
+            (mkIf (elem "submodule" config._module.features) {
+              "kubenix/module-name" = config.submodule.name;
+              "kubenix/module-version" = config.submodule.version;
+            })
+          ];
+        };
+      }];
+    }] ++ (map (i: let
+      object = loadYAML i;
+      groupVersion = splitString "/" object.apiVersion;
+      name = object.metadata.name;
+      version = last groupVersion;
+      group =
+        if version == (head groupVersion)
+        then "core" else head groupVersion;
+      kind = object.kind;
+    in {
+      ${group}.${version}.${kind}.${name} = object;
+    }) cfg.imports));
 
     kubernetes.objects = mkMerge [
       # gvk resources
@@ -303,23 +339,6 @@ in {
       items = config.kubernetes.objects;
       labels."kubenix/project-name" = config.kubenix.project;
     };
-
-    kubernetes.api.defaults = [{
-      default = {
-        metadata.namespace = mkDefault config.kubernetes.namespace;
-        metadata.labels = mkMerge [
-          {
-            "kubenix/project-name" = config.kubenix.project;
-          }
-
-          # if we are inside submodule, define additional labels
-          (mkIf (elem "submodule" config._module.features) {
-            "kubenix/module-name" = config.submodule.name;
-            "kubenix/module-version" = config.submodule.version;
-          })
-        ];
-      };
-    }];
 
     submodules.defaults = [{
       features = [ "k8s" ];
