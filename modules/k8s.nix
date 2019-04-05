@@ -42,12 +42,6 @@ let
         description = "Kubernetes defaults to apply to resources";
         type = types.listOf (types.submodule ({config, ...}: {
           options = {
-            resource = mkOption {
-              description = "Resource to apply default to (all by default)";
-              type = types.nullOr types.str;
-              default = null;
-            };
-
             group = mkOption {
               description = "Group to apply default to (all by default)";
               type = types.nullOr types.str;
@@ -66,8 +60,14 @@ let
               default = null;
             };
 
+            resource = mkOption {
+              description = "Resource to apply default to (all by default)";
+              type = types.nullOr types.str;
+              default = null;
+            };
+
             propagate = mkOption {
-              description = "Whether to propagate default";
+              description = "Whether to propagate defaults";
               type = types.bool;
               default = false;
             };
@@ -102,7 +102,7 @@ let
 
             resource = mkOption {
               description = "Resource name";
-              type = types.str;
+              type = types.nullOr types.str;
             };
           };
         });
@@ -146,20 +146,20 @@ let
         metadata.name = mkOptionDefault name;
       };
     };
-  in if cr.alias != null then {
+  in if cr.resource != null then {
     options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
       description = cr.description;
       type = types.attrsOf (types.submodule module);
       default = {};
     };
 
-    options.${cr.alias} = mkOption {
+    options.${cr.resource} = mkOption {
       description = cr.description;
       type = types.attrsOf (types.submodule module);
       default = {};
     };
 
-    config.${cr.group}.${cr.version}.${cr.kind} = config.${cr.alias};
+    config.${cr.group}.${cr.version}.${cr.kind} = config.${cr.resource};
   } else {
     options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
       description = cr.description;
@@ -299,7 +299,10 @@ in {
           ];
         };
       }];
-    }] ++ (map (i: let
+    }] ++
+
+    # import of yaml files
+    (map (i: let
       object = loadYAML i;
       groupVersion = splitString "/" object.apiVersion;
       name = object.metadata.name;
@@ -320,8 +323,10 @@ in {
         ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
       ) cfg.api.resources))
 
+      # aliased gvk resources
       (flatten (map (gvk:
-        mapAttrsToList (name: resource:
+        if gvk.resource == null then []
+        else mapAttrsToList (name: resource:
           moduleToAttrs resource
         ) cfg.api.${gvk.resource}
       ) cfg.api.resources))
