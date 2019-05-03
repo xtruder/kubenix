@@ -2,6 +2,7 @@
 , lib ? pkgs.lib
 , kubenix ? import ../. { inherit pkgs lib; }
 , k8sVersion ? "1.13"
+, nixosPath ? <nixpkgs/nixos>
 
 # whether any testing error should throw an error
 , throwError ? true
@@ -43,7 +44,7 @@ let
       inherit pkgs;
     };
     specialArgs = {
-      inherit kubenix;
+      inherit kubenix nixosPath;
     };
   }).config;
 in test.testing

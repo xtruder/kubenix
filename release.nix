@@ -1,4 +1,5 @@
-{ pkgs ? import <nixpkgs> {}, lib ? pkgs.lib, e2e ? true, throwError ? true }:
+{ pkgs ? import <nixpkgs> {}, nixosPath ? <nixpkgs/nixos>, lib ? pkgs.lib
+, e2e ? true, throwError ? true }:
 
 with lib;
 
@@ -19,7 +20,7 @@ let
   };
 
   runK8STests = k8sVersion: pkgs.recurseIntoAttrs (import ./tests {
-    inherit pkgs lib kubenix k8sVersion e2e throwError;
+    inherit pkgs lib kubenix k8sVersion e2e throwError nixosPath;
   });
 in rec {
   generate.k8s = pkgs.linkFarm "k8s-generated.nix" [{

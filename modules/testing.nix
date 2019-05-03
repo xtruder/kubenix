@@ -1,16 +1,16 @@
-{ config, pkgs, lib, kubenix, ... }:
+{ nixosPath, config, pkgs, lib, kubenix, ... }:
 
 with lib;
 
 let
   cfg = config.testing;
 
-  nixosTesting = import <nixpkgs/nixos/lib/testing.nix> {
+  nixosTesting = import "${nixosPath}/lib/testing.nix" {
     inherit pkgs;
     system = "x86_64-linux";
   };
 
-  kubernetesBaseConfig = { config, pkgs, lib, nodes, ... }: let
+  kubernetesBaseConfig = { modulesPath, config, pkgs, lib, nodes, ... }: let
     master = findFirst
       (node: any (role: role == "master") node.config.services.kubernetes.roles)
       (throw "no master node")
@@ -23,7 +23,7 @@ let
         (attrValues nodes)}
     '';
   in {
-    imports = [ <nixpkgs/nixos/modules/profiles/minimal.nix> ];
+    imports = [ "${toString modulesPath}/profiles/minimal.nix" ];
 
     config = mkMerge [{
       boot.postBootCommands = "rm -fr /var/lib/kubernetes/secrets /tmp/shared/*";
