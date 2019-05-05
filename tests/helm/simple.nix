@@ -55,7 +55,7 @@ in {
       $kube->waitUntilSucceeds("docker load < ${postgresql}");
       $kube->waitUntilSucceeds("docker load < ${postgresqlExporter}");
       $kube->waitUntilSucceeds("docker load < ${minideb}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.objects}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
       $kube->waitUntilSucceeds("PGPASSWORD=postgres ${pkgs.postgresql}/bin/psql -h app-psql-postgresql.test.svc.cluster.local -U postgres -l");
     '';
   };
