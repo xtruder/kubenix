@@ -6,7 +6,6 @@ let
 
   release = import ./release.nix {
     inherit pkgs lib;
-    e2e = false;
     nixosPath = "${nixpkgsSrc}/nixos";
   };
-in with lib; release.tests
+in pkgs.recurseIntoAttrs release
