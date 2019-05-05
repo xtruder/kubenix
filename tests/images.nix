@@ -30,7 +30,7 @@ with lib;
     tag = "latest";
     contents = [pkgs.nginx];
     extraCommands = ''
-      mkdir etc
+      mkdir -p etc
       chmod u+w etc
       echo "nginx:x:1000:1000::/:" > etc/passwd
       echo "nginx:x:1000:nginx" > etc/group

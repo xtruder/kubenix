@@ -2,7 +2,7 @@
 , lib ? pkgs.lib
 , kubenix ? import ../. { inherit pkgs lib; }
 , k8sVersion ? "1.13"
-, nixosPath ? <nixpkgs/nixos>
+, nixosPath ? toString <nixpkgs/nixos>
 
 # whether any testing error should throw an error
 , throwError ? true
@@ -18,6 +18,7 @@ let
       kubenix.modules.testing
 
       {
+        testing.name = "k8s-${k8sVersion}";
         testing.throwError = throwError;
         testing.e2e = e2e;
         testing.tests = [
@@ -47,4 +48,4 @@ let
       inherit kubenix nixosPath;
     };
   }).config;
-in test.testing
+in pkgs.recurseIntoAttrs test.testing

@@ -6,6 +6,7 @@ let
 
   release = import ./release.nix {
     inherit pkgs lib;
+    e2e = false;
     nixosPath = "${nixpkgsSrc}/nixos";
   };
-in with lib; release.test-results
+in with lib; release.tests

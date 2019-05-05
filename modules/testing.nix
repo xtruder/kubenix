@@ -5,6 +5,8 @@ with lib;
 let
   cfg = config.testing;
 
+  toJSONFile = content: builtins.toFile "json" (builtins.toJSON content);
+
   nixosTesting = import "${nixosPath}/lib/testing.nix" {
     inherit pkgs;
     system = "x86_64-linux";
@@ -155,7 +157,7 @@ let
       };
 
       evaled = mkOption {
-        description = "Wheter test was evaled";
+        description = "Test evaulation result";
         type = types.nullOr types.attrs;
         internal = true;
       };
@@ -180,16 +182,26 @@ let
         default = null;
       };
 
-      generated = mkOption {
-        description = "Generated resources";
-        type = types.nullOr types.package;
-        default = null;
+      result = mkOption {
+        description = "Test result";
+        type = types.package;
       };
     };
 
     config = mkMerge [{
       inherit evaled;
       inherit (test) name description enable;
+      result = pkgs.runCommand "${cfg.name}-${config.name}-test.json" {
+        buildInputs = [ pkgs.jshon pkgs.jq ];
+      } ''
+        jshon -n object \
+          -s "${config.name}" -i name \
+          -s "${config.description}" -i description \
+          -n "${if config.success then "true" else "false"}" -i success \
+          ${if config.test == null then "-n null" else "-s '${config.test}'"} -i test > result.json
+
+        jq -s '.[0].assertions = .[1] | .[0]' result.json ${toJSONFile (map (getAttrs ["assertion" "message"]) config.assertions)} > $out
+      '';
     } (mkIf (config.evaled != null) {
       inherit (evaled.config.test) assertions;
       success = all (el: el.assertion) config.assertions;
@@ -199,12 +211,16 @@ let
           name = config.name;
           inherit (evaled.config.test) testScript extraConfiguration;
         } else null;
-      generated = mkIf (hasAttr "kubernetes" evaled.config)
-        (pkgs.writeText "${config.name}-gen.json" (builtins.toJSON evaled.config.kubernetes.generated));
     })];
   };
 in {
   options = {
+    testing.name = mkOption {
+      description = "Testing suite name";
+      type = types.str;
+      default = "default";
+    };
+
     testing.throwError = mkOption {
       description = "Whether to throw error";
       type = types.bool;
@@ -227,7 +243,7 @@ in {
     };
 
     testing.tests = mkOption {
-      description = "Attribute set of test cases";
+      description = "List of test cases";
       default = [];
       type = types.listOf (types.coercedTo types.path (module: {inherit module;}) (types.submodule testOptions));
       apply = tests: filter (test: test.enable) tests;
@@ -251,17 +267,24 @@ in {
       default = all (test: test.success) cfg.tests;
     };
 
+    testing.results = mkOption {
+      description = "Test results";
+      type = types.attrsOf types.package;
+      default = mapAttrs (_: t: t.result) cfg.testsByName;
+    };
+
     testing.result = mkOption {
-      description = "Testing result";
-      type = types.attrs;
-      default = {
-        success = cfg.success;
-        tests = map (test: {
-          inherit (test) name description success test;
-          assertions = moduleToAttrs test.assertions;
-          generated = test.generated;
-        }) (filter (test: test.enable) cfg.tests);
-      };
+      description = "Testing results";
+      type = types.package;
+      default = pkgs.runCommand "${cfg.name}-test-results.json" {
+        buildInputs = [ pkgs.jq ];
+      } ''
+        jq -s -r '.' ${concatMapStringsSep " " (t: t.result) cfg.tests} > tests.json
+        jq -n \
+          --rawfile tests tests.json \
+          --argjson success `jq -s -r 'if all(.success) == true then true else false end' ${concatMapStringsSep " " (t: t.result) cfg.tests}` \
+          '{"success": $success, "tests": $tests | fromjson }' > $out
+      '';
     };
   };
 }
