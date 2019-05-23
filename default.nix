@@ -120,4 +120,6 @@ in {
   tests."k8s-1_9" = buildTest ./test/default.nix "1.9";
   tests."k8s-1_10" = buildTest ./test/default.nix "1.10";
   tests."k8s-1_11" = buildTest ./test/default.nix "1.11";
+  tests."k8s-1_12" = buildTest ./test/default.nix "1.12";
+  tests."k8s-1_13" = buildTest ./test/default.nix "1.13";
 }
