@@ -15,7 +15,7 @@ kubernetes resources very easyly.
 ### Building tests
 
 ```shell
-nix-build release.nix -A tests-results --show-trace
+nix-build release.nix -A test-results --show-trace
 ```
 
 **Building single e2e test**
