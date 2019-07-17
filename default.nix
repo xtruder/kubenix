@@ -48,7 +48,8 @@ let
     configuration ? {},
     resourceFilter ? groupName: name: resource: true,
     withDependencies ? true,
-    writeJSON ? true
+    writeJSON ? true,
+    writeHash ? true
   }: let
     evaldConfiguration = evalKubernetesModules configuration;
 
@@ -91,7 +92,7 @@ let
 
     listHash = builtins.hashString "sha1" (builtins.toJSON kubernetesList);
 
-    hashedList = kubernetesList // {
+    hashedList = kubernetesList // optionalAttrs (writeHash) {
       labels."kubenix/build" = listHash;
       items = map (resource: recursiveUpdate resource {
         metadata.labels."kubenix/build" = listHash;
