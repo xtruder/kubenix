@@ -1,4 +1,5 @@
-{ pkgs ? import <nixpkgs> {}
+{ name ? "k8s"
+, pkgs ? import <nixpkgs> {}
 , lib ? pkgs.lib
 , spec ? ./specs/1.10/swagger.json
 , ... }:
@@ -198,18 +199,18 @@ let
     }
   ) swagger.definitions;
 
-  genResources = swagger: mapAttrs' (name: path: let
+  genResourceTypes = swagger: mapAttrs' (name: path: let
     ref = refType (head path.post.parameters).schema;
     group' = path.post."x-kubernetes-group-version-kind".group;
     version' = path.post."x-kubernetes-group-version-kind".version;
   in nameValuePair ref {
     inherit ref;
 
-    kind = path.post."x-kubernetes-group-version-kind".kind;
-    version = version';
-    resource = last (splitString "/" name);
-    description = swagger.definitions.${ref}.description;
+    name = last (splitString "/" name);
     group = if group' == "" then "core" else group';
+    version = version';
+    kind = path.post."x-kubernetes-group-version-kind".kind;
+    description = swagger.definitions.${ref}.description;
     defintion = refDefinition (head path.post.parameters).schema;
   })
   (filterAttrs (name: path:
@@ -219,157 +220,184 @@ let
 
   swagger = fetchSpecs spec;
   definitions = genDefinitions swagger;
-  resources = genResources swagger;
+  resourceTypes = genResourceTypes swagger;
 
-  resourcesByKind = zipAttrs (mapAttrsToList (name: resource: {
-    ${resource.kind} = resource;
-  }) resources);
+  resourceTypesByKind = zipAttrs (mapAttrsToList (name: resourceType: {
+    ${resourceType.kind} = resourceType;
+  }) resourceTypes);
 
-  resourcesByKindOrderedByVersion = mapAttrs (kind: resources:
+  resourcesTypesByKindSortByVersion = mapAttrs (kind: resourceTypes:
     reverseList (sort (r1: r2:
       compareVersions r1.version r2.version > 0
-    ) resources)
-  ) resourcesByKind;
+    ) resourceTypes)
+  ) resourceTypesByKind;
 
-  latestResourcesByKind =
-    mapAttrs (kind: resources: last resources) resourcesByKindOrderedByVersion;
+  latestResourceTypesByKind =
+    mapAttrs (kind: resources: last resources) resourcesTypesByKindSortByVersion;
 
   genResourceOptions = resource: with gen; let
     submoduleForDefinition' = definition: let
     in submoduleForDefinition
-      definition.ref definition.resource definition.kind definition.group definition.version;
+      definition.ref definition.name definition.kind definition.group definition.version;
   in mkOption {
     description = resource.description;
     type = types.attrsOf (submoduleForDefinition' resource);
     default = {};
   };
-in pkgs.writeText "gen.nix"
-"# This file was generated with kubenix k8s generator, do not edit
-{lib, config, ... }:
 
-with lib;
+  generated = ''
+    # This file was generated with kubenix k8s generator, do not edit
+    { lib, options, config, ... }:
 
-let
-  getDefaults = resource: group: version: kind:
-    catAttrs \"default\" (filter (default:
-      (default.resource == null || default.resource == resource) &&
-      (default.group == null || default.group == group) &&
-      (default.version == null || default.version == version) &&
-      (default.kind == null || default.kind == kind)
-    ) config.defaults);
+    with lib;
 
-  types = lib.types // rec {
-    str = mkOptionType {
-      name = \"str\";
-      description = \"string\";
-      check = isString;
-      merge = mergeEqualOption;
-    };
+    let
+      getDefaults = resource: group: version: kind:
+        catAttrs "default" (filter (default:
+          (default.resource == null || default.resource == resource) &&
+          (default.group == null || default.group == group) &&
+          (default.version == null || default.version == version) &&
+          (default.kind == null || default.kind == kind)
+        ) config.defaults);
 
-    # Either value of type `finalType` or `coercedType`, the latter is
-    # converted to `finalType` using `coerceFunc`.
-    coercedTo = coercedType: coerceFunc: finalType:
-    mkOptionType rec {
-      name = \"coercedTo\";
-      description = \"\${finalType.description} or \${coercedType.description}\";
-      check = x: finalType.check x || coercedType.check x;
-      merge = loc: defs:
-        let
-          coerceVal = val:
-            if finalType.check val then val
-            else let
-              coerced = coerceFunc val;
-            in assert finalType.check coerced; coerced;
+      types = lib.types // rec {
+        str = mkOptionType {
+          name = "str";
+          description = "string";
+          check = isString;
+          merge = mergeEqualOption;
+        };
 
-        in finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
-      getSubOptions = finalType.getSubOptions;
-      getSubModules = finalType.getSubModules;
-      substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
-      typeMerge = t1: t2: null;
-      functor = (defaultFunctor name) // { wrapped = finalType; };
-    };
-  };
+        # Either value of type `finalType` or `coercedType`, the latter is
+        # converted to `finalType` using `coerceFunc`.
+        coercedTo = coercedType: coerceFunc: finalType:
+        mkOptionType rec {
+          name = "coercedTo";
+          description = "''${finalType.description} or ''${coercedType.description}";
+          check = x: finalType.check x || coercedType.check x;
+          merge = loc: defs:
+            let
+              coerceVal = val:
+                if finalType.check val then val
+                else let
+                  coerced = coerceFunc val;
+                in assert finalType.check coerced; coerced;
 
-  mkOptionDefault = mkOverride 1001;
+            in finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
+          getSubOptions = finalType.getSubOptions;
+          getSubModules = finalType.getSubModules;
+          substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
+          typeMerge = t1: t2: null;
+          functor = (defaultFunctor name) // { wrapped = finalType; };
+        };
+      };
 
-  mergeValuesByKey = mergeKey: values:
-    listToAttrs (map
-      (value: nameValuePair (
-        if isAttrs value.\${mergeKey}
-        then toString value.\${mergeKey}.content
-        else (toString value.\${mergeKey})
-      ) value)
-    values);
+      mkOptionDefault = mkOverride 1001;
 
-  submoduleOf = ref: types.submodule ({name, ...}: {
-    options = definitions.\"\${ref}\".options or {};
-    config = definitions.\"\${ref}\".config or {};
-  });
+      mergeValuesByKey = mergeKey: values:
+        listToAttrs (map
+          (value: nameValuePair (
+            if isAttrs value.''${mergeKey}
+            then toString value.''${mergeKey}.content
+            else (toString value.''${mergeKey})
+          ) value)
+        values);
 
-  submoduleWithMergeOf = ref: mergeKey: types.submodule ({name, ...}: let
-    convertName = name:
-      if definitions.\"\${ref}\".options.\${mergeKey}.type == types.int
-      then toInt name
-      else name;
-  in {
-    options = definitions.\"\${ref}\".options;
-    config = definitions.\"\${ref}\".config // {
-      \${mergeKey} = mkOverride 1002 (convertName name);
-    };
-  });
+      submoduleOf = ref: types.submodule ({name, ...}: {
+        options = definitions."''${ref}".options or {};
+        config = definitions."''${ref}".config or {};
+      });
 
-  submoduleForDefinition = ref: resource: kind: group: version: let
-    apiVersion = if group == \"core\" then version else \"\${group}/\${version}\";
-  in types.submodule ({name, ...}: {
-    imports = getDefaults resource group version kind;
-    options = definitions.\"\${ref}\".options;
-    config = mkMerge [
-      definitions.\"\${ref}\".config
-      {
-        kind = mkOptionDefault kind;
-        apiVersion = mkOptionDefault apiVersion;
+      submoduleWithMergeOf = ref: mergeKey: types.submodule ({name, ...}: let
+        convertName = name:
+          if definitions."''${ref}".options.''${mergeKey}.type == types.int
+          then toInt name
+          else name;
+      in {
+        options = definitions."''${ref}".options;
+        config = definitions."''${ref}".config // {
+          ''${mergeKey} = mkOverride 1002 (convertName name);
+        };
+      });
 
-        # metdata.name cannot use option default, due deep config
-        metadata.name = mkOptionDefault name;
-      }
-    ];
-  });
+      submoduleForDefinition = ref: resource: kind: group: version: let
+        apiVersion = if group == "core" then version else "''${group}/''${version}";
+      in types.submodule ({name, ...}: {
+        imports = getDefaults resource group version kind;
+        options = definitions."''${ref}".options;
+        config = mkMerge [
+          definitions."''${ref}".config
+          {
+            kind = mkOptionDefault kind;
+            apiVersion = mkOptionDefault apiVersion;
 
-  coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
-    (types.listOf (submoduleOf ref))
-    (mergeValuesByKey mergeKey)
-    (types.attrsOf (submoduleWithMergeOf ref mergeKey))
-  );
+            # metdata.name cannot use option default, due deep config
+            metadata.name = mkOptionDefault name;
+          }
+        ];
+      });
 
-  definitions = {
-    ${concatStrings (mapAttrsToList (name: value: "
-    \"${name}\" = {${optionalString (hasAttr "options" value) "
-      options = {${concatStrings (mapAttrsToList (name: value: "
-        \"${name}\" = ${value};
-      ") value.options)}};
-    "}${optionalString (hasAttr "config" value) "
-      config = {${concatStrings (mapAttrsToList (name: value: "
-        \"${name}\" = ${value};
-      ") value.config)}};
-    "}};
-    ") definitions)}
-  };
-in {
-  options = {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.group}\".\"${resource.version}\".\"${resource.kind}\" = ${genResourceOptions resource};
-  ") resources)}} // {${concatStrings (mapAttrsToList (name: resource: "
-    \"${resource.resource}\" = ${genResourceOptions resource};
-  ") latestResourcesByKind)}};
+      coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
+        (types.listOf (submoduleOf ref))
+        (mergeValuesByKey mergeKey)
+        (types.attrsOf (submoduleWithMergeOf ref mergeKey))
+      );
 
-  config = {
-    inherit definitions;
+      definitions = {
+        ${concatStrings (mapAttrsToList (name: value: ''
+          "${name}" = {
+            ${optionalString (hasAttr "options" value) "
+            options = {${concatStrings (mapAttrsToList (name: value: ''
+              "${name}" = ${value};
+            '') value.options)}};
+            "}
 
-    resources = [${concatStrings (mapAttrsToList (name: resource: "{
-      group = \"${resource.group}\";
-      version = \"${resource.version}\";
-      kind = \"${resource.kind}\";
-      resource = \"${resource.resource}\";
-    }") resources)}];
-  };
-}
-"
+            ${optionalString (hasAttr "config" value) ''
+              config = {${concatStrings (mapAttrsToList (name: value: ''
+                "${name}" = ${value};
+              '') value.config)}};
+            ''}
+          };
+        '') definitions)}
+      };
+    in {
+      # all resource versions
+      options = {
+        resources = {
+          ${concatStrings (mapAttrsToList (_: rt: ''
+            "${rt.group}"."${rt.version}"."${rt.kind}" = ${genResourceOptions rt};
+          '') resourceTypes)}
+        } // {
+          ${concatStrings (mapAttrsToList (_: rt: ''
+            "${rt.name}" = ${genResourceOptions rt};
+          '') latestResourceTypesByKind)}
+        };
+      };
+
+      config = {
+        # expose resource definitions
+        inherit definitions;
+
+        # register resource types
+        types = [${concatStrings (mapAttrsToList (_: rt: ''{
+          name = "${rt.name}";
+          group = "${rt.group}";
+          version = "${rt.version}";
+          kind = "${rt.kind}";
+        }'') resourceTypes)}];
+
+        resources = {
+          ${concatStrings (mapAttrsToList (_: rt: ''
+            "${rt.name}" =
+              mkAliasDefinitions options.resources."${rt.group}"."${rt.version}"."${rt.kind}";
+          '') latestResourceTypesByKind)}
+        };
+      };
+    }
+  '';
+in pkgs.runCommand "k8s-${name}-gen.nix" {
+  buildInputs = [ pkgs.haskellPackages.nixfmt ];
+} ''
+  cp ${builtins.toFile "k8s-${name}-gen-raw.nix" generated} $out
+  nixfmt -w 100 $out
+''

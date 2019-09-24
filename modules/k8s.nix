@@ -1,6 +1,6 @@
 # K8S module defines kubernetes definitions for kubenix
 
-{ config, lib, pkgs, k8s, ... }:
+{ options, config, lib, pkgs, k8s, ... }:
 
 with lib;
 
@@ -23,14 +23,6 @@ let
     then map (v: moduleToAttrs v) value
 
     else value;
-
-  flattenResources = resources: flatten (
-    mapAttrsToList (groupName: versions:
-      mapAttrsToList (versionName: kinds:
-        builtins.trace versionName kinds
-      ) versions
-    ) resources
-  );
 
   apiOptions = { config, ... }: {
     options = {
@@ -82,91 +74,119 @@ let
         default = [];
       };
 
-      resources = mkOption {
+      types = mkOption {
+        description = "List of registered kubernetes types";
         type = types.listOf (types.submodule {
           options = {
+            name = mkOption {
+              description = "Resource type name";
+              type = types.nullOr types.str;
+            };
+
             group = mkOption {
-              description = "Resoruce group";
+              description = "Resource type group";
               type = types.str;
             };
 
             version = mkOption {
-              description = "Resoruce version";
+              description = "Resoruce type version";
               type = types.str;
             };
 
             kind = mkOption {
-              description = "Resource kind";
+              description = "Resource type kind";
               type = types.str;
-            };
-
-            resource = mkOption {
-              description = "Resource name";
-              type = types.nullOr types.str;
             };
           };
         });
         default = [];
       };
     };
+
+    config = {
+      # apply aliased option
+      resources = mkAliasDefinitions options.kubernetes.resources;
+    };
   };
 
   indexOf = lst: value:
     head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
 
-  customResourceOptions = map (cr: {config, ...}: let
-    module = { name, ... }: {
-      imports = getDefaults cr.resource cr.group cr.version cr.kind;
-      options = {
-        apiVersion = mkOption {
-          description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources";
-          type = types.nullOr types.str;
-        };
+  compareVersions = ver1: ver2: let
+    getVersion = v: substring 1 10 v;
+    splittedVer1 = builtins.splitVersion (getVersion ver1);
+    splittedVer2 = builtins.splitVersion (getVersion ver2);
 
-        kind = mkOption {
-          description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds";
-          type = types.nullOr types.str;
-        };
+    v1 = if length splittedVer1 == 1 then "${getVersion ver1}prod" else getVersion ver1;
+    v2 = if length splittedVer2 == 1 then "${getVersion ver2}prod" else getVersion ver2;
+  in builtins.compareVersions v1 v2;
 
-        metadata = mkOption {
-          description = "Standard object metadata; More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata.";
-          type = types.nullOr (types.submodule config.definitions."io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta");
-        };
+  customResourceTypesByKind = zipAttrs (map (resourceType: {
+    ${resourceType.kind} = resourceType;
+  }) cfg.customTypes);
 
-        spec = mkOption {
-          description = "Module spec";
-          type = types.either types.attrs (types.submodule cr.module);
-          default = {};
-        };
+  customResourceTypesByKindSortByVersion = mapAttrs (_: resourceTypes:
+    reverseList (sort (r1: r2:
+      compareVersions r1.version r2.version > 0
+    ) resourceTypes)
+  ) customResourceTypesByKind;
+
+  latestCustomResourceTypes =
+    mapAttrsToList (_: resources: last resources) customResourceTypesByKindSortByVersion;
+
+  customResourceModuleForType = config: ct: { name, ... }: {
+    imports = getDefaults ct.name ct.group ct.version ct.kind;
+    options = {
+      apiVersion = mkOption {
+        description = "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources";
+        type = types.nullOr types.str;
       };
 
-      config = {
-        apiVersion = mkOptionDefault "${cr.group}/${cr.version}";
-        kind = mkOptionDefault cr.kind;
-        metadata.name = mkOptionDefault name;
+      kind = mkOption {
+        description = "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds";
+        type = types.nullOr types.str;
+      };
+
+      metadata = mkOption {
+        description = "Standard object metadata; More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata.";
+        type = types.nullOr (types.submodule config.definitions."io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta");
+      };
+
+      spec = mkOption {
+        description = "Module spec";
+        type = types.either types.attrs (types.submodule ct.module);
+        default = {};
       };
     };
-  in if cr.resource != null then {
-    options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
-      description = cr.description;
+
+    config = {
+      apiVersion = mkOptionDefault "${ct.group}/${ct.version}";
+      kind = mkOptionDefault ct.kind;
+      metadata.name = mkOptionDefault name;
+    };
+  };
+
+  customResourceOptions = (map (ct: {config, ...}: let
+    module = customResourceModuleForType config ct;
+  in {
+    options.resources.${ct.group}.${ct.version}.${ct.kind} = mkOption {
+      description = ct.description;
+      type = types.attrsOf (types.submodule module);
+      default = {};
+    };
+  }) cfg.customTypes) ++ (map (ct: { options, config, ... }: let
+    module = customResourceModuleForType config ct;
+  in {
+    options.resources.${ct.name} = mkOption {
+      description = ct.description;
       type = types.attrsOf (types.submodule module);
       default = {};
     };
 
-    options.${cr.resource} = mkOption {
-      description = cr.description;
-      type = types.attrsOf (types.submodule module);
-      default = {};
-    };
+    config.resources.${ct.group}.${ct.version}.${ct.kind} =
+      mkAliasDefinitions options.resources.${ct.name};
+  }) latestCustomResourceTypes);
 
-    config.${cr.group}.${cr.version}.${cr.kind} = config.${cr.resource};
-  } else {
-    options.${cr.group}.${cr.version}.${cr.kind} = mkOption {
-      description = cr.description;
-      type = types.attrsOf (types.submodule module);
-      default = {};
-    };
-  }) cfg.customResources;
 in {
   imports = [ ./base.nix ./submodules.nix ];
 
@@ -208,9 +228,13 @@ in {
       default = [];
     };
 
-    customResources = mkOption {
+    resources = mkOption {
+      description = "Alias for `config.kubernetes.api.resources` options";
+    };
+
+    customTypes = mkOption {
       default = [];
-      description = "List of custom resource definitions to make API for";
+      description = "List of custom resource types to make API for";
       type = types.listOf (types.submodule ({config, ...}: {
         options = {
           group = mkOption {
@@ -228,7 +252,7 @@ in {
             type = types.str;
           };
 
-          resource = mkOption {
+          name = mkOption {
             description = "Custom resource definition resource name";
             type = types.nullOr types.str;
             default = null;
@@ -244,12 +268,6 @@ in {
             description = "Custom resource definition module";
             type = types.unspecified;
             default = {};
-          };
-
-          alias = mkOption {
-            description = "Alias to create for API";
-            type = types.nullOr types.str;
-            default = null;
           };
         };
       }));
@@ -279,9 +297,10 @@ in {
     _module.features = [ "k8s" ];
 
     kubernetes.api = mkMerge ([{
-      resources = map (cr: {
-        inherit (cr) group version kind resource;
-      }) cfg.customResources;
+      # register custom types
+      types = map (cr: {
+        inherit (cr) name group version kind;
+      }) cfg.customTypes;
 
       defaults = [{
         default = {
@@ -316,20 +335,18 @@ in {
     }) cfg.imports));
 
     kubernetes.objects = mkMerge [
-      # gvk resources
-      (flatten (map (gvk:
-        mapAttrsToList (name: resource:
-          moduleToAttrs resource
-        ) cfg.api.${gvk.group}.${gvk.version}.${gvk.kind}
-      ) cfg.api.resources))
+      # versioned resources
+      (flatten (map (type:
+        mapAttrsToList (name: resource: moduleToAttrs resource)
+          cfg.api.resources.${type.group}.${type.version}.${type.kind}
+      ) cfg.api.types))
 
-      # aliased gvk resources
-      (flatten (map (gvk:
-        if gvk.resource == null then []
-        else mapAttrsToList (name: resource:
-          moduleToAttrs resource
-        ) cfg.api.${gvk.resource}
-      ) cfg.api.resources))
+      # latest resources
+      (flatten (map (type:
+        if type.name == null then []
+        else mapAttrsToList (name: resource: moduleToAttrs resource)
+          cfg.api.resources.${type.name}
+      ) cfg.api.types))
 
       # passthru of child kubernetes objects if passthru is enabled on submodule
       # and submodule has k8s module loaded

@@ -3,7 +3,8 @@
 with lib;
 
 let
-  cfg = config.kubernetes.api.customresourcedefinitions.crontabs;
+  crd = config.kubernetes.api.resources.customresourcedefinitions.crontabs;
+  latestCrontab = config.kubernetes.api.resources.crontabs.latest;
 in {
   imports = with kubenix.modules; [ test k8s ];
 
@@ -12,19 +13,25 @@ in {
     description = "Simple test tesing CRD";
     enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
-      message = "should have group set";
-      assertion = cfg.spec.group == "stable.example.com";
+      message = "CRD should have group and version set";
+      assertion =
+        crd.spec.group == "stable.example.com" &&
+        crd.spec.version == "v1";
+    } {
+      message = "Custom resource should have correct version set";
+      assertion = latestCrontab.apiVersion == "stable.example.com/v2";
     }];
     testScript = ''
       $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
       $kube->succeed("kubectl get crds | grep -i crontabs");
-      $kube->succeed("kubectl get crontabs | grep -i crontab");
+      $kube->succeed("kubectl get crontabs | grep -i versioned");
+      $kube->succeed("kubectl get crontabs | grep -i latest");
     '';
   };
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.api.customresourcedefinitions.crontabs = {
+  kubernetes.resources.customresourcedefinitions.crontabs = {
     metadata.name = "crontabs.stable.example.com";
     spec = {
       group = "stable.example.com";
@@ -39,11 +46,26 @@ in {
     };
   };
 
-  kubernetes.customResources = [{
+  kubernetes.resources.customresourcedefinitions.crontabsv2 = {
+    metadata.name = "crontabs.stable.example.com";
+    spec = {
+      group = "stable.example.com";
+      version = "v2";
+      scope = "Namespaced";
+      names = {
+        plural = "crontabs";
+        singular = "crontab";
+        kind = "CronTab";
+        shortNames = ["ct"];
+      };
+    };
+  };
+
+  kubernetes.customTypes = [{
+    name = "crontabs";
     group = "stable.example.com";
     version = "v1";
     kind = "CronTab";
-    resource = "crontabs";
     description = "CronTabs resources";
     module = {
       options.schedule = mkOption {
@@ -51,7 +73,27 @@ in {
         type = types.str;
       };
     };
+  } {
+    name = "crontabs";
+    group = "stable.example.com";
+    version = "v2";
+    kind = "CronTab";
+    description = "CronTabs resources";
+    module = {
+      options = {
+        schedule = mkOption {
+          description = "Crontab schedule script";
+          type = types.str;
+        };
+
+        command = mkOption {
+          description = "Command to run";
+          type = types.str;
+        };
+      };
+    };
   }];
 
-  kubernetes.api."stable.example.com"."v1".CronTab.crontab.spec.schedule = "* * * * *";
+  kubernetes.resources."stable.example.com"."v1".CronTab.versioned.spec.schedule = "* * * * *";
+  kubernetes.resources.crontabs.latest.spec.schedule = "* * * * *";
 }
