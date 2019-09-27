@@ -199,17 +199,32 @@ let
     }
   ) swagger.definitions;
 
+  mapCharPairs = f: s1: s2: concatStrings (imap0 (i: c1:
+    f i c1 (if i >= stringLength s2 then "" else elemAt (stringToCharacters s2) i)
+  ) (stringToCharacters s1));
+
+  getAttrName = resource: kind:
+    mapCharPairs (i: c1: c2:
+      if hasPrefix "API" kind && i == 0 then "A"
+      else if i == 0 then c1
+      else if c2 == "" || (toLower c2) != c1 then c1
+      else c2
+    ) resource kind;
+
   genResourceTypes = swagger: mapAttrs' (name: path: let
     ref = refType (head path.post.parameters).schema;
     group' = path.post."x-kubernetes-group-version-kind".group;
     version' = path.post."x-kubernetes-group-version-kind".version;
+    kind' = path.post."x-kubernetes-group-version-kind".kind;
+    name' = last (splitString "/" name);
+    attrName = getAttrName name' kind';
   in nameValuePair ref {
-    inherit ref;
+    inherit ref attrName;
 
-    name = last (splitString "/" name);
+    name = name';
     group = if group' == "" then "core" else group';
     version = version';
-    kind = path.post."x-kubernetes-group-version-kind".kind;
+    kind = kind';
     description = swagger.definitions.${ref}.description;
     defintion = refDefinition (head path.post.parameters).schema;
   })
@@ -369,7 +384,7 @@ let
           '') resourceTypes)}
         } // {
           ${concatStrings (mapAttrsToList (_: rt: ''
-            "${rt.name}" = ${genResourceOptions rt};
+            "${rt.attrName}" = ${genResourceOptions rt};
           '') latestResourceTypesByKind)}
         };
       };
@@ -388,8 +403,8 @@ let
 
         resources = {
           ${concatStrings (mapAttrsToList (_: rt: ''
-            "${rt.name}" =
-              mkAliasDefinitions options.resources."${rt.group}"."${rt.version}"."${rt.kind}";
+            "${rt.group}"."${rt.version}"."${rt.kind}" =
+              mkAliasDefinitions options.resources."${rt.attrName}";
           '') latestResourceTypesByKind)}
         };
       };

@@ -322,6 +322,7 @@ in {
 
     # import of yaml files
     (map (i: let
+      # load yaml file
       object = loadYAML i;
       groupVersion = splitString "/" object.apiVersion;
       name = object.metadata.name;
@@ -331,7 +332,7 @@ in {
         then "core" else head groupVersion;
       kind = object.kind;
     in {
-      ${group}.${version}.${kind}.${name} = object;
+      resources.${group}.${version}.${kind}.${name} = object;
     }) cfg.imports));
 
     kubernetes.objects = mkMerge [
@@ -339,13 +340,6 @@ in {
       (flatten (map (type:
         mapAttrsToList (name: resource: moduleToAttrs resource)
           cfg.api.resources.${type.group}.${type.version}.${type.kind}
-      ) cfg.api.types))
-
-      # latest resources
-      (flatten (map (type:
-        if type.name == null then []
-        else mapAttrsToList (name: resource: moduleToAttrs resource)
-          cfg.api.resources.${type.name}
       ) cfg.api.types))
 
       # passthru of child kubernetes objects if passthru is enabled on submodule

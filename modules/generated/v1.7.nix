@@ -12045,7 +12045,7 @@ in {
       };
 
     } // {
-      "apiservices" = mkOption {
+      "APIServices" = mkOption {
         description = ''
           APIService represents a server for a particular GroupVersion. Name must be "version.group".'';
         type = (types.attrsOf (submoduleForDefinition
@@ -12061,7 +12061,7 @@ in {
             "v1"));
         default = { };
       };
-      "certificatesigningrequests" = mkOption {
+      "certificateSigningRequests" = mkOption {
         description = "Describes a certificate signing request";
         type = (types.attrsOf (submoduleForDefinition
           "io.k8s.kubernetes.pkg.apis.certificates.v1beta1.CertificateSigningRequest"
@@ -12069,7 +12069,7 @@ in {
           "v1beta1"));
         default = { };
       };
-      "clusterroles" = mkOption {
+      "clusterRoles" = mkOption {
         description =
           "ClusterRole is a cluster level, logical grouping of PolicyRules that can be referenced as a unit by a RoleBinding or ClusterRoleBinding.";
         type = (types.attrsOf
@@ -12077,7 +12077,7 @@ in {
             "clusterroles" "ClusterRole" "rbac.authorization.k8s.io" "v1beta1"));
         default = { };
       };
-      "clusterrolebindings" = mkOption {
+      "clusterRoleBindings" = mkOption {
         description =
           "ClusterRoleBinding references a ClusterRole, but not contain it.  It can reference a ClusterRole in the global namespace, and adds who information via Subject.";
         type = (types.attrsOf
@@ -12085,14 +12085,14 @@ in {
             "clusterrolebindings" "ClusterRoleBinding" "rbac.authorization.k8s.io" "v1beta1"));
         default = { };
       };
-      "configmaps" = mkOption {
+      "configMaps" = mkOption {
         description = "ConfigMap holds configuration data for pods to consume.";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.api.v1.ConfigMap" "configmaps" "ConfigMap"
             "core" "v1"));
         default = { };
       };
-      "controllerrevisions" = mkOption {
+      "controllerRevisions" = mkOption {
         description =
           "ControllerRevision implements an immutable snapshot of state data. Clients are responsible for serializing and deserializing the objects that contain their internal state. Once a ControllerRevision has been successfully created, it can not be updated. The API Server will fail validation of all requests that attempt to mutate the Data field. ControllerRevisions may, however, be deleted. Note that, due to its use by both the DaemonSet and StatefulSet controllers for update and rollback, this object is beta. However, it may be subject to name and representation changes in future releases, and clients should not depend on its stability. It is primarily for internal use by controllers.";
         type = (types.attrsOf
@@ -12100,14 +12100,14 @@ in {
             "controllerrevisions" "ControllerRevision" "apps" "v1beta1"));
         default = { };
       };
-      "cronjobs" = mkOption {
+      "cronJobs" = mkOption {
         description = "CronJob represents the configuration of a single cron job.";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.batch.v2alpha1.CronJob" "cronjobs"
             "CronJob" "batch" "v2alpha1"));
         default = { };
       };
-      "daemonsets" = mkOption {
+      "daemonSets" = mkOption {
         description = "DaemonSet represents the configuration of a daemon set.";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.extensions.v1beta1.DaemonSet"
@@ -12163,7 +12163,7 @@ in {
             "Eviction" "policy" "v1beta1"));
         default = { };
       };
-      "externaladmissionhookconfigurations" = mkOption {
+      "externalAdmissionHookConfigurations" = mkOption {
         description =
           "ExternalAdmissionHookConfiguration describes the configuration of initializers.";
         type = (types.attrsOf (submoduleForDefinition
@@ -12172,7 +12172,7 @@ in {
           "admissionregistration.k8s.io" "v1alpha1"));
         default = { };
       };
-      "horizontalpodautoscalers" = mkOption {
+      "horizontalPodAutoscalers" = mkOption {
         description =
           "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
         type = (types.attrsOf (submoduleForDefinition
@@ -12188,7 +12188,7 @@ in {
             "ingresses" "Ingress" "extensions" "v1beta1"));
         default = { };
       };
-      "initializerconfigurations" = mkOption {
+      "initializerConfigurations" = mkOption {
         description = "InitializerConfiguration describes the configuration of initializers.";
         type = (types.attrsOf (submoduleForDefinition
           "io.k8s.kubernetes.pkg.apis.admissionregistration.v1alpha1.InitializerConfiguration"
@@ -12203,7 +12203,7 @@ in {
             "v1"));
         default = { };
       };
-      "limitranges" = mkOption {
+      "limitRanges" = mkOption {
         description =
           "LimitRange sets resource usage limits for each kind of resource in a Namespace.";
         type = (types.attrsOf
@@ -12211,7 +12211,7 @@ in {
             "LimitRange" "core" "v1"));
         default = { };
       };
-      "localsubjectaccessreviews" = mkOption {
+      "localSubjectAccessReviews" = mkOption {
         description =
           "LocalSubjectAccessReview checks whether or not a user or group can perform an action in a given namespace. Having a namespace scoped resource makes it much easier to grant namespace scoped policy that includes permissions checking.";
         type = (types.attrsOf (submoduleForDefinition
@@ -12227,7 +12227,7 @@ in {
             "core" "v1"));
         default = { };
       };
-      "networkpolicies" = mkOption {
+      "networkPolicies" = mkOption {
         description = "NetworkPolicy describes what network traffic is allowed for a set of Pods";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.networking.v1.NetworkPolicy"
@@ -12241,7 +12241,7 @@ in {
           (submoduleForDefinition "io.k8s.kubernetes.pkg.api.v1.Node" "nodes" "Node" "core" "v1"));
         default = { };
       };
-      "persistentvolumes" = mkOption {
+      "persistentVolumes" = mkOption {
         description =
           "PersistentVolume (PV) is a storage resource provisioned by an administrator. It is analogous to a node. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes";
         type = (types.attrsOf
@@ -12249,7 +12249,7 @@ in {
             "persistentvolumes" "PersistentVolume" "core" "v1"));
         default = { };
       };
-      "persistentvolumeclaims" = mkOption {
+      "persistentVolumeClaims" = mkOption {
         description =
           "PersistentVolumeClaim is a user's request for and claim to a persistent volume";
         type = (types.attrsOf
@@ -12264,7 +12264,7 @@ in {
           (submoduleForDefinition "io.k8s.kubernetes.pkg.api.v1.Pod" "pods" "Pod" "core" "v1"));
         default = { };
       };
-      "poddisruptionbudgets" = mkOption {
+      "podDisruptionBudgets" = mkOption {
         description =
           "PodDisruptionBudget is an object to define the max disruption that can be caused to a collection of pods";
         type = (types.attrsOf
@@ -12272,7 +12272,7 @@ in {
             "poddisruptionbudgets" "PodDisruptionBudget" "policy" "v1beta1"));
         default = { };
       };
-      "podpresets" = mkOption {
+      "podPresets" = mkOption {
         description =
           "PodPreset is a policy resource that defines additional runtime requirements for a Pod.";
         type = (types.attrsOf
@@ -12280,7 +12280,7 @@ in {
             "podpresets" "PodPreset" "settings.k8s.io" "v1alpha1"));
         default = { };
       };
-      "podsecuritypolicies" = mkOption {
+      "podSecurityPolicies" = mkOption {
         description =
           "Pod Security Policy governs the ability to make requests that affect the Security Context that will be applied to a pod and container.";
         type = (types.attrsOf
@@ -12288,21 +12288,21 @@ in {
             "podsecuritypolicies" "PodSecurityPolicy" "extensions" "v1beta1"));
         default = { };
       };
-      "podtemplates" = mkOption {
+      "podTemplates" = mkOption {
         description = "PodTemplate describes a template for creating copies of a predefined pod.";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.api.v1.PodTemplate" "podtemplates"
             "PodTemplate" "core" "v1"));
         default = { };
       };
-      "replicasets" = mkOption {
+      "replicaSets" = mkOption {
         description = "ReplicaSet represents the configuration of a ReplicaSet.";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.apis.extensions.v1beta1.ReplicaSet"
             "replicasets" "ReplicaSet" "extensions" "v1beta1"));
         default = { };
       };
-      "replicationcontrollers" = mkOption {
+      "replicationControllers" = mkOption {
         description =
           "ReplicationController represents the configuration of a replication controller.";
         type = (types.attrsOf
@@ -12310,7 +12310,7 @@ in {
             "replicationcontrollers" "ReplicationController" "core" "v1"));
         default = { };
       };
-      "resourcequotas" = mkOption {
+      "resourceQuotas" = mkOption {
         description = "ResourceQuota sets aggregate quota restrictions enforced per namespace";
         type = (types.attrsOf
           (submoduleForDefinition "io.k8s.kubernetes.pkg.api.v1.ResourceQuota" "resourcequotas"
@@ -12325,7 +12325,7 @@ in {
             "rbac.authorization.k8s.io" "v1beta1"));
         default = { };
       };
-      "rolebindings" = mkOption {
+      "roleBindings" = mkOption {
         description =
           "RoleBinding references a role, but does not contain it.  It can reference a Role in the same namespace or a ClusterRole in the global namespace. It adds who information via Subjects and namespace information by which namespace it exists in.  RoleBindings in a given namespace only have effect in that namespace.";
         type = (types.attrsOf
@@ -12341,7 +12341,7 @@ in {
             "v1"));
         default = { };
       };
-      "selfsubjectaccessreviews" = mkOption {
+      "selfSubjectAccessReviews" = mkOption {
         description = ''
           SelfSubjectAccessReview checks whether or the current user can perform an action.  Not filling in a spec.namespace means "in all namespaces".  Self is a special case, because users should always be able to check whether they can perform an action'';
         type = (types.attrsOf (submoduleForDefinition
@@ -12357,7 +12357,7 @@ in {
             "v1"));
         default = { };
       };
-      "serviceaccounts" = mkOption {
+      "serviceAccounts" = mkOption {
         description =
           "ServiceAccount binds together: * a name, understood by users, and perhaps by peripheral systems, for an identity * a principal that can be authenticated and authorized * a set of secrets";
         type = (types.attrsOf
@@ -12365,7 +12365,7 @@ in {
             "ServiceAccount" "core" "v1"));
         default = { };
       };
-      "statefulsets" = mkOption {
+      "statefulSets" = mkOption {
         description = ''
           StatefulSet represents a set of pods with consistent identities. Identities are defined as:
            - Network: A single stable DNS and hostname.
@@ -12376,7 +12376,7 @@ in {
             "statefulsets" "StatefulSet" "apps" "v1beta1"));
         default = { };
       };
-      "storageclasses" = mkOption {
+      "storageClasses" = mkOption {
         description = ''
           StorageClass describes the parameters for a class of storage for which PersistentVolumes can be dynamically provisioned.
 
@@ -12386,7 +12386,7 @@ in {
             "storageclasses" "StorageClass" "storage.k8s.io" "v1"));
         default = { };
       };
-      "subjectaccessreviews" = mkOption {
+      "subjectAccessReviews" = mkOption {
         description =
           "SubjectAccessReview checks whether or not a user or group can perform an action.";
         type = (types.attrsOf
@@ -12394,7 +12394,7 @@ in {
             "subjectaccessreviews" "SubjectAccessReview" "authorization.k8s.io" "v1"));
         default = { };
       };
-      "thirdpartyresources" = mkOption {
+      "thirdPartyResources" = mkOption {
         description =
           "A ThirdPartyResource is a generic representation of a resource, it is used by add-ons and plugins to add new resource types to the API.  It consists of one or more Versions of the api.";
         type = (types.attrsOf
@@ -12402,7 +12402,7 @@ in {
             "thirdpartyresources" "ThirdPartyResource" "extensions" "v1beta1"));
         default = { };
       };
-      "tokenreviews" = mkOption {
+      "tokenReviews" = mkOption {
         description =
           "TokenReview attempts to authenticate a token to a known user. Note: TokenReview requests may be cached by the webhook token authenticator plugin in the kube-apiserver.";
         type = (types.attrsOf
@@ -12771,70 +12771,70 @@ in {
     ];
 
     resources = {
-      "apiservices" =
-        mkAliasDefinitions options.resources."apiregistration.k8s.io"."v1beta1"."APIService";
-      "bindings" = mkAliasDefinitions options.resources."core"."v1"."Binding";
-      "certificatesigningrequests" = mkAliasDefinitions
-        options.resources."certificates.k8s.io"."v1beta1"."CertificateSigningRequest";
-      "clusterroles" =
-        mkAliasDefinitions options.resources."rbac.authorization.k8s.io"."v1beta1"."ClusterRole";
-      "clusterrolebindings" = mkAliasDefinitions
-        options.resources."rbac.authorization.k8s.io"."v1beta1"."ClusterRoleBinding";
-      "configmaps" = mkAliasDefinitions options.resources."core"."v1"."ConfigMap";
-      "controllerrevisions" =
-        mkAliasDefinitions options.resources."apps"."v1beta1"."ControllerRevision";
-      "cronjobs" = mkAliasDefinitions options.resources."batch"."v2alpha1"."CronJob";
-      "daemonsets" = mkAliasDefinitions options.resources."extensions"."v1beta1"."DaemonSet";
-      "deployments" = mkAliasDefinitions options.resources."apps"."v1beta1"."Deployment";
-      "rollback" = mkAliasDefinitions options.resources."apps"."v1beta1"."DeploymentRollback";
-      "endpoints" = mkAliasDefinitions options.resources."core"."v1"."Endpoints";
-      "events" = mkAliasDefinitions options.resources."core"."v1"."Event";
-      "eviction" = mkAliasDefinitions options.resources."policy"."v1beta1"."Eviction";
-      "externaladmissionhookconfigurations" = mkAliasDefinitions
-        options.resources."admissionregistration.k8s.io"."v1alpha1"."ExternalAdmissionHookConfiguration";
-      "horizontalpodautoscalers" =
-        mkAliasDefinitions options.resources."autoscaling"."v2alpha1"."HorizontalPodAutoscaler";
-      "ingresses" = mkAliasDefinitions options.resources."extensions"."v1beta1"."Ingress";
-      "initializerconfigurations" = mkAliasDefinitions
-        options.resources."admissionregistration.k8s.io"."v1alpha1"."InitializerConfiguration";
-      "jobs" = mkAliasDefinitions options.resources."batch"."v1"."Job";
-      "limitranges" = mkAliasDefinitions options.resources."core"."v1"."LimitRange";
-      "localsubjectaccessreviews" =
-        mkAliasDefinitions options.resources."authorization.k8s.io"."v1"."LocalSubjectAccessReview";
-      "namespaces" = mkAliasDefinitions options.resources."core"."v1"."Namespace";
-      "networkpolicies" =
-        mkAliasDefinitions options.resources."networking.k8s.io"."v1"."NetworkPolicy";
-      "nodes" = mkAliasDefinitions options.resources."core"."v1"."Node";
-      "persistentvolumes" = mkAliasDefinitions options.resources."core"."v1"."PersistentVolume";
-      "persistentvolumeclaims" =
-        mkAliasDefinitions options.resources."core"."v1"."PersistentVolumeClaim";
-      "pods" = mkAliasDefinitions options.resources."core"."v1"."Pod";
-      "poddisruptionbudgets" =
-        mkAliasDefinitions options.resources."policy"."v1beta1"."PodDisruptionBudget";
-      "podpresets" = mkAliasDefinitions options.resources."settings.k8s.io"."v1alpha1"."PodPreset";
-      "podsecuritypolicies" =
-        mkAliasDefinitions options.resources."extensions"."v1beta1"."PodSecurityPolicy";
-      "podtemplates" = mkAliasDefinitions options.resources."core"."v1"."PodTemplate";
-      "replicasets" = mkAliasDefinitions options.resources."extensions"."v1beta1"."ReplicaSet";
-      "replicationcontrollers" =
-        mkAliasDefinitions options.resources."core"."v1"."ReplicationController";
-      "resourcequotas" = mkAliasDefinitions options.resources."core"."v1"."ResourceQuota";
-      "roles" = mkAliasDefinitions options.resources."rbac.authorization.k8s.io"."v1beta1"."Role";
-      "rolebindings" =
-        mkAliasDefinitions options.resources."rbac.authorization.k8s.io"."v1beta1"."RoleBinding";
-      "secrets" = mkAliasDefinitions options.resources."core"."v1"."Secret";
-      "selfsubjectaccessreviews" =
-        mkAliasDefinitions options.resources."authorization.k8s.io"."v1"."SelfSubjectAccessReview";
-      "services" = mkAliasDefinitions options.resources."core"."v1"."Service";
-      "serviceaccounts" = mkAliasDefinitions options.resources."core"."v1"."ServiceAccount";
-      "statefulsets" = mkAliasDefinitions options.resources."apps"."v1beta1"."StatefulSet";
-      "storageclasses" = mkAliasDefinitions options.resources."storage.k8s.io"."v1"."StorageClass";
-      "subjectaccessreviews" =
-        mkAliasDefinitions options.resources."authorization.k8s.io"."v1"."SubjectAccessReview";
-      "thirdpartyresources" =
-        mkAliasDefinitions options.resources."extensions"."v1beta1"."ThirdPartyResource";
-      "tokenreviews" =
-        mkAliasDefinitions options.resources."authentication.k8s.io"."v1"."TokenReview";
+      "apiregistration.k8s.io"."v1beta1"."APIService" =
+        mkAliasDefinitions options.resources."APIServices";
+      "core"."v1"."Binding" = mkAliasDefinitions options.resources."bindings";
+      "certificates.k8s.io"."v1beta1"."CertificateSigningRequest" =
+        mkAliasDefinitions options.resources."certificateSigningRequests";
+      "rbac.authorization.k8s.io"."v1beta1"."ClusterRole" =
+        mkAliasDefinitions options.resources."clusterRoles";
+      "rbac.authorization.k8s.io"."v1beta1"."ClusterRoleBinding" =
+        mkAliasDefinitions options.resources."clusterRoleBindings";
+      "core"."v1"."ConfigMap" = mkAliasDefinitions options.resources."configMaps";
+      "apps"."v1beta1"."ControllerRevision" =
+        mkAliasDefinitions options.resources."controllerRevisions";
+      "batch"."v2alpha1"."CronJob" = mkAliasDefinitions options.resources."cronJobs";
+      "extensions"."v1beta1"."DaemonSet" = mkAliasDefinitions options.resources."daemonSets";
+      "apps"."v1beta1"."Deployment" = mkAliasDefinitions options.resources."deployments";
+      "apps"."v1beta1"."DeploymentRollback" = mkAliasDefinitions options.resources."rollback";
+      "core"."v1"."Endpoints" = mkAliasDefinitions options.resources."endpoints";
+      "core"."v1"."Event" = mkAliasDefinitions options.resources."events";
+      "policy"."v1beta1"."Eviction" = mkAliasDefinitions options.resources."eviction";
+      "admissionregistration.k8s.io"."v1alpha1"."ExternalAdmissionHookConfiguration" =
+        mkAliasDefinitions options.resources."externalAdmissionHookConfigurations";
+      "autoscaling"."v2alpha1"."HorizontalPodAutoscaler" =
+        mkAliasDefinitions options.resources."horizontalPodAutoscalers";
+      "extensions"."v1beta1"."Ingress" = mkAliasDefinitions options.resources."ingresses";
+      "admissionregistration.k8s.io"."v1alpha1"."InitializerConfiguration" =
+        mkAliasDefinitions options.resources."initializerConfigurations";
+      "batch"."v1"."Job" = mkAliasDefinitions options.resources."jobs";
+      "core"."v1"."LimitRange" = mkAliasDefinitions options.resources."limitRanges";
+      "authorization.k8s.io"."v1"."LocalSubjectAccessReview" =
+        mkAliasDefinitions options.resources."localSubjectAccessReviews";
+      "core"."v1"."Namespace" = mkAliasDefinitions options.resources."namespaces";
+      "networking.k8s.io"."v1"."NetworkPolicy" =
+        mkAliasDefinitions options.resources."networkPolicies";
+      "core"."v1"."Node" = mkAliasDefinitions options.resources."nodes";
+      "core"."v1"."PersistentVolume" = mkAliasDefinitions options.resources."persistentVolumes";
+      "core"."v1"."PersistentVolumeClaim" =
+        mkAliasDefinitions options.resources."persistentVolumeClaims";
+      "core"."v1"."Pod" = mkAliasDefinitions options.resources."pods";
+      "policy"."v1beta1"."PodDisruptionBudget" =
+        mkAliasDefinitions options.resources."podDisruptionBudgets";
+      "settings.k8s.io"."v1alpha1"."PodPreset" = mkAliasDefinitions options.resources."podPresets";
+      "extensions"."v1beta1"."PodSecurityPolicy" =
+        mkAliasDefinitions options.resources."podSecurityPolicies";
+      "core"."v1"."PodTemplate" = mkAliasDefinitions options.resources."podTemplates";
+      "extensions"."v1beta1"."ReplicaSet" = mkAliasDefinitions options.resources."replicaSets";
+      "core"."v1"."ReplicationController" =
+        mkAliasDefinitions options.resources."replicationControllers";
+      "core"."v1"."ResourceQuota" = mkAliasDefinitions options.resources."resourceQuotas";
+      "rbac.authorization.k8s.io"."v1beta1"."Role" = mkAliasDefinitions options.resources."roles";
+      "rbac.authorization.k8s.io"."v1beta1"."RoleBinding" =
+        mkAliasDefinitions options.resources."roleBindings";
+      "core"."v1"."Secret" = mkAliasDefinitions options.resources."secrets";
+      "authorization.k8s.io"."v1"."SelfSubjectAccessReview" =
+        mkAliasDefinitions options.resources."selfSubjectAccessReviews";
+      "core"."v1"."Service" = mkAliasDefinitions options.resources."services";
+      "core"."v1"."ServiceAccount" = mkAliasDefinitions options.resources."serviceAccounts";
+      "apps"."v1beta1"."StatefulSet" = mkAliasDefinitions options.resources."statefulSets";
+      "storage.k8s.io"."v1"."StorageClass" = mkAliasDefinitions options.resources."storageClasses";
+      "authorization.k8s.io"."v1"."SubjectAccessReview" =
+        mkAliasDefinitions options.resources."subjectAccessReviews";
+      "extensions"."v1beta1"."ThirdPartyResource" =
+        mkAliasDefinitions options.resources."thirdPartyResources";
+      "authentication.k8s.io"."v1"."TokenReview" =
+        mkAliasDefinitions options.resources."tokenReviews";
 
     };
   };
