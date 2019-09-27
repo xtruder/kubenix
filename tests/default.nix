@@ -30,6 +30,7 @@ let
           ./k8s/order.nix
           ./k8s/submodule.nix
           ./k8s/imports.nix
+          ./k8s/v1/modules.nix
           ./helm/simple.nix
           ./istio/bookinfo.nix
           ./submodules/simple.nix
