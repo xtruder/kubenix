@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.kubernetes.api.customresourcedefinitions.crontabs;
+  cfg = config.kubernetes.api.resources.customResourceDefinitions.crontabs;
 in {
   imports = with kubenix.modules; [ test k8s ];
 
@@ -22,7 +22,7 @@ in {
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.api.customresourcedefinitions.crontabs = {
+  kubernetes.resources.customResourceDefinitions.crontabs = {
     metadata.name = "crontabs.stable.example.com";
     spec = {
       group = "stable.example.com";
@@ -37,12 +37,13 @@ in {
     };
   };
 
-  kubernetes.customResources = [{
+  kubernetes.customTypes = [{
+    name = "crontabs";
+    description = "CronTabs resources";
+
     group = "stable.example.com";
     version = "v1";
     kind = "CronTab";
-    resource = "crontabs";
-    description = "CronTabs resources";
     module = {
       options.schedule = mkOption {
         description = "Crontab schedule script";
@@ -51,7 +52,7 @@ in {
     };
   }];
 
-  kubernetes.api.namespaces.test = {};
+  kubernetes.resources.namespaces.test = {};
 
-  kubernetes.api."stable.example.com"."v1".CronTab.crontab.spec.schedule = "* * * * *";
+  kubernetes.resources."stable.example.com"."v1".CronTab.crontab.spec.schedule = "* * * * *";
 }

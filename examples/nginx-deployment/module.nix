@@ -9,7 +9,7 @@ in {
 
   docker.images.nginx.image = nginx;
 
-  kubernetes.api.deployments.nginx = {
+  kubernetes.resources.deployments.nginx = {
     spec = {
       replicas = 10;
       selector.matchLabels.app = "nginx";
@@ -30,7 +30,7 @@ in {
     };
   };
 
-  kubernetes.api.configmaps.nginx-config.data."nginx.conf" = ''
+  kubernetes.resources.configMaps.nginx-config.data."nginx.conf" = ''
     user nginx nginx;
     daemon off;
     error_log /dev/stdout info;
@@ -48,11 +48,11 @@ in {
     }
   '';
 
-  kubernetes.api.configmaps.nginx-static.data."index.html" = ''
+  kubernetes.resources.configMaps.nginx-static.data."index.html" = ''
     <html><body><h1>Hello from NGINX</h1></body></html>
   '';
 
-  kubernetes.api.services.nginx = {
+  kubernetes.resources.services.nginx = {
     spec = {
       ports = [{
         name = "http";

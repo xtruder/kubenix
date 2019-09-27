@@ -3,8 +3,8 @@
 with lib;
 
 let
-  pod1 = config.kubernetes.api.pods.pod1;
-  pod2 = config.kubernetes.api.pods.pod2;
+  pod1 = config.kubernetes.api.resources.pods.pod1;
+  pod2 = config.kubernetes.api.resources.pods.pod2;
 in {
   imports = with kubenix.modules; [ test k8s ];
 
@@ -25,9 +25,9 @@ in {
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.api.pods.pod1 = {};
+  kubernetes.resources.pods.pod1 = {};
 
-  kubernetes.api.pods.pod2 = {
+  kubernetes.resources.pods.pod2 = {
     metadata.labels.custom-label = "value";
   };
 

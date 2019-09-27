@@ -3,8 +3,8 @@
 with lib;
 
 let
-  pod = config.kubernetes.api.core.v1.Pod.test;
-  deployment = config.kubernetes.api.apps.v1.Deployment.nginx-deployment;
+  pod = config.kubernetes.api.resources.core.v1.Pod.test;
+  deployment = config.kubernetes.api.resources.apps.v1.Deployment.nginx-deployment;
 in {
   imports = with kubenix.modules; [ test k8s ];
 

@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.kubernetes.api.deployments.nginx;
+  cfg = config.kubernetes.api.resources.deployments.nginx;
   image = images.nginx;
 in {
   imports = [ kubenix.modules.test kubenix.modules.k8s kubenix.modules.docker ];
@@ -43,7 +43,7 @@ in {
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.api.deployments.nginx = {
+  kubernetes.resources.deployments.nginx = {
     spec = {
       replicas = 10;
       selector.matchLabels.app = "nginx";
@@ -57,7 +57,7 @@ in {
     };
   };
 
-  kubernetes.api.services.nginx = {
+  kubernetes.resources.services.nginx = {
     spec = {
       ports = [{
         name = "http";

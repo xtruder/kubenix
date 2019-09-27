@@ -3,7 +3,7 @@
 with lib;
 
 let
-  crd = config.kubernetes.api.resources.customresourcedefinitions.crontabs;
+  crd = config.kubernetes.api.resources.customResourceDefinitions.crontabs;
   latestCrontab = config.kubernetes.api.resources.crontabs.latest;
 in {
   imports = with kubenix.modules; [ test k8s ];
@@ -31,7 +31,7 @@ in {
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.resources.customresourcedefinitions.crontabs = {
+  kubernetes.resources.customResourceDefinitions.crontabs = {
     metadata.name = "crontabs.stable.example.com";
     spec = {
       group = "stable.example.com";
@@ -46,7 +46,7 @@ in {
     };
   };
 
-  kubernetes.resources.customresourcedefinitions.crontabsv2 = {
+  kubernetes.resources.customResourceDefinitions.crontabsv2 = {
     metadata.name = "crontabs.stable.example.com";
     spec = {
       group = "stable.example.com";

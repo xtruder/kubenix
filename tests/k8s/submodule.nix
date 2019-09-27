@@ -28,7 +28,7 @@ in {
       config = {
         submodule.name = "test-submodule";
 
-        kubernetes.api.pods.nginx = {
+        kubernetes.resources.pods.nginx = {
           metadata.name = name;
           spec.containers.nginx.image = config.docker.images.nginx.path;
         };

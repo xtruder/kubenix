@@ -19,5 +19,5 @@ in {
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.api.pods.nginx = {};
+  kubernetes.resources.pods.nginx = {};
 }
