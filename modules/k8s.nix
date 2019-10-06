@@ -193,7 +193,7 @@ let
   }) latestCustomResourceTypes);
 
 in {
-  imports = [ ./base.nix ./submodules.nix ];
+  imports = [ ./base.nix ];
 
   options.kubernetes = {
     version = mkOption {
@@ -299,7 +299,37 @@ in {
     # expose k8s helper methods as module argument
     _module.args.k8s = import ../lib/k8s.nix { inherit lib; };
 
+    # features that module is defining
     _module.features = [ "k8s" ];
+
+    # module propagation options
+    _module.propagate = [{
+      features = ["k8s"];
+      module = { config, ... }: {
+        # propagate kubernetes version and namespace
+        kubernetes.version = mkDefault cfg.version;
+        kubernetes.namespace = mkDefault cfg.namespace;
+      };
+    } {
+      features = ["k8s" "submodule"];
+      module = { config, ... }: {
+        # set module defaults
+        kubernetes.api.defaults = (
+          # propagate defaults if default propagation is enabled
+          (filter (default: default.propagate) cfg.api.defaults) ++
+
+          [
+            # set module name and version for all kuberentes resources
+            {
+              default.metadata.labels = {
+                "kubenix/module-name" = config.submodule.name;
+                "kubenix/module-version" = config.submodule.version;
+              };
+            }
+          ]
+        );
+      };
+    }];
 
     kubernetes.api = mkMerge ([{
       # register custom types
@@ -309,18 +339,11 @@ in {
 
       defaults = [{
         default = {
+          # set default kubernetes namespace to all resources
           metadata.namespace = mkDefault config.kubernetes.namespace;
-          metadata.labels = mkMerge [
-            {
-              "kubenix/project-name" = config.kubenix.project;
-            }
 
-            # if we are inside submodule, define additional labels
-            (mkIf (elem "submodule" config._module.features) {
-              "kubenix/module-name" = config.submodule.name;
-              "kubenix/module-version" = config.submodule.version;
-            })
-          ];
+          # set project name to all resources
+          metadata.labels."kubenix/project-name" = config.kubenix.project;
         };
       }];
     }] ++
@@ -360,17 +383,5 @@ in {
       items = config.kubernetes.objects;
       labels."kubenix/project-name" = config.kubenix.project;
     };
-
-    submodules.defaults = [{
-      features = [ "k8s" ];
-      default = { config, name, ... }: {
-        # propagate kubernetes version and namespace
-        kubernetes.version = mkDefault cfg.version;
-        kubernetes.namespace = mkDefault cfg.namespace;
-
-        # propagate defaults if default propagation is enabled
-        kubernetes.api.defaults = filter (default: default.propagate) cfg.api.defaults;
-      };
-    }];
   };
 }

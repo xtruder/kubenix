@@ -215,18 +215,25 @@ in {
     default = {};
   };
 
-  config = mkMerge [
+  config = mkMerge ([
     {
       _module.features = ["submodules"];
 
       submodules.specialArgs.kubenix = kubenix;
 
       # passthru kubenix.project to submodules
-      submodules.defaults = [{
-        default = {
-          kubenix.project = parentConfig.kubenix.project;
-        };
-      }];
+      submodules.defaults = mkMerge [
+        [{
+          default = {
+            kubenix.project = parentConfig.kubenix.project;
+          };
+        }]
+
+        (map (propagate: {
+          features = propagate.features;
+          default = propagate.module;
+        }) config._module.propagate)
+      ];
     }
 
     (mkIf cfg.propagate.enable {

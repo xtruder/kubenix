@@ -5,6 +5,8 @@ with lib;
 let
   cfg = config.docker;
 in {
+  imports = [ ./base.nix ];
+
   options.docker = {
     registry.url = mkOption {
       description = "Default registry url where images are published";
@@ -70,13 +72,16 @@ in {
   };
 
   config = {
+    # define docker feature
     _module.features = ["docker"];
 
+    # pass docker library as param
     _module.args.docker = import ../lib/docker.nix { inherit lib pkgs; };
 
-    submodules.defaults = [{
+    # propagate docker options if docker feature is enabled
+    _module.propagate = [{
       features = [ "docker" ];
-      default = { config, name, ... }: {
+      module = { config, name, ... }: {
         # propagate registry options
         docker.registry = cfg.registry;
       };
