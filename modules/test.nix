@@ -49,6 +49,7 @@ in {
     extraCheckInputs = mkOption {
       description = "Extra check inputs";
       type = types.listOf types.package;
+      default = [];
     };
 
     testScript = mkOption {

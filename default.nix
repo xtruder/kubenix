@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {}, lib ? pkgs.lib }:
+{ pkgs ? import <nixpkgs> {}, nixosPath ? toString <nixpkgs/nixos>, lib ? pkgs.lib }:
 
 with lib;
 
@@ -7,7 +7,7 @@ let
   lib' = lib.extend (lib: self: import ./lib/extra.nix { inherit lib pkgs; });
 
   defaultSpecialArgs = {
-    inherit kubenix;
+    inherit kubenix nixosPath;
   };
 
   # evalModules with same interface as lib.evalModules and kubenix as
