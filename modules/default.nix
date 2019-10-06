@@ -8,7 +8,5 @@
   testing = ./testing.nix;
   test = ./test.nix;
   module = ./module.nix;
-  v1 = {
-    modules = ./v1/modules.nix;
-  };
+  legacy = ./legacy.nix;
 }

@@ -1,7 +1,8 @@
-{ config, pkgs, lib, ... }:
+# support for legacy kubenix
+
+{ options, config, pkgs, lib, kubenix, ... }:
 
 with lib;
-with import ../../lib/modules.nix { inherit lib; };
 
 let
   parentModule = module;
@@ -30,8 +31,8 @@ let
         _module.args.name = module.name;
         _module.args.module = module;
       }
-      ../k8s.nix
-      ./modules.nix
+      ./k8s.nix
+      ./legacy.nix
       (injectModuleAttrs moduleDefinition.module {_file = file;})
       {
         config.kubernetes.api.defaults = [{
@@ -42,6 +43,7 @@ let
        ++ (optionals (hasAttr moduleDefinition.name config.kubernetes.defaultModuleConfiguration)
          config.kubernetes.defaultModuleConfiguration.${moduleDefinition.name});
 
+  # prefix kubernetes objects with ${serviceName}, this magic was removed in new kubenix
   prefixResources = resources: serviceName:  map (resource: resource // {
     metadata = resource.metadata // {
       name = "${serviceName}-${resource.metadata.name}";
@@ -60,10 +62,10 @@ let
     else throw ''requested kubernetes moduleDefinition with name "${name}" does not exist'';
 
 in {
-  imports = [ ../k8s.nix ];
+  imports = [ ./k8s.nix ];
 
   options.kubernetes.moduleDefinitions = mkOption {
-    description = "Attribute set of module definitions";
+    description = "Legacy kubenix attribute set of module definitions";
     default = {};
     type = types.attrsOf (types.submodule ({name, ...}: {
       options = {
@@ -93,7 +95,7 @@ in {
   };
 
   options.kubernetes.defaultModuleConfiguration = mkOption {
-    description = "Module default options";
+    description = "Legacy kubenix module default options";
     type = types.submodule {
       options = defaultModuleConfigurationOptions // {
         all = mkOption {
@@ -107,7 +109,7 @@ in {
   };
 
   options.kubernetes.modules = mkOption {
-    description = "Attribute set of modules";
+    description = "Legacy kubenix attribute set of modules";
     default = {};
     type = types.attrsOf (types.submodule ({config, name, ...}: {
       options = {
@@ -134,8 +136,10 @@ in {
 
         configuration = mkOption {
           description = "Module configuration";
-          type = types.submodule {
+          type = submoduleWithSpecialArgs {
             imports = mkModuleOptions (getModuleDefinition config.module) config;
+          } {
+            inherit kubenix;
           };
           default = {};
         };
@@ -149,7 +153,24 @@ in {
     }));
   };
 
+  options.kubernetes.defaults = mkOption {
+    type = types.attrsOf (types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified));
+    description = "Legacy kubenix kubernetes defaults.";
+    default = {};
+  };
+
+  # for back compatibility with kubernetes.customResources
+  options.kubernetes.customResources = options.kubernetes.resources;
+
   config = {
+    kubernetes.api.defaults = mapAttrsToList (attrName: default: let
+      type = head (filter (type: type.attrName == attrName) config.kubernetes.api.types);
+    in {
+      default = { imports = default; };
+    } // (if (attrName == "all") then {} else {
+      resource = type.name;
+    })) config.kubernetes.defaults;
+
     kubernetes.objects = mkMerge (
       mapAttrsToList (name: module: let
         moduleDefinition = getModuleDefinition module.module;
@@ -159,6 +180,9 @@ in {
         else module.configuration.kubernetes.objects
       ) config.kubernetes.modules
     );
+
+    # custom resources are now included in normal resources, so just make an alias
+    kubernetes.customResources = mkAliasDefinitions options.kubernetes.resources;
 
     kubernetes.defaultModuleConfiguration.all = {
       _file = head options.kubernetes.defaultModuleConfiguration.files;

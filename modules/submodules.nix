@@ -1,7 +1,6 @@
-{ config, kubenix, pkgs, lib, ... }:
+{ config, options, kubenix, pkgs, lib, ... }:
 
 with lib;
-with import ../lib/modules.nix { inherit lib; };
 
 let
   cfg = config.submodules;
