@@ -87,17 +87,8 @@ in {
       };
     }];
 
-    docker.export = mkMerge [
-      (mapAttrsToList (_: i: i.image)
-        (filterAttrs (_: i: i.registry != null) config.docker.images))
-
-      # passthru of docker exported images if passthru is enabled on submodule
-      # and submodule has docker module loaded
-      (flatten (mapAttrsToList (_: submodule:
-        optionals
-          (submodule.passthru.enable && (elem "docker" submodule.config._module.features))
-          submodule.config.docker.export
-      ) config.submodules.instances))
-    ];
+    # list of exported docker images
+    docker.export = mapAttrsToList (_: i: i.image)
+      (filterAttrs (_: i: i.registry != null) config.docker.images);
   };
 }

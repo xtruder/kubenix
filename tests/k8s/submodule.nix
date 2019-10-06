@@ -26,7 +26,13 @@ in {
       imports = with kubenix.modules; [ submodule k8s docker ];
 
       config = {
-        submodule.name = "test-submodule";
+        submodule = {
+          name = "test-submodule";
+          passthru = {
+            kubernetes.objects = config.kubernetes.objects;
+            docker.images = config.docker.images;
+          };
+        };
 
         kubernetes.resources.pods.nginx = {
           metadata.name = name;

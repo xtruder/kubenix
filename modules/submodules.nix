@@ -44,6 +44,20 @@ let
       then throw "No module found ${name}/${if version == null then "latest" else version}"
       else head versionSortedSubmodules;
   in matchingModule;
+
+  passthruConfig = mapAttrsToList (name: opt: {
+    ${name} = mkMerge (mapAttrsToList (_: inst:
+      if inst.passthru.enable
+      then inst.config.submodule.passthru.${name} or {}
+      else {}
+    ) config.submodules.instances);
+
+    _module.args = mkMerge (mapAttrsToList (_: inst:
+      if inst.passthru.enable
+      then inst.config.submodule.passthru._module.args or {}
+      else {}
+    ) config.submodules.instances);
+  }) (removeAttrs options ["_definedNames" "_module" "submodules"]);
 in {
   imports = [ ./base.nix ];
 
@@ -248,5 +262,5 @@ in {
         };
       }];
     })
-  ];
+  ] ++ passthruConfig);
 }

@@ -363,21 +363,10 @@ in {
       resources.${group}.${version}.${kind}.${name} = object;
     }) cfg.imports));
 
-    kubernetes.objects = mkMerge [
-      # versioned resources
-      (flatten (map (type:
-        mapAttrsToList (name: resource: moduleToAttrs resource)
-          cfg.api.resources.${type.group}.${type.version}.${type.kind}
-      ) cfg.api.types))
-
-      # passthru of child kubernetes objects if passthru is enabled on submodule
-      # and submodule has k8s module loaded
-      (flatten (mapAttrsToList (_: submodule:
-        optionals
-          (submodule.passthru.enable && (elem "k8s" submodule.config._module.features))
-          submodule.config.kubernetes.objects
-      ) config.submodules.instances))
-    ];
+    kubernetes.objects = flatten (map (type:
+      mapAttrsToList (name: resource: moduleToAttrs resource)
+        cfg.api.resources.${type.group}.${type.version}.${type.kind}
+    ) cfg.api.types);
 
     kubernetes.generated = k8s.mkHashedList {
       items = config.kubernetes.objects;

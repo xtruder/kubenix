@@ -30,7 +30,7 @@ with lib;
     };
 
     passthru = mkOption {
-      description = "Attribute set to passthru to parent";
+      description = "Attribute set to passthru";
       default = {};
       type = types.attrs;
     };
