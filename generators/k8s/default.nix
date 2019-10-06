@@ -399,6 +399,7 @@ let
           group = "${rt.group}";
           version = "${rt.version}";
           kind = "${rt.kind}";
+          attrName = "${rt.attrName}";
         }'') resourceTypes)}];
 
         resources = {

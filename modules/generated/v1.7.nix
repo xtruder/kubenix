@@ -12425,348 +12425,406 @@ in {
         group = "apiregistration.k8s.io";
         version = "v1beta1";
         kind = "APIService";
+        attrName = "APIServices";
       }
       {
         name = "bindings";
         group = "core";
         version = "v1";
         kind = "Binding";
+        attrName = "bindings";
       }
       {
         name = "configmaps";
         group = "core";
         version = "v1";
         kind = "ConfigMap";
+        attrName = "configMaps";
       }
       {
         name = "endpoints";
         group = "core";
         version = "v1";
         kind = "Endpoints";
+        attrName = "endpoints";
       }
       {
         name = "events";
         group = "core";
         version = "v1";
         kind = "Event";
+        attrName = "events";
       }
       {
         name = "limitranges";
         group = "core";
         version = "v1";
         kind = "LimitRange";
+        attrName = "limitRanges";
       }
       {
         name = "namespaces";
         group = "core";
         version = "v1";
         kind = "Namespace";
+        attrName = "namespaces";
       }
       {
         name = "nodes";
         group = "core";
         version = "v1";
         kind = "Node";
+        attrName = "nodes";
       }
       {
         name = "persistentvolumes";
         group = "core";
         version = "v1";
         kind = "PersistentVolume";
+        attrName = "persistentVolumes";
       }
       {
         name = "persistentvolumeclaims";
         group = "core";
         version = "v1";
         kind = "PersistentVolumeClaim";
+        attrName = "persistentVolumeClaims";
       }
       {
         name = "pods";
         group = "core";
         version = "v1";
         kind = "Pod";
+        attrName = "pods";
       }
       {
         name = "podtemplates";
         group = "core";
         version = "v1";
         kind = "PodTemplate";
+        attrName = "podTemplates";
       }
       {
         name = "replicationcontrollers";
         group = "core";
         version = "v1";
         kind = "ReplicationController";
+        attrName = "replicationControllers";
       }
       {
         name = "resourcequotas";
         group = "core";
         version = "v1";
         kind = "ResourceQuota";
+        attrName = "resourceQuotas";
       }
       {
         name = "secrets";
         group = "core";
         version = "v1";
         kind = "Secret";
+        attrName = "secrets";
       }
       {
         name = "services";
         group = "core";
         version = "v1";
         kind = "Service";
+        attrName = "services";
       }
       {
         name = "serviceaccounts";
         group = "core";
         version = "v1";
         kind = "ServiceAccount";
+        attrName = "serviceAccounts";
       }
       {
         name = "externaladmissionhookconfigurations";
         group = "admissionregistration.k8s.io";
         version = "v1alpha1";
         kind = "ExternalAdmissionHookConfiguration";
+        attrName = "externalAdmissionHookConfigurations";
       }
       {
         name = "initializerconfigurations";
         group = "admissionregistration.k8s.io";
         version = "v1alpha1";
         kind = "InitializerConfiguration";
+        attrName = "initializerConfigurations";
       }
       {
         name = "controllerrevisions";
         group = "apps";
         version = "v1beta1";
         kind = "ControllerRevision";
+        attrName = "controllerRevisions";
       }
       {
         name = "deployments";
         group = "apps";
         version = "v1beta1";
         kind = "Deployment";
+        attrName = "deployments";
       }
       {
         name = "rollback";
         group = "apps";
         version = "v1beta1";
         kind = "DeploymentRollback";
+        attrName = "rollback";
       }
       {
         name = "statefulsets";
         group = "apps";
         version = "v1beta1";
         kind = "StatefulSet";
+        attrName = "statefulSets";
       }
       {
         name = "tokenreviews";
         group = "authentication.k8s.io";
         version = "v1";
         kind = "TokenReview";
+        attrName = "tokenReviews";
       }
       {
         name = "tokenreviews";
         group = "authentication.k8s.io";
         version = "v1beta1";
         kind = "TokenReview";
+        attrName = "tokenReviews";
       }
       {
         name = "localsubjectaccessreviews";
         group = "authorization.k8s.io";
         version = "v1";
         kind = "LocalSubjectAccessReview";
+        attrName = "localSubjectAccessReviews";
       }
       {
         name = "selfsubjectaccessreviews";
         group = "authorization.k8s.io";
         version = "v1";
         kind = "SelfSubjectAccessReview";
+        attrName = "selfSubjectAccessReviews";
       }
       {
         name = "subjectaccessreviews";
         group = "authorization.k8s.io";
         version = "v1";
         kind = "SubjectAccessReview";
+        attrName = "subjectAccessReviews";
       }
       {
         name = "localsubjectaccessreviews";
         group = "authorization.k8s.io";
         version = "v1beta1";
         kind = "LocalSubjectAccessReview";
+        attrName = "localSubjectAccessReviews";
       }
       {
         name = "selfsubjectaccessreviews";
         group = "authorization.k8s.io";
         version = "v1beta1";
         kind = "SelfSubjectAccessReview";
+        attrName = "selfSubjectAccessReviews";
       }
       {
         name = "subjectaccessreviews";
         group = "authorization.k8s.io";
         version = "v1beta1";
         kind = "SubjectAccessReview";
+        attrName = "subjectAccessReviews";
       }
       {
         name = "horizontalpodautoscalers";
         group = "autoscaling";
         version = "v1";
         kind = "HorizontalPodAutoscaler";
+        attrName = "horizontalPodAutoscalers";
       }
       {
         name = "horizontalpodautoscalers";
         group = "autoscaling";
         version = "v2alpha1";
         kind = "HorizontalPodAutoscaler";
+        attrName = "horizontalPodAutoscalers";
       }
       {
         name = "jobs";
         group = "batch";
         version = "v1";
         kind = "Job";
+        attrName = "jobs";
       }
       {
         name = "cronjobs";
         group = "batch";
         version = "v2alpha1";
         kind = "CronJob";
+        attrName = "cronJobs";
       }
       {
         name = "certificatesigningrequests";
         group = "certificates.k8s.io";
         version = "v1beta1";
         kind = "CertificateSigningRequest";
+        attrName = "certificateSigningRequests";
       }
       {
         name = "daemonsets";
         group = "extensions";
         version = "v1beta1";
         kind = "DaemonSet";
+        attrName = "daemonSets";
       }
       {
         name = "deployments";
         group = "extensions";
         version = "v1beta1";
         kind = "Deployment";
+        attrName = "deployments";
       }
       {
         name = "rollback";
         group = "extensions";
         version = "v1beta1";
         kind = "DeploymentRollback";
+        attrName = "rollback";
       }
       {
         name = "ingresses";
         group = "extensions";
         version = "v1beta1";
         kind = "Ingress";
+        attrName = "ingresses";
       }
       {
         name = "networkpolicies";
         group = "extensions";
         version = "v1beta1";
         kind = "NetworkPolicy";
+        attrName = "networkPolicies";
       }
       {
         name = "podsecuritypolicies";
         group = "extensions";
         version = "v1beta1";
         kind = "PodSecurityPolicy";
+        attrName = "podSecurityPolicies";
       }
       {
         name = "replicasets";
         group = "extensions";
         version = "v1beta1";
         kind = "ReplicaSet";
+        attrName = "replicaSets";
       }
       {
         name = "thirdpartyresources";
         group = "extensions";
         version = "v1beta1";
         kind = "ThirdPartyResource";
+        attrName = "thirdPartyResources";
       }
       {
         name = "networkpolicies";
         group = "networking.k8s.io";
         version = "v1";
         kind = "NetworkPolicy";
+        attrName = "networkPolicies";
       }
       {
         name = "eviction";
         group = "policy";
         version = "v1beta1";
         kind = "Eviction";
+        attrName = "eviction";
       }
       {
         name = "poddisruptionbudgets";
         group = "policy";
         version = "v1beta1";
         kind = "PodDisruptionBudget";
+        attrName = "podDisruptionBudgets";
       }
       {
         name = "clusterroles";
         group = "rbac.authorization.k8s.io";
         version = "v1alpha1";
         kind = "ClusterRole";
+        attrName = "clusterRoles";
       }
       {
         name = "clusterrolebindings";
         group = "rbac.authorization.k8s.io";
         version = "v1alpha1";
         kind = "ClusterRoleBinding";
+        attrName = "clusterRoleBindings";
       }
       {
         name = "roles";
         group = "rbac.authorization.k8s.io";
         version = "v1alpha1";
         kind = "Role";
+        attrName = "roles";
       }
       {
         name = "rolebindings";
         group = "rbac.authorization.k8s.io";
         version = "v1alpha1";
         kind = "RoleBinding";
+        attrName = "roleBindings";
       }
       {
         name = "clusterroles";
         group = "rbac.authorization.k8s.io";
         version = "v1beta1";
         kind = "ClusterRole";
+        attrName = "clusterRoles";
       }
       {
         name = "clusterrolebindings";
         group = "rbac.authorization.k8s.io";
         version = "v1beta1";
         kind = "ClusterRoleBinding";
+        attrName = "clusterRoleBindings";
       }
       {
         name = "roles";
         group = "rbac.authorization.k8s.io";
         version = "v1beta1";
         kind = "Role";
+        attrName = "roles";
       }
       {
         name = "rolebindings";
         group = "rbac.authorization.k8s.io";
         version = "v1beta1";
         kind = "RoleBinding";
+        attrName = "roleBindings";
       }
       {
         name = "podpresets";
         group = "settings.k8s.io";
         version = "v1alpha1";
         kind = "PodPreset";
+        attrName = "podPresets";
       }
       {
         name = "storageclasses";
         group = "storage.k8s.io";
         version = "v1";
         kind = "StorageClass";
+        attrName = "storageClasses";
       }
       {
         name = "storageclasses";
         group = "storage.k8s.io";
         version = "v1beta1";
         kind = "StorageClass";
+        attrName = "storageClasses";
       }
     ];
 

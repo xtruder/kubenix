@@ -97,6 +97,11 @@ let
               description = "Resource type kind";
               type = types.str;
             };
+
+            attrName = mkOption {
+              description = "Name of the nixified attribute";
+              type = types.str;
+            };
           };
         });
         default = [];
