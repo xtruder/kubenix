@@ -144,11 +144,17 @@ in {
                 description = "Submodule definition";
                 type = types.attrs;
               };
+
+              exportAs = mkOption {
+                description = "Name under which to register exports";
+                type = types.nullOr types.str;
+                default = null;
+              };
             };
 
             config = {
               definition = {
-                inherit (evaledSubmodule.config.submodule) name description version tags;
+                inherit (evaledSubmodule.config.submodule) name description version tags exports;
               };
 
               features = evaledSubmodule.config._module.features;
@@ -230,6 +236,11 @@ in {
 
   config = mkMerge ([
     {
+      # register exported functions as args
+      _module.args = mkMerge (map (submodule: {
+        ${submodule.exportAs} = submodule.definition.exports;
+      }) (filter (submodule: submodule.exportAs != null) cfg.imports));
+
       _module.features = ["submodules"];
 
       submodules.specialArgs.kubenix = kubenix;

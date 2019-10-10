@@ -29,10 +29,16 @@ with lib;
       default = [];
     };
 
+    exports = mkOption {
+      description = "Attribute set of functions to export";
+      type = types.attrs;
+      default = {};
+    };
+
     passthru = mkOption {
       description = "Attribute set to passthru";
-      default = {};
       type = types.attrs;
+      default = {};
     };
 
     args._empty = mkOption {};
