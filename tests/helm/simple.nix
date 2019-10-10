@@ -5,8 +5,8 @@ with kubenix.lib;
 with pkgs.dockerTools;
 
 let
-  corev1 = config.kubernetes.api.core.v1;
-  appsv1beta2 = config.kubernetes.api.apps.v1beta2;
+  corev1 = config.kubernetes.api.resources.core.v1;
+  appsv1beta2 = config.kubernetes.api.resources.apps.v1beta2;
 
   postgresql = pullImage {
     imageName = "docker.io/bitnami/postgresql";
@@ -62,14 +62,14 @@ in {
 
   kubernetes.version = k8sVersion;
 
-  kubernetes.api.namespaces.test = {};
+  kubernetes.resources.namespaces.test = {};
 
   kubernetes.helm.instances.app-psql = {
     namespace = "test";
     chart = helm.fetch {
       chart = "stable/postgresql";
       version = "3.0.0";
-      sha256 = "0icnnpcqvf1hqn7fc9niyifd0amlm9jfrx3iks0y360rk8wndbch";
+      sha256 = "06dkn4fgvgqr27hcnbbax1ylvr4sld3rcmy1w5kanljsajbph57m";
     };
 
     values = {

@@ -95,7 +95,7 @@ in {
     # expose helm helper methods as module argument
     _module.args.helm = import ../lib/helm { inherit pkgs; };
 
-    kubernetes.api = mkMerge (flatten (mapAttrsToList (_: instance:
+    kubernetes.api.resources = mkMerge (flatten (mapAttrsToList (_: instance:
       map (object: let
         apiVersion = parseApiVersion object.apiVersion;
         name = object.metadata.name;
