@@ -37,6 +37,7 @@ let
           ./submodules/defaults.nix
           ./submodules/versioning.nix
           ./submodules/exports.nix
+          ./submodules/passthru.nix
         ];
         testing.args = {
           inherit images k8sVersion;
