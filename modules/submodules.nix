@@ -6,16 +6,24 @@ let
   cfg = config.submodules;
   parentConfig = config;
 
-  getDefaults = {name, tags, features}:
-    catAttrs "default" (filter (submodule:
-      (submodule.name == null || submodule.name == name) &&
+  matchesVersion = requiredVersion: version:
+    if requiredVersion != null then
+      if hasPrefix "~" requiredVersion
+      then (builtins.match (removePrefix "~" requiredVersion) version) != null
+      else requiredVersion == version
+    else true;
+
+  getDefaults = {name, version, tags, features}:
+    catAttrs "default" (filter (submoduleDefault:
+      (submoduleDefault.name == null || submoduleDefault.name == name) &&
+      (matchesVersion submoduleDefault.version version) &&
       (
-        (length submodule.tags == 0) ||
-        (length (intersectLists submodule.tags tags)) > 0
+        (length submoduleDefault.tags == 0) ||
+        (length (intersectLists submoduleDefault.tags tags)) > 0
       ) &&
       (
-        (length submodule.features == 0) ||
-        (length (intersectLists submodule.features features)) > 0
+        (length submoduleDefault.features == 0) ||
+        (length (intersectLists submoduleDefault.features features)) > 0
       )
     ) config.submodules.defaults);
 
@@ -26,11 +34,7 @@ let
   findSubmodule = {name, version ? null, latest ? true}: let
     matchingSubmodules = filter (el:
       el.definition.name == name &&
-      (if version != null then
-        if hasPrefix "~" version
-        then (builtins.match (removePrefix "~" version) el.definition.version) != null
-        else el.definition.version == version
-      else true)
+      (matchesVersion version el.definition.version)
     ) cfg.imports;
 
     versionSortedSubmodules = sort (s1: s2:
@@ -72,13 +76,22 @@ in {
       type = types.listOf (types.submodule ({config, ...}: {
         options = {
           name = mkOption {
-            description = "Name of the submodule to apply defaults to";
+            description = "Name of the submodule to apply defaults for";
+            type = types.nullOr types.str;
+            default = null;
+          };
+
+          version = mkOption {
+            description = ''
+              Version of submodule to apply defaults for. If version starts with
+              "~" it is threated as regex pattern for example "~1.0.*
+            '';
             type = types.nullOr types.str;
             default = null;
           };
 
           tags = mkOption {
-            description = "List of tags to apply defaults to";
+            description = "List of tags to apply defaults for";
             type = types.listOf types.str;
             default = [];
           };
@@ -181,6 +194,7 @@ in {
         # submodule defaults
         defaults = getDefaults {
           name = submoduleDefinition.name;
+          version = submoduleDefinition.version;
           tags = submoduleDefinition.tags;
           features = submodule.features;
         };

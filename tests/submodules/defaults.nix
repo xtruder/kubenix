@@ -8,6 +8,7 @@ let
   instance3 = config.submodules.instances.instance3;
   instance4 = config.submodules.instances.instance4;
   instance5 = config.submodules.instances.instance5;
+  versioned-submodule = config.submodules.instances.versioned-submodule;
 
   submodule = {name, ...}: {
     imports = [ kubenix.modules.submodule ];
@@ -53,6 +54,9 @@ in {
     } {
       message = "should apply defaults by custom condition";
       assertion = instance5.config.submodule.args.defaultValue == "my-custom-value";
+    } {
+      message = "should apply defaults to versioned submodule";
+      assertion = versioned-submodule.config.submodule.args.defaultValue == "versioned-submodule";
     }];
   };
 
@@ -90,6 +94,13 @@ in {
       };
       submodule.args.value = "custom-value";
     }];
+  } {
+    modules = [submodule {
+      submodule = {
+        name = "versioned-submodule";
+        version = "2.0.0";
+      };
+    }];
   }];
 
   submodules.defaults = [{
@@ -107,6 +118,10 @@ in {
     default = {config, ...}: {
       submodule.args.defaultValue = mkIf (config.submodule.args.value == "custom-value") "my-custom-value";
     };
+  } {
+    name = "versioned-submodule";
+    version = "2.0.0";
+    default.submodule.args.value = mkDefault "versioned";
   }];
 
   submodules.instances.instance1.submodule = "submodule1";
@@ -117,4 +132,8 @@ in {
   };
   submodules.instances.instance4.submodule = "submodule4";
   submodules.instances.instance5.submodule = "submodule5";
+  submodules.instances.versioned-submodule = {
+    submodule = "versioned-submodule";
+    args.defaultValue = "versioned-submodule";
+  };
 }
