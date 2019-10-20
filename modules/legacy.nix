@@ -164,7 +164,7 @@ in {
 
   config = {
     kubernetes.api.defaults = mapAttrsToList (attrName: default: let
-      type = head (filter (type: type.attrName == attrName) config.kubernetes.api.types);
+      type = head (mapAttrsToList (_: v: v) (filterAttrs (_: type: type.attrName == attrName) config.kubernetes.api.types));
     in {
       default = { imports = default; };
     } // (if (attrName == "all") then {} else {
@@ -183,6 +183,9 @@ in {
 
     # custom resources are now included in normal resources, so just make an alias
     kubernetes.customResources = mkAliasDefinitions options.kubernetes.resources;
+
+    # create custom types from CRDs was old behavior
+    kubernetes.createCustomTypesFromCRDs = true;
 
     kubernetes.defaultModuleConfiguration.all = {
       _file = head options.kubernetes.defaultModuleConfiguration.files;

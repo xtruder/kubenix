@@ -7,6 +7,8 @@ with lib;
 let
   cfg = config.kubernetes;
 
+  gvkKeyFn = type: "${type.group}/${type.version}/${type.kind}";
+
   getDefaults = resource: group: version: kind:
     catAttrs "default" (filter (default:
       (resource == null || default.resource == null || default.resource == resource) &&
@@ -76,13 +78,8 @@ let
 
       types = mkOption {
         description = "List of registered kubernetes types";
-        type = types.listOf (types.submodule {
+        type = coerceListOfSubmodulesToAttrs {
           options = {
-            name = mkOption {
-              description = "Resource type name";
-              type = types.nullOr types.str;
-            };
-
             group = mkOption {
               description = "Resource type group";
               type = types.str;
@@ -98,13 +95,18 @@ let
               type = types.str;
             };
 
+            name = mkOption {
+              description = "Resource type name";
+              type = types.nullOr types.str;
+            };
+
             attrName = mkOption {
               description = "Name of the nixified attribute";
               type = types.str;
             };
           };
-        });
-        default = [];
+        } gvkKeyFn;
+        default = {};
       };
     };
 
@@ -126,18 +128,18 @@ let
     v2 = if length splittedVer2 == 1 then "${getVersion ver2}prod" else getVersion ver2;
   in builtins.compareVersions v1 v2;
 
-  customResourceTypesByKind = zipAttrs (map (resourceType: {
-    ${resourceType.kind} = resourceType;
+  customResourceTypesByAttrName = zipAttrs (mapAttrsToList (_: resourceType: {
+    ${resourceType.attrName} = resourceType;
   }) cfg.customTypes);
 
-  customResourceTypesByKindSortByVersion = mapAttrs (_: resourceTypes:
+  customResourceTypesByAttrNameSortByVersion = mapAttrs (_: resourceTypes:
     reverseList (sort (r1: r2:
       compareVersions r1.version r2.version > 0
     ) resourceTypes)
-  ) customResourceTypesByKind;
+  ) customResourceTypesByAttrName;
 
   latestCustomResourceTypes =
-    mapAttrsToList (_: resources: last resources) customResourceTypesByKindSortByVersion;
+    mapAttrsToList (_: resources: last resources) customResourceTypesByAttrNameSortByVersion;
 
   customResourceModuleForType = config: ct: { name, ... }: {
     imports = getDefaults ct.name ct.group ct.version ct.kind;
@@ -171,7 +173,7 @@ let
     };
   };
 
-  customResourceOptions = (map (ct: {config, ...}: let
+  customResourceOptions = (mapAttrsToList (_: ct: {config, ...}: let
     module = customResourceModuleForType config ct;
   in {
     options.resources.${ct.group}.${ct.version}.${ct.kind} = mkOption {
@@ -182,14 +184,14 @@ let
   }) cfg.customTypes) ++ (map (ct: { options, config, ... }: let
     module = customResourceModuleForType config ct;
   in {
-    options.resources.${ct.name} = mkOption {
+    options.resources.${ct.attrName} = mkOption {
       description = ct.description;
       type = types.attrsOf (types.submodule module);
       default = {};
     };
 
     config.resources.${ct.group}.${ct.version}.${ct.kind} =
-      mkAliasDefinitions options.resources.${ct.name};
+      mkAliasDefinitions options.resources.${ct.attrName};
   }) latestCustomResourceTypes);
 
 in {
@@ -238,45 +240,56 @@ in {
       default = {};
     };
 
+    createCustomTypesFromCRDs = mkOption {
+      description = "Whether to create customTypes from custom resource definitions";
+      type = types.bool;
+      default = false;
+    };
+
     customTypes = mkOption {
-      default = [];
       description = "List of custom resource types to make API for";
-      type = types.listOf (types.submodule ({config, ...}: {
+      type = coerceListOfSubmodulesToAttrs {
         options = {
           group = mkOption {
-            description = "Custom resource definition group";
+            description = "Custom type group";
             type = types.str;
           };
 
           version = mkOption {
-            description = "Custom resource definition version";
+            description = "Custom type version";
             type = types.str;
           };
 
           kind = mkOption {
-            description = "Custom resource definition kind";
+            description = "Custom type kind";
             type = types.str;
           };
 
           name = mkOption {
-            description = "Custom resource definition resource name";
+            description = "Custom type resource name";
             type = types.nullOr types.str;
             default = null;
           };
 
+          attrName = mkOption {
+            description = "Name of the nixified attribute";
+            type = types.str;
+          };
+
           description = mkOption {
-            description = "Custom resource definition description";
+            description = "Custom type description";
             type = types.str;
             default = "";
           };
 
           module = mkOption {
-            description = "Custom resource definition module";
+            description = "Custom type module";
             type = types.unspecified;
             default = {};
           };
         };
-      }));
+      } gvkKeyFn;
+      default = {};
     };
 
     objects = mkOption {
@@ -334,8 +347,8 @@ in {
 
     kubernetes.api = mkMerge ([{
       # register custom types
-      types = map (cr: {
-        inherit (cr) name group version kind;
+      types = mapAttrsToList (_: cr: {
+        inherit (cr) name group version kind attrName;
       }) cfg.customTypes;
 
       defaults = [{
@@ -364,10 +377,21 @@ in {
       resources.${group}.${version}.${kind}.${name} = object;
     }) cfg.imports));
 
-    kubernetes.objects = flatten (map (type:
+    kubernetes.objects = flatten (mapAttrsToList (_: type:
       mapAttrsToList (name: resource: moduleToAttrs resource)
         cfg.api.resources.${type.group}.${type.version}.${type.kind}
     ) cfg.api.types);
+
+    # custom types created from customResourceDefinitions
+    kubernetes.customTypes = mkIf cfg.createCustomTypesFromCRDs (
+      mapAttrsToList (_: crd: {
+        group = crd.spec.group;
+        version = crd.spec.version;
+        kind = crd.spec.names.kind;
+        name = crd.spec.names.plural;
+        attrName = mkDefault crd.spec.names.plural;
+      }) (cfg.resources.customResourceDefinitions or {})
+    );
 
     kubernetes.generated = k8s.mkHashedList {
       items = config.kubernetes.objects;

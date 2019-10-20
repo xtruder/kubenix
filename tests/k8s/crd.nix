@@ -61,39 +61,64 @@ in {
     };
   };
 
-  kubernetes.customTypes = [{
-    name = "crontabs";
-    group = "stable.example.com";
-    version = "v1";
-    kind = "CronTab";
-    description = "CronTabs resources";
-    module = {
-      options.schedule = mkOption {
-        description = "Crontab schedule script";
-        type = types.str;
-      };
-    };
-  } {
-    name = "crontabs";
-    group = "stable.example.com";
-    version = "v2";
-    kind = "CronTab";
-    description = "CronTabs resources";
-    module = {
-      options = {
-        schedule = mkOption {
-          description = "Crontab schedule script";
-          type = types.str;
-        };
+  kubernetes.createCustomTypesFromCRDs = true;
 
-        command = mkOption {
-          description = "Command to run";
-          type = types.str;
+  kubernetes.customTypes = mkMerge [
+    {
+      "stable.example.com/v1/CronTab" = {
+        attrName = "cronTabs";
+        description = "CronTabs resources";
+        module = {
+          options.schedule = mkOption {
+            description = "Crontab schedule script";
+            type = types.str;
+          };
         };
       };
-    };
-  }];
+    }
+    {
+      "stable.example.com/v2/CronTab" = {
+        description = "CronTabs resources";
+        attrName = "cronTabs";
+        module = {
+          options = {
+            schedule = mkOption {
+              description = "Crontab schedule script";
+              type = types.str;
+            };
+
+            command = mkOption {
+              description = "Command to run";
+              type = types.str;
+            };
+          };
+        };
+      };
+    }
+
+    [{
+      group = "stable.example.com";
+      version = "v3";
+      kind = "CronTab";
+      description = "CronTabs resources";
+      attrName = "cronTabsV3";
+      module = {
+        options = {
+          schedule = mkOption {
+            description = "Crontab schedule script";
+            type = types.str;
+          };
+
+          command = mkOption {
+            description = "Command to run";
+            type = types.str;
+          };
+        };
+      };
+    }]
+  ];
 
   kubernetes.resources."stable.example.com"."v1".CronTab.versioned.spec.schedule = "* * * * *";
-  kubernetes.resources.crontabs.latest.spec.schedule = "* * * * *";
+  kubernetes.resources.cronTabs.latest.spec.schedule = "* * * * *";
+  kubernetes.resources.cronTabsV3.latest.spec.schedule = "* * * * *";
 }
