@@ -1,0 +1,89 @@
+{ options, config, lib, kubenix, pkgs, k8sVersion, ... }:
+
+with lib;
+
+{
+  imports = with kubenix.modules; [ test k8s legacy ];
+
+  test = {
+    name = "legacy-crd";
+    description = "Simple test tesing kubenix legacy integration with crds crd";
+    assertions = [];
+  };
+
+  kubernetes.version = k8sVersion;
+  kubernetes.namespace = "test";
+
+  kubernetes.moduleDefinitions.secret-claim.module = { config, k8s, module, ... }: {
+    options = {
+      name = mkOption {
+        description = "Name of the secret claim";
+        type = types.str;
+        default = module.name;
+      };
+
+      type = mkOption {
+        description = "Type of the secret";
+        type = types.enum ["Opaque" "kubernetes.io/tls"];
+        default = "Opaque";
+      };
+
+      path = mkOption {
+        description = "Secret path";
+        type = types.str;
+      };
+
+      renew = mkOption {
+        description = "Renew time in seconds";
+        type = types.nullOr types.int;
+        default = null;
+      };
+
+      data = mkOption {
+        type = types.nullOr types.attrs;
+        description = "Data to pass to get secrets";
+        default = null;
+      };
+    };
+
+		config = {
+      kubernetes.resources.customResourceDefinitions.secret-claims = {
+        kind = "CustomResourceDefinition";
+        apiVersion = "apiextensions.k8s.io/v1beta1";
+        metadata.name = "secretclaims.vaultproject.io";
+        spec = {
+          group = "vaultproject.io";
+          version = "v1";
+          scope = "Namespaced";
+          names = {
+            plural = "secretclaims";
+            kind = "SecretClaim";
+            shortNames = ["scl"];
+          };
+        };
+      };
+
+      kubernetes.customResources.secret-claims.claim = {
+        metadata.name = config.name;
+        spec = {
+          inherit (config) type path;
+        } // (optionalAttrs (config.renew != null) {
+          inherit (config) renew;
+        }) // (optionalAttrs (config.data != null) {
+          inherit (config) data;
+        });
+      };
+    };
+  };
+
+  kubernetes.modules.myclaim = {
+    module = "secret-claim";
+    configuration.path = "tokens/test";
+  };
+
+  kubernetes.customResources.secret-claims.propagated-claim = {
+    spec = {
+      path = "secrets/test2";
+    };
+  };
+}

@@ -6,6 +6,7 @@ with lib;
 
 let
   parentModule = module;
+  globalConfig = config;
 
   mkOptionDefault = mkOverride 1001;
 
@@ -120,10 +121,7 @@ in {
         namespace = mkOption {
           description = "Namespace where to deploy module";
           type = types.str;
-          default =
-            if parentModule != null
-            then parentModule.namespace
-            else "default";
+          default = globalConfig.kubernetes.namespace;
         };
 
         labels = mkOption {
@@ -161,43 +159,44 @@ in {
   options.kubernetes.customResources = options.kubernetes.resources;
 
   config = {
-    kubernetes.api.defaults = mapAttrsToList (attrName: default: let
-      type = head (mapAttrsToList (_: v: v) (filterAttrs (_: type: type.attrName == attrName) config.kubernetes.api.types));
-    in {
-      default = { imports = default; };
-    } // (if (attrName == "all") then {} else {
-      resource = type.name;
-    })) config.kubernetes.defaults;
+    kubernetes = mkMerge [{
+      api.defaults = mapAttrsToList (attrName: default: let
+        type = head (mapAttrsToList (_: v: v) (filterAttrs (_: type: type.attrName == attrName) config.kubernetes.api.types));
+      in {
+        default = { imports = default; };
+      } // (if (attrName == "all") then {} else {
+        resource = type.name;
+      })) config.kubernetes.defaults;
 
-    kubernetes.resources = mkMerge (
-      mapAttrsToList (name: module:
-        mapAttrs' (_: type: let
-          moduleDefinition = getModuleDefinition module.module;
+      resources = mkMerge (
+        mapAttrsToList (name: module:
+          mapAttrs' (_: type: let
+            moduleDefinition = getModuleDefinition module.module;
 
-          moduleResources = module.configuration.kubernetes.api.resources.${type.attrName} or {};
+            moduleResources = module.configuration.kubernetes.api.resources.${type.attrName} or {};
 
-          moduleConfig =
-            if moduleDefinition.prefixResources
-            then prefixResources (moduleToAttrs moduleResources) name
-            else moduleToAttrs moduleResources;
-        in nameValuePair type.attrName
-          (if moduleDefinition.assignAsDefaults
-           then mkAllDefault moduleConfig 1000
-           else moduleConfig)
-        ) module.configuration.kubernetes.api.types
-      ) config.kubernetes.modules
-    );
+            moduleConfig =
+              if moduleDefinition.prefixResources && type.kind != "CustomResourceDefinition"
+              then prefixResources (moduleToAttrs moduleResources) name
+              else moduleToAttrs moduleResources;
+          in nameValuePair type.attrName
+            (if moduleDefinition.assignAsDefaults
+            then mkAllDefault moduleConfig 1000
+            else moduleConfig)
+          ) module.configuration.kubernetes.api.types
+        ) config.kubernetes.modules
+      );
 
-    # custom resources are now included in normal resources, so just make an alias
-    kubernetes.customResources = mkAliasDefinitions options.kubernetes.resources;
+      # create custom types from CRDs was old behavior
+      createCustomTypesFromCRDs = true;
 
-    # create custom types from CRDs was old behavior
-    kubernetes.createCustomTypesFromCRDs = true;
-
-    kubernetes.defaultModuleConfiguration.all = {
-      _file = head options.kubernetes.defaultModuleConfiguration.files;
-      config.kubernetes.version = mkDefault config.kubernetes.version;
-      config.kubernetes.moduleDefinitions = config.kubernetes.moduleDefinitions;
-    };
+      defaultModuleConfiguration.all = {
+        _file = head options.kubernetes.defaultModuleConfiguration.files;
+        config.kubernetes.version = mkDefault config.kubernetes.version;
+        config.kubernetes.moduleDefinitions = config.kubernetes.moduleDefinitions;
+      };
+    } {
+      resources = mkAliasDefinitions options.kubernetes.customResources;
+    }];
   };
 }

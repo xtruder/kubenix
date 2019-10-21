@@ -17,11 +17,11 @@ in {
     name = "legacy-modules";
     description = "Simple test tesing kubenix legacy modules";
     assertions = [{
-    message = "should have all objects";
-    assertion =
-      hasObject {kind = "Deployment"; name = "myapp";} &&
-      hasObject {kind = "Deployment"; name = "myapp2";} &&
-      hasObject {kind = "Deployment"; name = "myapp2-app2";};
+      message = "should have all objects";
+      assertion =
+        hasObject {kind = "Deployment"; name = "myapp";} &&
+        hasObject {kind = "Deployment"; name = "myapp2";} &&
+        hasObject {kind = "Deployment"; name = "myapp2-app2";};
     } {
       message = "should have default labels set";
       assertion =

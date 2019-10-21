@@ -169,7 +169,7 @@ let
     config = {
       apiVersion = mkOptionDefault "${ct.group}/${ct.version}";
       kind = mkOptionDefault ct.kind;
-      metadata.name = mkOptionDefault name;
+      metadata.name = mkDefault name;
     };
   };
 
@@ -384,12 +384,12 @@ in {
 
     # custom types created from customResourceDefinitions
     kubernetes.customTypes = mkIf cfg.createCustomTypesFromCRDs (
-      mapAttrsToList (_: crd: {
+      mapAttrsToList (name: crd: {
         group = crd.spec.group;
         version = crd.spec.version;
         kind = crd.spec.names.kind;
         name = crd.spec.names.plural;
-        attrName = mkDefault crd.spec.names.plural;
+        attrName = mkOptionDefault name;
       }) (cfg.resources.customResourceDefinitions or {})
     );
 
