@@ -7,6 +7,8 @@ with lib;
 let
   parentModule = module;
 
+  mkOptionDefault = mkOverride 1001;
+
   mkModuleOptions = moduleDefinition: module:
     let
       # gets file where module is defined by looking into moduleDefinitions
@@ -35,20 +37,16 @@ let
       ./legacy.nix
       (injectModuleAttrs moduleDefinition.module {_file = file;})
       {
-        config.kubernetes.api.defaults = [{
-          default.metadata.namespace = mkOptionDefault module.namespace;
-        }];
+        config.kubernetes.namespace = mkOptionDefault module.namespace;
+        config.kubenix.project = mkOptionDefault config.kubenix.project;
       }
      ] ++ config.kubernetes.defaultModuleConfiguration.all
        ++ (optionals (hasAttr moduleDefinition.name config.kubernetes.defaultModuleConfiguration)
          config.kubernetes.defaultModuleConfiguration.${moduleDefinition.name});
 
   # prefix kubernetes objects with ${serviceName}, this magic was removed in new kubenix
-  prefixResources = resources: serviceName:  map (resource: resource // {
-    metadata = resource.metadata // {
-      name = "${serviceName}-${resource.metadata.name}";
-    };
-  }) resources;
+  prefixResources = resources: serviceName:
+    mapAttrs' (name: resource: nameValuePair "${serviceName}-${name}" resource) resources;
 
   defaultModuleConfigurationOptions = mapAttrs (name: moduleDefinition: mkOption {
     description = "Module default configuration for ${name} module";
@@ -171,13 +169,22 @@ in {
       resource = type.name;
     })) config.kubernetes.defaults;
 
-    kubernetes.objects = mkMerge (
-      mapAttrsToList (name: module: let
-        moduleDefinition = getModuleDefinition module.module;
-      in
-        if moduleDefinition.prefixResources
-        then prefixResources (module.configuration.kubernetes.objects) module.name
-        else module.configuration.kubernetes.objects
+    kubernetes.resources = mkMerge (
+      mapAttrsToList (name: module:
+        mapAttrs' (_: type: let
+          moduleDefinition = getModuleDefinition module.module;
+
+          moduleResources = module.configuration.kubernetes.api.resources.${type.attrName} or {};
+
+          moduleConfig =
+            if moduleDefinition.prefixResources
+            then prefixResources (moduleToAttrs moduleResources) name
+            else moduleToAttrs moduleResources;
+        in nameValuePair type.attrName
+          (if moduleDefinition.assignAsDefaults
+           then mkAllDefault moduleConfig 1000
+           else moduleConfig)
+        ) module.configuration.kubernetes.api.types
       ) config.kubernetes.modules
     );
 
