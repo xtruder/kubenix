@@ -4,7 +4,7 @@ with lib;
 
 let
   crd = config.kubernetes.api.resources.customResourceDefinitions.crontabs;
-  latestCrontab = config.kubernetes.api.resources.crontabs.latest;
+  latestCrontab = config.kubernetes.api.resources.cronTabs.latest;
 in {
   imports = with kubenix.modules; [ test k8s ];
 
