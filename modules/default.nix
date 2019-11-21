@@ -7,6 +7,5 @@
   docker = ./docker.nix;
   testing = ./testing.nix;
   test = ./test.nix;
-  module = ./module.nix;
   legacy = ./legacy.nix;
 }

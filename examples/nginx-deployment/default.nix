@@ -30,7 +30,7 @@ rec {
   result = k8s.mkHashedList { items = config.kubernetes.objects; };
 
   # YAML file you can deploy to kubernetes
-  yaml = toYAML k8s-result;
+  yaml = toYAML result;
 
   # Exported docker images
   images = config.docker.export;
