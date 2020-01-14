@@ -53,7 +53,7 @@ let
 
     hasTypeMapping = def:
       hasAttr "type" def &&
-      elem def.type ["string" "integer" "boolean" "object"];
+      elem def.type ["string" "integer" "boolean"];
 
     mergeValuesByKey = mergeKey: ''(mergeValuesByKey "${mergeKey}")'';
 
