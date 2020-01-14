@@ -36,4 +36,4 @@ testScript;
 
 ## License
 
-MIT © [Jaka Hudoklin](https://x-truder.net)
+[MIT](LICENSE) © [Jaka Hudoklin](https://x-truder.net)
