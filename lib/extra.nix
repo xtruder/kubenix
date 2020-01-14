@@ -24,11 +24,11 @@ rec {
   loadYAML = path: importJSON (pkgs.runCommand "yaml-to-json" {
   } "${pkgs.remarshal}/bin/remarshal -i ${path} -if yaml -of json > $out");
 
-  toYAML = config: pkgs.runCommand "to-yaml" {
+  toYAML = config: builtins.readFile (pkgs.runCommand "to-yaml" {
     buildInputs = [pkgs.remarshal];
   } ''
     remarshal -i ${pkgs.writeText "to-json" (builtins.toJSON config)} -if json -of yaml > $out
-  '';
+  '');
 
   toBase64 = value:
     builtins.readFile
