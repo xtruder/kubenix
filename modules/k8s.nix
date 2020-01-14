@@ -238,6 +238,7 @@ in {
     resources = mkOption {
       description = "Alias for `config.kubernetes.api.resources` options";
       default = {};
+      type = types.attrsOf types.attrs;
     };
 
     createCustomTypesFromCRDs = mkOption {
