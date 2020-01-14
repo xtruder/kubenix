@@ -10,7 +10,7 @@ with lib;
     description = "Test testing nginx deployment";
     testScript = ''
       $kube->waitUntilSucceeds("docker load < ${config.docker.images.nginx.image}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
 
       $kube->succeed("kubectl get deployment | grep -i nginx");
       $kube->waitUntilSucceeds("kubectl get deployment -o go-template nginx --template={{.status.readyReplicas}} | grep 10");

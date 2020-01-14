@@ -31,7 +31,7 @@ in {
       services.kubernetes.kubelet.seedDockerImages = config.docker.export;
     };
     testScript = ''
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
 
       $kube->succeed("kubectl get deployment | grep -i nginx");
       $kube->waitUntilSucceeds("kubectl get deployment -o go-template nginx --template={{.status.readyReplicas}} | grep 10");

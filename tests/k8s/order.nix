@@ -41,6 +41,7 @@ in {
     name = "crontabs";
     description = "CronTabs resources";
 
+    attrName = "cronTabs";
     group = "stable.example.com";
     version = "v1";
     kind = "CronTab";

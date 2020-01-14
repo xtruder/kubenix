@@ -22,7 +22,7 @@ in {
       assertion = latestCrontab.apiVersion == "stable.example.com/v2";
     }];
     testScript = ''
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
       $kube->succeed("kubectl get crds | grep -i crontabs");
       $kube->succeed("kubectl get crontabs | grep -i versioned");
       $kube->succeed("kubectl get crontabs | grep -i latest");

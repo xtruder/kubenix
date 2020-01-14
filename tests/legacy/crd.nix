@@ -16,14 +16,15 @@ in {
   test = {
     name = "legacy-crd";
     description = "Simple test tesing kubenix legacy integration with crds crd";
+    enable = builtins.compareVersions config.kubernetes.version "1.13" >= 0;
     assertions = [{
-      message = "should define claim in module";
+      message = "should define crd in module";
       assertion =
-        hasObject {kind = "SecretClaim"; name = "secret-claim";};
+        hasObject {kind = "SecretClaim"; name = "module-claim";};
     } {
-      message = "should define claim in root";
+      message = "should define crd in root";
       assertion =
-        hasObject {kind = "SecretClaim"; name = "my-claim";};
+        hasObject {kind = "SecretClaim"; name = "root-claim";};
     }];
   };
 
@@ -92,11 +93,12 @@ in {
     };
   };
 
-  kubernetes.modules.secret-claim = {
+  kubernetes.modules.module-claim = {
+    module = "secret-claim";
     configuration.path = "tokens/test";
   };
 
-  kubernetes.customResources.secret-claims.my-claim = {
+  kubernetes.customResources.secret-claims.root-claim = {
     spec = {
       path = "secrets/test2";
     };

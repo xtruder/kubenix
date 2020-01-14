@@ -55,7 +55,7 @@ in {
       $kube->waitUntilSucceeds("docker load < ${postgresql}");
       $kube->waitUntilSucceeds("docker load < ${postgresqlExporter}");
       $kube->waitUntilSucceeds("docker load < ${minideb}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
       $kube->waitUntilSucceeds("PGPASSWORD=postgres ${pkgs.postgresql}/bin/psql -h app-psql-postgresql.test.svc.cluster.local -U postgres -l");
     '';
   };
@@ -67,7 +67,8 @@ in {
   kubernetes.helm.instances.app-psql = {
     namespace = "test";
     chart = helm.fetch {
-      chart = "stable/postgresql";
+      repo = "https://kubernetes-charts.storage.googleapis.com/";
+      chart = "postgresql";
       version = "3.0.0";
       sha256 = "06dkn4fgvgqr27hcnbbax1ylvr4sld3rcmy1w5kanljsajbph57m";
     };

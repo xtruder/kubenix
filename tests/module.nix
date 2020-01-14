@@ -23,7 +23,7 @@ in {
     }];
     testScript = ''
       $kube->waitUntilSucceeds("docker load < ${images.nginx}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${toYAML config.kubernetes.generated}");
+      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
 
       $kube->succeed("kubectl get deployment -n test | grep -i test-nginx");
       $kube->waitUntilSucceeds("kubectl get deployment -n test -o go-template test-nginx --template={{.status.readyReplicas}} | grep 1");

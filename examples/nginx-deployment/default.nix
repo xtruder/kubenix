@@ -26,11 +26,11 @@ rec {
   # nixos test script for running the test
   test-script = config.testing.testsByName.nginx-deployment.test;
 
-  # hashed kubernetes List object
-  result = k8s.mkHashedList { items = config.kubernetes.objects; };
+  # genreated kubernetes List object
+  generated = config.kubernetes.generated;
 
-  # YAML file you can deploy to kubernetes
-  yaml = toYAML k8s-result;
+  # JSON file you can deploy to kubernetes
+  result = config.kubernetes.result;
 
   # Exported docker images
   images = config.docker.export;
