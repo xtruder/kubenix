@@ -51,4 +51,7 @@ rec {
       "kubenix/hash" = hash;
     } // labels;
   };
+
+  toBase64 = lib.toBase64;
+  octalToDecimal = lib.octalToDecimal;
 }
