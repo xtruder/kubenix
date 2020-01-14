@@ -2,13 +2,29 @@
 
 with lib;
 
-{
+let
+  findObject = { kind, name }: filter (object:
+    object.kind == kind && object.metadata.name == name
+  ) config.kubernetes.objects;
+
+  getObject = filter: head (findObject filter);
+
+  hasObject = { kind, name }: length (findObject { inherit kind name; }) == 1;
+in {
   imports = with kubenix.modules; [ test k8s legacy ];
 
   test = {
     name = "legacy-crd";
     description = "Simple test tesing kubenix legacy integration with crds crd";
-    assertions = [];
+    assertions = [{
+      message = "should define claim in module";
+      assertion =
+        hasObject {kind = "SecretClaim"; name = "secret-claim";};
+    } {
+      message = "should define claim in root";
+      assertion =
+        hasObject {kind = "SecretClaim"; name = "my-claim";};
+    }];
   };
 
   kubernetes.version = k8sVersion;
@@ -76,12 +92,11 @@ with lib;
     };
   };
 
-  kubernetes.modules.myclaim = {
-    module = "secret-claim";
+  kubernetes.modules.secret-claim = {
     configuration.path = "tokens/test";
   };
 
-  kubernetes.customResources.secret-claims.propagated-claim = {
+  kubernetes.customResources.secret-claims.my-claim = {
     spec = {
       path = "secrets/test2";
     };
