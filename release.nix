@@ -94,6 +94,27 @@ in rec {
         sha256 = "1q3dc416fr9nzy64pl7rydahygnird0vpk9yflssw7v9gx84m6x9";
       }}/api/openapi-spec/swagger.json";
     }
+
+    {
+      name = "v1.14.nix";
+      path = generateK8S "v1.14" "${pkgs.fetchFromGitHub {
+        owner = "kubernetes";
+        repo = "kubernetes";
+        rev = "v1.14.10";
+        sha256 = "0lkajm0qfi0qgcqm465z9bi04f778pg3qwnnkxlq38p7ibvi5vn4";
+      }}/api/openapi-spec/swagger.json";
+    }
+
+    {
+      name = "v1.15.nix";
+      path = generateK8S "v1.15" "${pkgs.fetchFromGitHub {
+        owner = "kubernetes";
+        repo = "kubernetes";
+        rev = "v1.15.7";
+        sha256 = "1hp6231c1l1fx9s182ivy1s6cgqlk208dj95dbhajd3qq8fdabqc";
+      }}/api/openapi-spec/swagger.json";
+    }
+
   ];
 
   generate.istio = pkgs.linkFarm "istio-generated.nix" [{
@@ -109,6 +130,8 @@ in rec {
     k8s-1_11 = runK8STests "1.11";
     k8s-1_12 = runK8STests "1.12";
     k8s-1_13 = runK8STests "1.13";
+    k8s-1_14 = runK8STests "1.14";
+    k8s-1_15 = runK8STests "1.15";
   };
 
   test-results = pkgs.recurseIntoAttrs (mapAttrs (_: t: pkgs.recurseIntoAttrs {
