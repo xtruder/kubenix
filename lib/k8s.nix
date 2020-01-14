@@ -20,7 +20,7 @@ rec {
 
       config = mkDefault (if default == null then {} else default);
     });
-    default = {};
+    default = default;
   };
 
   secretToEnv = value: {
