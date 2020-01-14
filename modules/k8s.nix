@@ -308,6 +308,11 @@ in {
       description = "Generated kubernetes list object";
       type = types.attrs;
     };
+
+    result = mkOption {
+      description = "Generated kubernetes JSON file";
+      type = types.package;
+    };
   };
 
   config = {
@@ -398,5 +403,8 @@ in {
       items = config.kubernetes.objects;
       labels."kubenix/project-name" = config.kubenix.project;
     };
+
+    kubernetes.result =
+      pkgs.writeText "kubenix-generated.json" (builtins.toJSON cfg.generated);
   };
 }
