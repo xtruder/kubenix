@@ -402,6 +402,7 @@ in {
     kubernetes.generated = k8s.mkHashedList {
       items = config.kubernetes.objects;
       labels."kubenix/project-name" = config.kubenix.project;
+      labels."kubenix/k8s-version" = config.kubernetes.version;
     };
 
     kubernetes.result =
