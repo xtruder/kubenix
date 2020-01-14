@@ -22,8 +22,8 @@ in stdenvNoCC.mkDerivation {
   name = "${name}.json";
   buildCommand = ''
     # template helm file and write resources to yaml
-    helm template --name "${name}" \
-      ${optionalString (kubeVersion != null) "--kube-version ${kubeVersion}"} \
+    helm template "${name}" \
+      ${optionalString (kubeVersion != null) "--api-versions ${kubeVersion}"} \
       ${optionalString (namespace != null) "--namespace ${namespace}"} \
       ${optionalString (values != {}) "-f ${valuesJsonFile}"} \
       ${chart} >resources.yaml
