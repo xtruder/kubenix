@@ -74,6 +74,7 @@ let
           };
         }));
         default = [];
+        apply = unique;
       };
 
       types = mkOption {
