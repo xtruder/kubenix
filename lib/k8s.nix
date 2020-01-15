@@ -3,27 +3,29 @@
 with lib;
 
 rec {
+  # TODO: refactor into mkOptionType
   mkSecretOption = {description ? "", default ? {}, allowNull ? true}: mkOption {
     inherit description;
     type = (if allowNull then types.nullOr else id) (types.submodule {
       options = {
-        name = mkOption {
+        name = mkOption ({
           description = "Name of the secret where secret is stored";
           type = types.str;
-          default = default.name or null;
-        };
+          default = default.name;
+        } // (optionalAttrs (default ? "name") {
+          default = default.name;
+        }));
 
-        key = mkOption {
+        key = mkOption ({
           description = "Name of the key where secret is stored";
           type = types.str;
-          default = default.key or null;
-        };
+        } // (optionalAttrs (default ? "key") {
+          default = default.key;
+        }));
       };
     });
-    default = {};
-  } // (optionalAttrs (default == null) {
-    default = null;
-  }));
+    default = if default == null then null else {};
+  };
 
   secretToEnv = value: {
     valueFrom.secretKeyRef = {
