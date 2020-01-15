@@ -1,126 +1,57 @@
-{
-  pkgs ? import <nixpkgs> {}
-}:
+{ pkgs ? import <nixpkgs> {}, nixosPath ? toString <nixpkgs/nixos>, lib ? pkgs.lib }:
 
-with pkgs.lib;
-with import ./lib.nix { inherit pkgs; inherit (pkgs) lib; };
+with lib;
 
 let
-  evalKubernetesModules = configuration: evalModules rec {
-    modules = [
-      ./kubernetes.nix
-      ./modules.nix configuration
-    ];
+  kubenixLib = import ./lib { inherit lib pkgs; };
+  lib' = lib.extend (lib: self: import ./lib/extra.nix { inherit lib pkgs; });
+
+  defaultSpecialArgs = {
+    inherit kubenix nixosPath;
+  };
+
+  # evalModules with same interface as lib.evalModules and kubenix as
+  # special argument
+  evalModules = {
+    module ? null,
+    modules ? [module],
+    specialArgs ? defaultSpecialArgs, ...
+  }@attrs: let
+    attrs' = filterAttrs (n: _: n != "module") attrs;
+  in lib'.evalModules (recursiveUpdate {
+    inherit specialArgs modules;
     args = {
       inherit pkgs;
       name = "default";
-      k8s = import ./k8s.nix {
-        inherit pkgs;
-        inherit (pkgs) lib;
-      };
-      module = null;
     };
-  };
+  } attrs');
 
-  flattenResources = resources: flatten (
-    mapAttrsToList (name: resourceGroup:
-      mapAttrsToList (name: resource: resource) resourceGroup
-    ) resources
-  );
+  modules = import ./modules;
 
-  filterResources = resourceFilter: resources:
-    mapAttrs (groupName: resources:
-      (filterAttrs (name: resource:
-        resourceFilter groupName name resource
-      ) resources)
-    ) resources;
-
-  toKubernetesList = resources: {
-    kind = "List";
-    apiVersion = "v1";
-    items = resources;
-  };
-
-  removeNixOptions = resources:
-    map (filterAttrs (name: attr: name != "nix")) resources;
-
+  # legacy support for buildResources
   buildResources = {
     configuration ? {},
-    resourceFilter ? groupName: name: resource: true,
-    withDependencies ? true,
     writeJSON ? true,
     writeHash ? true
   }: let
-    evaldConfiguration = evalKubernetesModules configuration;
-
-    allResources = moduleToAttrs (
-      evaldConfiguration.config.kubernetes.resources //
-      evaldConfiguration.config.kubernetes.customResources
-    );
-
-    filteredResources = filterResources resourceFilter allResources;
-
-    allDependencies = flatten (
-      mapAttrsToList (groupName: resources:
-        mapAttrsToList (name: resource: resource.nix.dependencies) resources
-      ) filteredResources
-    );
-
-    resourceDependencies =
-      filterResources (groupName: name: resource:
-        elem "${groupName}/${name}" allDependencies
-      ) allResources;
-
-    finalResources =
-      if withDependencies
-      then recursiveUpdate resourceDependencies filteredResources
-      else filteredResources;
-
-    resources = unique (removeNixOptions (
-      # custom resource definitions have to be allways created first
-      (flattenResources (filterResources (groupName: name: resource:
-        groupName == "customResourceDefinitions"
-      ) finalResources)) ++
-
-      # everything but custom resource definitions
-      (flattenResources (filterResources (groupName: name: resource:
-        groupName != "customResourceDefinitions"
-      ) finalResources))
-    ));
-
-    kubernetesList = toKubernetesList resources;
-
-    listHash = builtins.hashString "sha1" (builtins.toJSON kubernetesList);
-
-    hashedList = kubernetesList // optionalAttrs (writeHash) {
-      labels."kubenix/build" = listHash;
-      items = map (resource: recursiveUpdate resource {
-        metadata.labels."kubenix/build" = listHash;
-      }) kubernetesList.items;
+    evaled = evalModules {
+      modules = [
+        configuration
+        modules.legacy
+      ];
     };
 
-    result = if writeJSON then
-      pkgs.writeText "resources.json" (builtins.toJSON hashedList)
-      else hashedList;
-  in
-    result;
+    generated = evaled.config.kubernetes.generated;
 
-  buildTest = test: version: buildResources {
-    configuration = {
-      require = [test {
-        config.kubernetes.version = version;
-      }];
-    };
+    result =
+      if writeJSON
+      then pkgs.writeText "resources.json" (builtins.toJSON generated)
+      else generated;
+  in result;
+
+  kubenix = {
+    inherit evalModules buildResources modules;
+
+    lib = kubenixLib;
   };
-
-in {
-  inherit buildResources;
-
-  tests."k8s-1_7" = buildTest ./test/default.nix "1.7";
-  tests."k8s-1_8" = buildTest ./test/default.nix "1.8";
-  tests."k8s-1_9" = buildTest ./test/default.nix "1.9";
-  tests."k8s-1_10" = buildTest ./test/default.nix "1.10";
-  tests."k8s-1_11" = buildTest ./test/default.nix "1.11";
-  tests."k8s-1_12" = buildTest ./test/default.nix "1.12";
-  tests."k8s-1_13" = buildTest ./test/default.nix "1.13";
-}
+in kubenix

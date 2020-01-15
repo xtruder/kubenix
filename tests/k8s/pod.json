@@ -1,0 +1,13 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "test"
+  },
+  "spec": {
+    "containers": [{
+      "name": "test",
+      "image": "busybox"
+    }]
+  }
+}
