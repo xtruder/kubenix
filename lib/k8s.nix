@@ -3,9 +3,9 @@
 with lib;
 
 rec {
-  mkSecretOption = {description ? "", default ? {}}: mkOption ({
+  mkSecretOption = {description ? "", default ? {}, allowNull ? true}: mkOption {
     inherit description;
-    type = types.nullOr (types.submodule {
+    type = (if allowNull then types.nullOr else id) (types.submodule {
       options = {
         name = mkOption {
           description = "Name of the secret where secret is stored";
