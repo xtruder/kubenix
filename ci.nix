@@ -1,5 +1,5 @@
 let
-  nixpkgsSrc = builtins.fetchTarball "https://github.com/NixOS/nixpkgs-channels/archive/nixos-unstable.tar.gz";
+  nixpkgsSrc = builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz";
   pkgs = import nixpkgsSrc {};
 
   lib = pkgs.lib;
