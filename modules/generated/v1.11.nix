@@ -28513,8 +28513,8 @@ in {
       "cronJobs" = mkOption {
         description = "CronJob represents the configuration of a single cron job.";
         type = (types.attrsOf
-          (submoduleForDefinition "io.k8s.api.batch.v2alpha1.CronJob" "cronjobs" "CronJob" "batch"
-            "v2alpha1"));
+          (submoduleForDefinition "io.k8s.api.batch.v1beta1.CronJob" "cronjobs" "CronJob" "batch"
+            "v1beta1"));
         default = { };
       };
       "customResourceDefinitions" = mkOption {
@@ -29454,7 +29454,7 @@ in {
         mkAliasDefinitions options.resources."clusterRoleBindings";
       "core"."v1"."ConfigMap" = mkAliasDefinitions options.resources."configMaps";
       "apps"."v1"."ControllerRevision" = mkAliasDefinitions options.resources."controllerRevisions";
-      "batch"."v2alpha1"."CronJob" = mkAliasDefinitions options.resources."cronJobs";
+      "batch"."v1beta1"."CronJob" = mkAliasDefinitions options.resources."cronJobs";
       "apiextensions.k8s.io"."v1beta1"."CustomResourceDefinition" =
         mkAliasDefinitions options.resources."customResourceDefinitions";
       "apps"."v1"."DaemonSet" = mkAliasDefinitions options.resources."daemonSets";

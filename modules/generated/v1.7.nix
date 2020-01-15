@@ -12173,11 +12173,10 @@ in {
         default = { };
       };
       "horizontalPodAutoscalers" = mkOption {
-        description =
-          "HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified.";
+        description = "configuration of a horizontal pod autoscaler.";
         type = (types.attrsOf (submoduleForDefinition
-          "io.k8s.kubernetes.pkg.apis.autoscaling.v2alpha1.HorizontalPodAutoscaler"
-          "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v2alpha1"));
+          "io.k8s.kubernetes.pkg.apis.autoscaling.v1.HorizontalPodAutoscaler"
+          "horizontalpodautoscalers" "HorizontalPodAutoscaler" "autoscaling" "v1"));
         default = { };
       };
       "ingresses" = mkOption {
@@ -12850,7 +12849,7 @@ in {
       "policy"."v1beta1"."Eviction" = mkAliasDefinitions options.resources."eviction";
       "admissionregistration.k8s.io"."v1alpha1"."ExternalAdmissionHookConfiguration" =
         mkAliasDefinitions options.resources."externalAdmissionHookConfigurations";
-      "autoscaling"."v2alpha1"."HorizontalPodAutoscaler" =
+      "autoscaling"."v1"."HorizontalPodAutoscaler" =
         mkAliasDefinitions options.resources."horizontalPodAutoscalers";
       "extensions"."v1beta1"."Ingress" = mkAliasDefinitions options.resources."ingresses";
       "admissionregistration.k8s.io"."v1alpha1"."InitializerConfiguration" =

@@ -85,11 +85,15 @@ let
 
   compareVersions = ver1: ver2: let
     getVersion = v: substring 1 10 v;
-    splittedVer1 = builtins.splitVersion (getVersion ver1);
-    splittedVer2 = builtins.splitVersion (getVersion ver2);
+    splitVersion = v: builtins.splitVersion (getVersion v);
+    isAlpha = v: elem "alpha" (splitVersion v);
+    patchVersion = v:
+      if isAlpha v then ""
+      else if length (splitVersion v) == 1 then "${getVersion v}prod"
+      else getVersion v;
 
-    v1 = if length splittedVer1 == 1 then "${getVersion ver1}prod" else getVersion ver1;
-    v2 = if length splittedVer2 == 1 then "${getVersion ver2}prod" else getVersion ver2;
+    v1 = patchVersion ver1;
+    v2 = patchVersion ver2;
   in builtins.compareVersions v1 v2;
 
   fixJSON = content: replaceStrings ["\\u"] ["u"] content;
