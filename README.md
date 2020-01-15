@@ -1,5 +1,4 @@
-**Kubenix 2.0 is in development, with much more features, better tests and better docs.
-It will be merged into master in following weeks. For progress and features take a look here: https://github.com/xtruder/kubenix/issues/9**
+**Kubenix 2.0 is in still work in progress, expect breaking changes**
 
 # KubeNix
 
