@@ -49,10 +49,12 @@ let
   prefixResources = resources: serviceName:
     mapAttrs' (name: resource: nameValuePair "${serviceName}-${name}" resource) resources;
 
+  # TODO: rewrite using mkOptionType
   defaultModuleConfigurationOptions = mapAttrs (name: moduleDefinition: mkOption {
     description = "Module default configuration for ${name} module";
     type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
     default = [];
+    apply = filter (v: v!=[]);
   }) config.kubernetes.moduleDefinitions;
 
   getModuleDefinition = name:
@@ -101,6 +103,7 @@ in {
           description = "Module default configuration for all modules";
           type = types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified);
           default = [];
+          apply = filter (v: v != []);
         };
       };
     };
@@ -150,7 +153,7 @@ in {
   };
 
   options.kubernetes.defaults = mkOption {
-    type = types.attrsOf (types.coercedTo types.unspecified (value: [value]) (types.listOf types.unspecified));
+    type = types.attrsOf (types.coercedTo types.attrs (value: [value]) (types.listOf types.attrs));
     description = "Legacy kubenix kubernetes defaults.";
     default = {};
   };

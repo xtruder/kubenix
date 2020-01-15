@@ -3,7 +3,7 @@
 with lib;
 
 rec {
-  # TODO: refactor into mkOptionType
+  # TODO: refactor with mkOptionType
   mkSecretOption = {description ? "", default ? {}, allowNull ? true}: mkOption {
     inherit description;
     type = (if allowNull then types.nullOr else id) (types.submodule {

@@ -239,6 +239,7 @@ in {
       example = literalExample ''{config, ...}: {
         kubernetes.version = config.kubernetes.version;
       }'';
+      apply = filter (v: v!=[]);
       default = [];
     };
 
