@@ -88,6 +88,7 @@ in {
           inherit (config) chart name namespace values kubeVersion;
         });
       }));
+      default = {};
     };
   };
 
