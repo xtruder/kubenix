@@ -4,7 +4,8 @@ with lib;
 
 let
   cfg = config.testing;
-
+  k3s = pkgs.k3s;
+  k3sAirgapImages = pkgs.callPackage ./k3s-airgap-images.nix {};
   toJSONFile = content: builtins.toFile "json" (builtins.toJSON content);
 
   nixosTesting = import "${nixosPath}/lib/testing-python.nix" {
@@ -111,6 +112,95 @@ let
       '';
     };
 
+  k3sBaseConfig = { modulesPath, config, pkgs, lib, nodes, ... }: let
+    extraHosts = ''
+      ${concatMapStringsSep "\n"
+        (node: let n = node.config.networking; in "${n.primaryIPAddress}  ${n.hostName}.${n.domain}")
+        (attrValues nodes)}
+    '';
+  in {
+    imports = [ "${toString modulesPath}/profiles/minimal.nix" ];
+
+    config = mkMerge [{
+      virtualisation.memorySize = mkDefault 2048;
+      virtualisation.cores = mkDefault 16;
+      virtualisation.diskSize = mkDefault 4096;
+      virtualisation.docker.enable = true;
+      networking = {
+        inherit extraHosts;
+        domain = "my.xzy";
+        nameservers = ["10.43.0.10"];
+        firewall = {
+          trustedInterfaces = ["docker0" "cni0"];
+
+          extraCommands = concatMapStrings  (node: ''
+            iptables -A INPUT -s ${node.config.networking.primaryIPAddress} -j ACCEPT
+          '') (attrValues nodes);
+        };
+      };
+      environment.systemPackages = [ pkgs.kubectl pkgs.docker k3s ];
+      environment.variables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
+      systemd.extraConfig = "DefaultLimitNOFILE=1048576";
+      systemd.services.seed-docker-images = {
+        description = "Copy k3s airgap images, and services.kubernetes.kubelet.seedDockerImages";
+        wantedBy = ["k3s.service"];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = [
+            "${pkgs.docker}/bin/docker load --input='${k3sAirgapImages}'"
+          ] ++ builtins.map 
+            (image : "${pkgs.docker}/bin/docker load --input='${image}'") 
+            config.services.kubernetes.kubelet.seedDockerImages;
+        };
+      };
+      systemd.services.k3s = {
+        description = "Lightweight Kubernetes";
+        wantedBy = ["multi-user.target"];
+        after = ["network-online.target" "seed-docker-images.service"];
+        
+        serviceConfig = {
+          # setting --service-cidr 10.0.0.0/24 --cluster-dns 10.0.0.254
+          # was flakey, removed and hard coding nameservers to default value
+          ExecStart = "${k3s}/bin/k3s server --docker";
+          Type = "notify";
+          KillMode = "process";
+          Delegate = "yes";
+          LimitNOFILE = "infinity";
+          LimitNPROC = "infinity";
+          LimitCORE = "infinity";
+          TasksMax = "infinity";
+          TimeoutStartSec = "0";
+          Restart = "always";
+          RestartSec = "5s";
+        };
+      };
+    }
+    (mkIf (any (role: role == "master") config.services.kubernetes.roles) {
+      networking.firewall.allowedTCPPorts = [
+        443 # kubernetes apiserver
+      ];
+    })];
+  };
+
+  mkK3sTest = { name, testScript, extraConfiguration ? {} }:
+  
+    nixosTesting.makeTest {
+      inherit name;
+      
+      nodes.kube = { config, pkgs, nodes, ... }: {
+        imports = [ k3sBaseConfig extraConfiguration ];
+        networking.primaryIPAddress = mkForce "192.168.1.1";
+      };
+
+      testScript = ''
+        startAll;
+
+        $kube->waitForUnit('k3s.service');
+        $kube->waitUntilSucceeds("kubectl get node kube | grep -w Ready");
+
+        ${testScript}
+      '';
+    };
   testOptions = { config, ... }: let
     modules = [config.module ./test.nix ./base.nix {
       config = {
@@ -209,10 +299,20 @@ let
       success = all (el: el.assertion) config.assertions;
       test =
         if cfg.e2e && evaled.config.test.testScript != null
-        then mkKubernetesSingleNodeTest {
-          name = config.name;
-          inherit (evaled.config.test) testScript extraConfiguration;
-        } else null;
+        then 
+          if evaled.config.test.distro == null || 
+             evaled.config.test.distro == "nixos" then 
+            mkKubernetesSingleNodeTest {
+              name = config.name;
+              inherit (evaled.config.test) testScript extraConfiguration;
+            }
+          else if evaled.config.test.distro == "k3s" then
+            mkK3sTest {
+              name = config.name;
+              inherit (evaled.config.test) testScript extraConfiguration;
+            }
+          else throw "invalid test.distro ${evaled.config.test.distro}"
+        else null;
     })];
   };
 in {
