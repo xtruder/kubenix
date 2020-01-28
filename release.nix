@@ -1,4 +1,6 @@
-{ pkgs ? import <nixpkgs> {}, nixosPath ? toString <nixpkgs/nixos>, lib ? pkgs.lib
+{ pkgs ? import (fetchTarball {
+    url = "https://github.com/xtruder/nixpkgs/archive/pkgs/k3s/init.tar.gz";
+}) {}, nixosPath ? toString <nixpkgs/nixos>, lib ? pkgs.lib
 , e2e ? true, throwError ? true }:
 
 with lib;
