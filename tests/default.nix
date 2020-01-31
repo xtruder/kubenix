@@ -24,6 +24,7 @@ let
         testing.tests = [
           ./k8s/simple.nix
           ./k8s/deployment.nix
+          ./k8s/deployment-k3s.nix
           ./k8s/crd.nix
           ./k8s/defaults.nix
           ./k8s/order.nix
