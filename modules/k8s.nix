@@ -242,12 +242,6 @@ in {
       type = types.attrsOf types.attrs;
     };
 
-    createCustomTypesFromCRDs = mkOption {
-      description = "Whether to create customTypes from custom resource definitions";
-      type = types.bool;
-      default = false;
-    };
-
     customTypes = mkOption {
       description = "List of custom resource types to make API for";
       type = coerceListOfSubmodulesToAttrs {
@@ -388,17 +382,6 @@ in {
       mapAttrsToList (name: resource: moduleToAttrs resource)
         cfg.api.resources.${type.group}.${type.version}.${type.kind}
     ) cfg.api.types);
-
-    # custom types created from customResourceDefinitions
-    kubernetes.customTypes = mkIf cfg.createCustomTypesFromCRDs (
-      mapAttrsToList (name: crd: {
-        group = crd.spec.group;
-        version = crd.spec.version;
-        kind = crd.spec.names.kind;
-        name = crd.spec.names.plural;
-        attrName = mkOptionDefault name;
-      }) (cfg.resources.customResourceDefinitions or {})
-    );
 
     kubernetes.generated = k8s.mkHashedList {
       items = config.kubernetes.objects;

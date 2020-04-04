@@ -190,8 +190,15 @@ in {
         ) config.kubernetes.modules
       );
 
-      # create custom types from CRDs was old behavior
-      createCustomTypesFromCRDs = true;
+      # custom types created from customResourceDefinitions
+      customTypes =
+        mapAttrsToList (name: crd: {
+          group = crd.spec.group;
+          version = crd.spec.version;
+          kind = crd.spec.names.kind;
+          name = crd.spec.names.plural;
+          attrName = mkOptionDefault name;
+        }) (config.kubernetes.resources.customResourceDefinitions or {});
 
       defaultModuleConfiguration.all = {
         _file = head options.kubernetes.defaultModuleConfiguration.files;
