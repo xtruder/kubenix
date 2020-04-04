@@ -10,7 +10,6 @@ in {
   test = {
     name = "k8s-order";
     description = "test tesing k8s resource order";
-    enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
       message = "should have correct order of resources";
       assertion =
@@ -23,10 +22,15 @@ in {
   kubernetes.version = k8sVersion;
 
   kubernetes.resources.customResourceDefinitions.crontabs = {
+    apiVersion = "apiextensions.k8s.io/v1";
     metadata.name = "crontabs.stable.example.com";
     spec = {
       group = "stable.example.com";
-      version = "v1";
+      versions = [{
+        name = "v1";
+        served = true;
+        schema = true;
+      }];
       scope = "Namespaced";
       names = {
         plural = "crontabs";

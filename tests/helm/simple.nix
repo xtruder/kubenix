@@ -34,7 +34,8 @@ in {
   test = {
     name = "helm-simple";
     description = "Simple k8s testing wheter name, apiVersion and kind are preset";
-    enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
+    enable = false;
+    #enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
       message = "should have generated resources";
       assertion =

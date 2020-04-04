@@ -120,9 +120,6 @@ in rec {
   }];
 
   tests = {
-    k8s-1_8 = runK8STests "1.8";
-    k8s-1_9 = runK8STests "1.9";
-    k8s-1_10 = runK8STests "1.10";
     k8s-1_11 = runK8STests "1.11";
     k8s-1_12 = runK8STests "1.12";
     k8s-1_13 = runK8STests "1.13";

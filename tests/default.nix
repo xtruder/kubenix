@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {}
 , lib ? pkgs.lib
 , kubenix ? import ../. { inherit pkgs lib; }
-, k8sVersion ? "1.13"
+, k8sVersion ? "1.18"
 , nixosPath ? toString <nixpkgs/nixos>
 
 # whether any testing error should throw an error
@@ -25,7 +25,6 @@ let
           ./k8s/simple.nix
           ./k8s/deployment.nix
           ./k8s/crd.nix
-          ./k8s/1.13/crd.nix
           ./k8s/defaults.nix
           ./k8s/order.nix
           ./k8s/submodule.nix
@@ -33,7 +32,7 @@ let
           ./legacy/k8s.nix
           ./legacy/crd.nix
           ./legacy/modules.nix
-          ./helm/simple.nix
+          #./helm/simple.nix
           ./istio/bookinfo.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix

@@ -16,7 +16,7 @@ in {
   test = {
     name = "legacy-crd";
     description = "Simple test tesing kubenix legacy integration with crds crd";
-    enable = builtins.compareVersions config.kubernetes.version "1.13" >= 0;
+    enable = builtins.compareVersions config.kubernetes.version "1.15" <= 0;
     assertions = [{
       message = "should define crd in module";
       assertion =
