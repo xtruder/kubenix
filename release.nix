@@ -26,95 +26,92 @@ let
 in rec {
   generate.k8s = pkgs.linkFarm "k8s-generated.nix" [
     {
-      name = "v1.7.nix";
-      path = generateK8S "v1.7" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.7.16";
-        sha256 = "1ksalw3hzbcca89n9h3pas9nqj2n5gq3rbpdx633ycqb8g46h1iw";
-      }}/api/openapi-spec/swagger.json";
-    }
-
-    {
       name = "v1.8.nix";
-      path = generateK8S "v1.8" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.8.15";
-        sha256 = "1mwaafnkimr4kwqws4qli11wbavpmf27i6pjq77sfsapw9sz54j4";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.8" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.8.15/api/openapi-spec/swagger.json";
+        sha256 = "112c64gq6ksskzqscgwj8l30mq80w2ha9skpz5ixgvjjz6amylh8";
+      });
     }
 
     {
       name = "v1.9.nix";
-      path = generateK8S "v1.9" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.9.11";
-        sha256 = "1wl944ci7k8knrkdrc328agyq4c953j9dm0sn314s42j18lfd7rv";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.9" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.9.11/api/openapi-spec/swagger.json";
+        sha256 = "0x3ka044ii39ln0f8q2m3w9vwd4vf3bsmbwkc793bkw46w879vvq";
+      });
     }
 
     {
       name = "v1.10.nix";
-      path = generateK8S "v1.10" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.10.13";
-        sha256 = "07hwcamlc1kh5flwv4ahfkcg2lyhnbs8q2xczaws6v3sjxaycrrn";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.10" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.10.13/api/openapi-spec/swagger.json";
+        sha256 = "133ldlrlh9yfgp39ij1qm9mwlb92igbnxf5flfm1ffifdsd5j3hy";
+      });
     }
 
     {
       name = "v1.11.nix";
-      path = generateK8S "v1.11" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.11.8";
-        sha256 = "1q6x38zdycd4ai31gn666hg41bs4q32dyz2d07x76hj33fkzqs1f";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.11" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.11.8/api/openapi-spec/swagger.json";
+        sha256 = "1c7wjvi5rh69lpm373jp3z1dqzyzgkk5csr8qxw0pqr26bhr7w6s";
+      });
     }
 
     {
       name = "v1.12.nix";
-      path = generateK8S "v1.12" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.12.6";
-        sha256 = "0p9wh264xfm4c0inz99jclf603c414807vn19gfn62bfls3jcmgf";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.12" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.12.6/api/openapi-spec/swagger.json";
+        sha256 = "1bmvmwd8jakh5q2rcf17y4fdn1pb4srvcm816m9q5kavz60wdbkx";
+      });
     }
 
     {
       name = "v1.13.nix";
-      path = generateK8S "v1.13" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.13.4";
-        sha256 = "1q3dc416fr9nzy64pl7rydahygnird0vpk9yflssw7v9gx84m6x9";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.13" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.13.4/api/openapi-spec/swagger.json";
+        sha256 = "158izzjlq3qayhfg2ns5w6nwwn11gzxn1pyyxjz6rvvk526drs92";
+      });
     }
 
     {
       name = "v1.14.nix";
-      path = generateK8S "v1.14" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.14.10";
-        sha256 = "0lkajm0qfi0qgcqm465z9bi04f778pg3qwnnkxlq38p7ibvi5vn4";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.14" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.14.10/api/openapi-spec/swagger.json";
+        sha256 = "017jf5pr559d3a6cacbz79c892fh50iz7f0zcg8iwsr5af10h8xr";
+      });
     }
 
     {
       name = "v1.15.nix";
-      path = generateK8S "v1.15" "${pkgs.fetchFromGitHub {
-        owner = "kubernetes";
-        repo = "kubernetes";
-        rev = "v1.15.7";
-        sha256 = "1hp6231c1l1fx9s182ivy1s6cgqlk208dj95dbhajd3qq8fdabqc";
-      }}/api/openapi-spec/swagger.json";
+      path = generateK8S "v1.15" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.15.7/api/openapi-spec/swagger.json";
+        sha256 = "0lrya0i632xjdyr92q8hriifk6xr8cbv2qymfcrshrmx1a45h0kp";
+      });
     }
 
+    {
+      name = "v1.16.nix";
+      path = generateK8S "v1.16" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.16.8/api/openapi-spec/swagger.json";
+        sha256 = "06rh8phsdfvw0mg5nxnnpqfxfmgcka4rq64ardyzns0s2kv6x8l3";
+      });
+    }
+
+    {
+      name = "v1.17.nix";
+      path = generateK8S "v1.17" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.17.4/api/openapi-spec/swagger.json";
+        sha256 = "1yljdpi172dzj0djc9s665r9kz423wd30d7gxvnf3rswg73ial8k";
+      });
+    }
+
+    {
+      name = "v1.18.nix";
+      path = generateK8S "v1.18" (builtins.fetchurl {
+        url = "https://github.com/kubernetes/kubernetes/raw/v1.18.0/api/openapi-spec/swagger.json";
+        sha256 = "0f3qdn8bfc25a0h8cbdh75mpz1dykbmgymn6qr0rjnisc124fsy1";
+      });
+    }
   ];
 
   generate.istio = pkgs.linkFarm "istio-generated.nix" [{
@@ -123,7 +120,6 @@ in rec {
   }];
 
   tests = {
-    k8s-1_7 = runK8STests "1.7";
     k8s-1_8 = runK8STests "1.8";
     k8s-1_9 = runK8STests "1.9";
     k8s-1_10 = runK8STests "1.10";
@@ -132,6 +128,9 @@ in rec {
     k8s-1_13 = runK8STests "1.13";
     k8s-1_14 = runK8STests "1.14";
     k8s-1_15 = runK8STests "1.15";
+    k8s-1_16 = runK8STests "1.16";
+    k8s-1_17 = runK8STests "1.17";
+    k8s-1_18 = runK8STests "1.18";
   };
 
   test-results = pkgs.recurseIntoAttrs (mapAttrs (_: t: pkgs.recurseIntoAttrs {
