@@ -10,13 +10,13 @@ with lib;
       default = "kubenix";
     };
 
-    _module.features = mkOption {
+    _m.features = mkOption {
       description = "List of features exposed by module";
       type = types.listOf types.str;
       default = [];
     };
 
-    _module.propagate = mkOption {
+    _m.propagate = mkOption {
       description = "Module propagation options";
       type = types.listOf (types.submodule ({config, ...}: {
         options = {

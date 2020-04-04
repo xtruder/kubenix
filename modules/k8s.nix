@@ -317,14 +317,11 @@ in {
   };
 
   config = {
-    # expose k8s helper methods as module argument
-    _module.args.k8s = import ../lib/k8s.nix { inherit lib; };
-
     # features that module is defining
-    _module.features = [ "k8s" ];
+    _m.features = [ "k8s" ];
 
     # module propagation options
-    _module.propagate = [{
+    _m.propagate = [{
       features = ["k8s"];
       module = { config, ... }: {
         # propagate kubernetes version and namespace
@@ -351,6 +348,9 @@ in {
         );
       };
     }];
+
+    # expose k8s helper methods as module argument
+    _module.args.k8s = import ../lib/k8s.nix { inherit lib; };
 
     kubernetes.api = mkMerge ([{
       # register custom types

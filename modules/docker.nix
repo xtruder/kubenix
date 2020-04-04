@@ -73,19 +73,19 @@ in {
 
   config = {
     # define docker feature
-    _module.features = ["docker"];
-
-    # pass docker library as param
-    _module.args.docker = import ../lib/docker.nix { inherit lib pkgs; };
+    _m.features = ["docker"];
 
     # propagate docker options if docker feature is enabled
-    _module.propagate = [{
+    _m.propagate = [{
       features = [ "docker" ];
       module = { config, name, ... }: {
         # propagate registry options
         docker.registry = cfg.registry;
       };
     }];
+
+    # pass docker library as param
+    _module.args.docker = import ../lib/docker.nix { inherit lib pkgs; };
 
     # list of exported docker images
     docker.export = mapAttrsToList (_: i: i.image)

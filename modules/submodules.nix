@@ -60,7 +60,7 @@ let
       then inst.config.submodule.passthru._module.args or {}
       else {}
     ) config.submodules.instances);
-  }) (removeAttrs options ["_definedNames" "_module" "submodules"]);
+  }) (removeAttrs options ["_definedNames" "_module" "_m" "submodules"]);
 in {
   imports = [ ./base.nix ];
 
@@ -132,7 +132,7 @@ in {
             };
 
             evaledSubmodule =
-              if (!(elem "submodule" evaledSubmodule'.config._module.features))
+              if (!(elem "submodule" evaledSubmodule'.config._m.features))
               then throw "no submodule defined"
               else evaledSubmodule';
           in {
@@ -170,7 +170,7 @@ in {
                 inherit (evaledSubmodule.config.submodule) name description version tags exports;
               };
 
-              features = evaledSubmodule.config._module.features;
+              features = evaledSubmodule.config._m.features;
             };
           })
         )
@@ -255,7 +255,7 @@ in {
         ${submodule.exportAs} = submodule.definition.exports;
       }) (filter (submodule: submodule.exportAs != null) cfg.imports));
 
-      _module.features = ["submodules"];
+      _m.features = ["submodules"];
 
       submodules.specialArgs.kubenix = kubenix;
 
@@ -270,7 +270,7 @@ in {
         (map (propagate: {
           features = propagate.features;
           default = propagate.module;
-        }) config._module.propagate)
+        }) config._m.propagate)
       ];
     }
 
