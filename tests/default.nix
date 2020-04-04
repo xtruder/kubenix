@@ -32,7 +32,7 @@ let
           ./legacy/k8s.nix
           ./legacy/crd.nix
           ./legacy/modules.nix
-          #./helm/simple.nix
+          ./helm/simple.nix
           ./istio/bookinfo.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix

@@ -6,27 +6,27 @@ with pkgs.dockerTools;
 
 let
   corev1 = config.kubernetes.api.resources.core.v1;
-  appsv1beta2 = config.kubernetes.api.resources.apps.v1beta2;
+  appsv1 = config.kubernetes.api.resources.apps.v1;
 
   postgresql = pullImage {
     imageName = "docker.io/bitnami/postgresql";
-    imageDigest = "sha256:16485a9b19696958ab7259e0d2c3efa0ef7f300b6fd1beb13a6643e120970a05";
-    sha256 = "0hqdkpk7s3wcy5qsy6dzgzqc0rbpavpghly350p97j1janxbyhc7";
-    finalImageTag = "10.7.0";
+    imageDigest = "sha256:ec16eb9ff2e7bf0669cfc52e595f17d9c52efd864c3f943f404d525dafaaaf96";
+    sha256 = "1idl8amp2jifc71lq8ymyns41d76cnasqbxyaild0gjzlpxmsn9n";
+    finalImageTag = "11.7.0-debian-10-r55";
   };
 
   postgresqlExporter = pullImage {
-    imageName = "docker.io/wrouesnel/postgres_exporter";
-    imageDigest = "sha256:dd8051322ceb8995d3d7f116041a2116815e01e88232a90f635ebde8dcc4d3f4";
-    sha256 = "09mva5jx1g4v47s4lr1pkpfzzmxc7z9dnajfizffm3rxwl0qzjji";
-    finalImageTag = "v0.4.7";
+    imageName = "docker.io/bitnami/postgres-exporter";
+    imageDigest = "sha256:08ab46104b83834760a5e0329af11de23ccf920b4beffd27c506f34421920313";
+    sha256 = "14yw8fp6ja7x1wn3lyw8ws5lc5z9jz54vdc5ad5s7yxjfs0jvk6d";
+    finalImageTag = "0.8.0-debian-10-r66";
   };
 
   minideb = pullImage {
     imageName = "docker.io/bitnami/minideb";
-    imageDigest = "sha256:363011b4ad5308e7f2aee505b80730cbaadf9d41ff87879403f567dd98cfb5cf";
-    sha256 = "1vfyfdhmgidi7hc8kjflpq91vkzdqi9sj78g51ci8nyarclr808q";
-    finalImageTag = "latest";
+    imageDigest = "sha256:2f430acaa0ffd88454ac330a6843840f1e1204007bf92f8ce7b654fd3b558d68";
+    sha256 = "1h589digi99jvpdzn3azx4p8hlh7plci04him9vfmx2vfa5zxq4i";
+    finalImageTag = "buster";
   };
 in {
   imports = [ kubenix.modules.test kubenix.modules.helm kubenix.modules.k8s ];
@@ -34,23 +34,20 @@ in {
   test = {
     name = "helm-simple";
     description = "Simple k8s testing wheter name, apiVersion and kind are preset";
-    enable = false;
-    #enable = builtins.compareVersions config.kubernetes.version "1.8" >= 0;
     assertions = [{
       message = "should have generated resources";
       assertion =
-        appsv1beta2.StatefulSet ? "app-psql-postgresql-master" &&
-        appsv1beta2.StatefulSet ? "app-psql-postgresql-slave" &&
-        corev1.ConfigMap ? "app-psql-postgresql-init-scripts" &&
+        appsv1.StatefulSet ? "app-psql-postgresql-master" &&
+        appsv1.StatefulSet ? "app-psql-postgresql-slave" &&
         corev1.Secret ? "app-psql-postgresql" &&
         corev1.Service ? "app-psql-postgresql-headless" ;
     } {
       message = "should have values passed";
-      assertion = appsv1beta2.StatefulSet.app-psql-postgresql-slave.spec.replicas == 2;
+      assertion = appsv1.StatefulSet.app-psql-postgresql-slave.spec.replicas == 2;
     } {
       message = "should have namespace defined";
       assertion =
-        appsv1beta2.StatefulSet.app-psql-postgresql-master.metadata.namespace == "test";
+        appsv1.StatefulSet.app-psql-postgresql-master.metadata.namespace == "test";
     }];
     testScript = ''
       $kube->waitUntilSucceeds("docker load < ${postgresql}");
@@ -68,10 +65,10 @@ in {
   kubernetes.helm.instances.app-psql = {
     namespace = "test";
     chart = helm.fetch {
-      repo = "https://kubernetes-charts.storage.googleapis.com/";
+      repo = "https://charts.bitnami.com/bitnami";
       chart = "postgresql";
-      version = "3.0.0";
-      sha256 = "06dkn4fgvgqr27hcnbbax1ylvr4sld3rcmy1w5kanljsajbph57m";
+      version = "8.6.13";
+      sha256 = "pYJuxr5Ec6Yjv/wFn7QAA6vCiVjNTz1mWoexdxwiEzE=";
     };
 
     values = {
