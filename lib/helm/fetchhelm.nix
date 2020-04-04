@@ -31,7 +31,6 @@ in {
 
   buildCommand = ''
     export HOME="$PWD"
-    helm init >/dev/null
     echo "adding helm repo"
     ${if repo == null then "" else "helm repo add repository ${repo}"}
     echo "fetching helm chart"
