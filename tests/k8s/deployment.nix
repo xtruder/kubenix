@@ -1,10 +1,26 @@
-{ config, lib, pkgs, kubenix, images, k8sVersion, ... }:
+{ config, lib, pkgs, kubenix, images, ... }:
 
 with lib;
 
 let
   cfg = config.kubernetes.api.resources.deployments.nginx;
   image = images.nginx;
+
+  clientPod = builtins.toFile "client.json" (builtins.toJSON {
+    apiVersion = "v1";
+    kind = "Pod";
+    metadata = {
+      namespace = config.kubernetes.namespace;
+      name = "curl";
+    };
+    spec.containers = [{
+      name = "curl";
+      image = config.docker.images.curl.path;
+      args = ["curl" "--retry" "20" "--retry-connrefused" "http://nginx"];
+    }];
+    spec.restartPolicy = "Never";
+  });
+
 in {
   imports = [ kubenix.modules.test kubenix.modules.k8s kubenix.modules.docker ];
 
@@ -24,34 +40,55 @@ in {
       assertion = cfg.kind == "Deployment";
     } {
       message = "should have replicas set";
-      assertion = cfg.spec.replicas == 10;
+      assertion = cfg.spec.replicas == 3;
     }];
-    extraConfiguration = {
-      environment.systemPackages = [ pkgs.curl ];
-      services.kubernetes.kubelet.seedDockerImages = config.docker.export;
-    };
-    testScript = ''
-      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
+    driver = "kubetest";
+    script = ''
+      import time
 
-      $kube->succeed("kubectl get deployment | grep -i nginx");
-      $kube->waitUntilSucceeds("kubectl get deployment -o go-template nginx --template={{.status.readyReplicas}} | grep 10");
-      $kube->waitUntilSucceeds("curl http://nginx.default.svc.cluster.local | grep -i hello");
+      @pytest.mark.applymanifest('${config.kubernetes.resultYAML}')
+      def test_deployment(kube):
+          """Tests whether deployment get successfully created"""
+
+          kube.wait_for_registered(timeout=30)
+
+          deployments = kube.get_deployments()
+          nginx_deploy = deployments.get('nginx')
+          assert nginx_deploy is not None
+
+          pods = nginx_deploy.get_pods()
+          assert len(pods) == 3
+
+          client_pod = kube.load_pod('${clientPod}')
+          client_pod.create()
+
+          client_pod.wait_until_ready(timeout=30)
+          client_pod.wait_until_containers_start()
+
+          container = client_pod.get_container('curl')
+
+          time.sleep(5)
+
+          logs = container.get_logs()
+
+          assert "Hello from NGINX" in logs
     '';
   };
 
-  docker.images.nginx.image = image;
-
-  kubernetes.version = k8sVersion;
+  docker.images = {
+    nginx.image = image;
+    curl.image = images.curl;
+  };
 
   kubernetes.resources.deployments.nginx = {
     spec = {
-      replicas = 10;
+      replicas = 3;
       selector.matchLabels.app = "nginx";
       template.metadata.labels.app = "nginx";
       template.spec = {
         containers.nginx = {
           image = config.docker.images.nginx.path;
-          imagePullPolicy = "Never";
+          imagePullPolicy = "IfNotPresent";
         };
       };
     };

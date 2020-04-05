@@ -207,8 +207,8 @@ in {
 
     namespace = mkOption {
       description = "Default namespace where to deploy kubernetes resources";
-      type = types.str;
-      default = "default";
+      type = types.nullOr types.str;
+      default = null;
     };
 
     resourceOrder = mkOption {
@@ -308,6 +308,11 @@ in {
       description = "Generated kubernetes JSON file";
       type = types.package;
     };
+
+    resultYAML = mkOption {
+      description = "Genrated kubernetes YAML file";
+      type = types.package;
+    };
   };
 
   config = {
@@ -355,10 +360,14 @@ in {
       defaults = [{
         default = {
           # set default kubernetes namespace to all resources
-          metadata.namespace = mkDefault config.kubernetes.namespace;
+          metadata.namespace = mkIf (config.kubernetes.namespace != null)
+            (mkDefault config.kubernetes.namespace);
 
           # set project name to all resources
-          metadata.labels."kubenix/project-name" = config.kubenix.project;
+          metadata.annotations = {
+            "kubenix/project-name" = config.kubenix.project;
+            "kubenix/k8s-version" = cfg.version;
+          };
         };
       }];
     }] ++
@@ -390,6 +399,9 @@ in {
     };
 
     kubernetes.result =
-      pkgs.writeText "kubenix-generated.json" (builtins.toJSON cfg.generated);
+      pkgs.writeText "${config.kubenix.project}-generated.json" (builtins.toJSON cfg.generated);
+
+    kubernetes.resultYAML =
+      toMultiDocumentYaml "${config.kubenix.project}-generated.yaml" (config.kubernetes.objects);
   };
 }

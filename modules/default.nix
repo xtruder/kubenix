@@ -5,8 +5,8 @@
   submodule = ./submodule.nix;
   helm = ./helm.nix;
   docker = ./docker.nix;
-  testing = ./testing.nix;
-  test = ./test.nix;
+  testing = ./testing;
+  test = ./testing/test-options.nix;
   module = ./module.nix;
   legacy = ./legacy.nix;
 }
