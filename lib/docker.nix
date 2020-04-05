@@ -4,12 +4,12 @@ with lib;
 
 {
   copyDockerImages = { images,  dest, args ? "" }:
-    pkgs.writeScriptBin "copy-docker-images" (concatMapStrings (image: ''
-      #!${pkgs.bash}/bin/bash
+    pkgs.writeScript "copy-docker-images.sh" (concatMapStrings (image: ''
+      #!${pkgs.runtimeShell}
 
       set -e
 
-      echo "copying ${image.imageName}:${image.imageTag}"
+      echo "copying '${image.imageName}:${image.imageTag}' to '${dest}/${image.imageName}:${image.imageTag}'"
       ${pkgs.skopeo}/bin/skopeo copy ${args} $@ docker-archive:${image} ${dest}/${image.imageName}:${image.imageTag}
     '') images);
 }

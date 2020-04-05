@@ -30,6 +30,12 @@ rec {
     remarshal -i ${pkgs.writeText "to-json" (builtins.toJSON config)} -if json -of yaml > $out
   '');
 
+  toMultiDocumentYaml = name: documents: pkgs.runCommand name {
+    buildInputs = [ pkgs.remarshal ];
+  } (concatMapStringsSep "\necho --- >> $out\n" (d:
+    "remarshal -i ${builtins.toFile "doc" (builtins.toJSON d)} -if json -of yaml >> $out"
+  ) documents);
+
   toBase64 = value:
     builtins.readFile
       (pkgs.runCommand "value-to-b64" {} "echo -n '${value}' | ${pkgs.coreutils}/bin/base64 -w0 > $out");

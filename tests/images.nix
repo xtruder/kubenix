@@ -3,6 +3,13 @@
 with lib;
 
 {
+  curl = dockerTools.buildLayeredImage {
+    name = "curl";
+    tag = "latest";
+    config.Cmd = [ "${pkgs.bash}" "-c" "sleep infinity" ];
+    contents = [ pkgs.bash pkgs.curl pkgs.cacert ];
+  };
+
   nginx = let
     nginxPort = "80";
     nginxConf = pkgs.writeText "nginx.conf" ''

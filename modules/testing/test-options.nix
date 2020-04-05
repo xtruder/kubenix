@@ -4,6 +4,7 @@ with lib;
 
 let
   cfg = config.test;
+
 in {
   options.test = {
     name = mkOption {
@@ -38,7 +39,7 @@ in {
         };
       });
       default = [];
-      example = [ { assertion = false; message = "you can't enable this for that reason"; } ];
+      example = [ { assertion = false; message = "you can't enable this for some reason"; } ];
       description = ''
         This option allows modules to express conditions that must
         hold for the evaluation of the system configuration to
@@ -46,10 +47,9 @@ in {
       '';
     };
 
-    extraCheckInputs = mkOption {
-      description = "Extra check inputs";
-      type = types.listOf types.package;
-      default = [];
+    script = mkOption {
+      description = "Test script to use for e2e test";
+      type = types.nullOr (types.either types.lines types.path);
     };
 
     testScript = mkOption {
@@ -64,10 +64,9 @@ in {
       default = null;
     };
 
-    extraConfiguration = mkOption {
-      description = "Extra configuration for running test";
-      type = types.unspecified;
-      default = {};
+    driver = mkOption {
+      description = "Name of the driver to use for testing";
+      type = types.str;
     };
   };
 }
