@@ -58,6 +58,12 @@ in {
       default = null;
     };
 
+    distro = mkOption {
+      description = "Kubernetes distro to run the test with. Defaults to 'nixos', other option is 'k3s'";
+      type = types.nullOr types.str;
+      default = null;
+    };
+
     extraConfiguration = mkOption {
       description = "Extra configuration for running test";
       type = types.unspecified;
