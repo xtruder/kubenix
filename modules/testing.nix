@@ -7,7 +7,7 @@ let
 
   toJSONFile = content: builtins.toFile "json" (builtins.toJSON content);
 
-  nixosTesting = import "${nixosPath}/lib/testing.nix" {
+  nixosTesting = import "${nixosPath}/lib/testing-python.nix" {
     inherit pkgs;
     system = "x86_64-linux";
   };

@@ -1,5 +1,12 @@
-{ pkgs ? import <nixpkgs> {}, nixosPath ? toString <nixpkgs/nixos>, lib ? pkgs.lib
-, e2e ? true, throwError ? true }:
+let
+  fetch = import ./lib/compat.nix;
+in
+{ pkgs ? import (fetch "nixpkgs") { }
+, nixosPath ? toString (fetch "nixpkgs") + "/nixos"
+, lib ? pkgs.lib
+, e2e ? true
+, throwError ? true
+}:
 
 with lib;
 
@@ -23,7 +30,8 @@ let
   runK8STests = k8sVersion: import ./tests {
     inherit pkgs lib kubenix k8sVersion e2e throwError nixosPath;
   };
-in rec {
+in
+rec {
   generate.k8s = pkgs.linkFarm "k8s-generated.nix" [
     {
       name = "v1.8.nix";
@@ -130,15 +138,17 @@ in rec {
     k8s-1_18 = runK8STests "1.18";
   };
 
-  test-results = pkgs.recurseIntoAttrs (mapAttrs (_: t: pkgs.recurseIntoAttrs {
-    results = pkgs.recurseIntoAttrs t.results;
-    result = t.result;
-  }) tests);
+  test-results = pkgs.recurseIntoAttrs (mapAttrs
+    (_: t: pkgs.recurseIntoAttrs {
+      results = pkgs.recurseIntoAttrs t.results;
+      result = t.result;
+    })
+    tests);
 
   test-check =
     if !(all (test: test.success) (attrValues tests))
     then throw "tests failed"
     else true;
 
-  examples = import ./examples {};
+  examples = import ./examples { };
 }
