@@ -22,11 +22,11 @@ in {
       assertion = (head config.docker.export) == images.nginx;
     }];
     testScript = ''
-      $kube->waitUntilSucceeds("docker load < ${images.nginx}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
+      kube.wait_until_succeeds("docker load < ${images.nginx}")
+      kube.wait_until_succeeds("kubectl apply -f ${config.kubernetes.result}")
 
-      $kube->succeed("kubectl get deployment -n test | grep -i test-nginx");
-      $kube->waitUntilSucceeds("kubectl get deployment -n test -o go-template test-nginx --template={{.status.readyReplicas}} | grep 1");
+      kube.succeed("kubectl get deployment -n test | grep -i test-nginx")
+      kube.wait_until_succeeds("kubectl get deployment -n test -o go-template test-nginx --template={{.status.readyReplicas}} | grep 1")
     '';
   };
 

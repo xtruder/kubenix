@@ -100,10 +100,12 @@ let
         networking.primaryIPAddress = mkForce "192.168.1.1";
       };
 
-      testScript = ''
-        startAll;
+      skipLint = true;
 
-        $kube->waitUntilSucceeds("kubectl get node kube.my.xzy | grep -w Ready");
+      testScript = ''
+        start_all()
+
+        kube.wait_until_succeeds("kubectl get node kube.my.xzy | grep -w Ready")
 
         ${testScript}
       '';
