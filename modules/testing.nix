@@ -7,7 +7,7 @@ let
 
   toJSONFile = content: builtins.toFile "json" (builtins.toJSON content);
 
-  nixosTesting = import "${nixosPath}/lib/testing.nix" {
+  nixosTesting = import "${nixosPath}/lib/testing-python.nix" {
     inherit pkgs;
     system = "x86_64-linux";
   };
@@ -100,10 +100,12 @@ let
         networking.primaryIPAddress = mkForce "192.168.1.1";
       };
 
-      testScript = ''
-        startAll;
+      skipLint = true;
 
-        $kube->waitUntilSucceeds("kubectl get node kube.my.xzy | grep -w Ready");
+      testScript = ''
+        start_all()
+
+        kube.wait_until_succeeds("kubectl get node kube.my.xzy | grep -w Ready")
 
         ${testScript}
       '';

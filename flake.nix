@@ -1,17 +1,48 @@
 {
   description = "Kubernetes resource builder using nix";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:NixOS/nixpkgs";
+  };
 
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system}; in
-      rec {
-        packages.kubenix = pkgs.callPackage ./default.nix {
-          inherit pkgs;
+    { nixosModules = import ./modules; }
+    //
+    (flake-utils.lib.eachDefaultSystem
+      (system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              self.overlay
+            ];
+            config = { };
+          };
+        in
+        rec {
+          devShell = with pkgs; mkShell {
+            buildInputs = [
+            ];
+          };
+
+          packages = flake-utils.lib.flattenTree {
+            inherit (pkgs)
+              kubenix
+              ;
+          };
+
+          hydraJobs = {
+            inherit packages;
+          };
+        }
+      )
+    ) //
+    {
+      overlay = final: prev: {
+        kubenix = prev.callPackage ./default.nix {
           nixosPath = "${nixpkgs}/nixos";
         };
-        defaultPackage = packages.kubenix;
-      });
+      };
+    };
 }

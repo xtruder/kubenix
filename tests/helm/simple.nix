@@ -50,11 +50,11 @@ in {
         appsv1.StatefulSet.app-psql-postgresql-master.metadata.namespace == "test";
     }];
     testScript = ''
-      $kube->waitUntilSucceeds("docker load < ${postgresql}");
-      $kube->waitUntilSucceeds("docker load < ${postgresqlExporter}");
-      $kube->waitUntilSucceeds("docker load < ${minideb}");
-      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
-      $kube->waitUntilSucceeds("PGPASSWORD=postgres ${pkgs.postgresql}/bin/psql -h app-psql-postgresql.test.svc.cluster.local -U postgres -l");
+      kube.wait_until_succeeds("docker load < ${postgresql}")
+      kube.wait_until_succeeds("docker load < ${postgresqlExporter}")
+      kube.wait_until_succeeds("docker load < ${minideb}")
+      kube.wait_until_succeeds("kubectl apply -f ${config.kubernetes.result}")
+      kube.wait_until_succeeds("PGPASSWORD=postgres ${pkgs.postgresql}/bin/psql -h app-psql-postgresql.test.svc.cluster.local -U postgres -l")
     '';
   };
 

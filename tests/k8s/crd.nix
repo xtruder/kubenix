@@ -16,10 +16,10 @@ in {
       assertion = latestCrontab.apiVersion == "stable.example.com/v2";
     }];
     testScript = ''
-      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
-      $kube->succeed("kubectl get crds | grep -i crontabs");
-      $kube->succeed("kubectl get crontabs | grep -i versioned");
-      $kube->succeed("kubectl get crontabs | grep -i latest");
+      kube.wait_until_succeeds("kubectl apply -f ${config.kubernetes.result}")
+      kube.succeed("kubectl get crds | grep -i crontabs")
+      kube.succeed("kubectl get crontabs | grep -i versioned")
+      kube.succeed("kubectl get crontabs | grep -i latest")
     '';
   };
 
