@@ -192,11 +192,13 @@ let
         networking.primaryIPAddress = mkForce "192.168.1.1";
       };
 
-      testScript = ''
-        startAll;
+      skipLint = true;
 
-        $kube->waitForUnit('k3s.service');
-        $kube->waitUntilSucceeds("kubectl get node kube | grep -w Ready");
+      testScript = ''
+        start_all()
+
+        kube.wait_for_unit('k3s.service')
+        kube.wait_until_succeeds("kubectl get node kube | grep -w Ready")
 
         ${testScript}
       '';

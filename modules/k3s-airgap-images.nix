@@ -9,15 +9,15 @@ stdenv.mkDerivation rec {
   in {
     x86_64-linux = fetchurl {
       url = "https://github.com/rancher/k3s/releases/download/v${version}/k3s-airgap-images-amd64.tar";
-      sha256 = "1fiq211vvsnxdzfx9ybb28yyyif08zls7bx3kl8xmv4hrf8xza4i";
+      sha256 = "sha256-6kQmlpNV+4cU1Kn5lyZhutXYK5qYdey0jubzYRRF3vA=";
     };
     aarch64-linux = fetchurl {
       url = "https://github.com/rancher/k3s/releases/download/v${version}/k3s-airgap-images-arm64.tar";
-      sha256 = "1xaggiw5h0zndgvdikg7babwd9903n9vabp1dkh53g8al812sfnd";
+      sha256 = "sha256-OlqqdAmBN+azT0kfjZ/Bd0CFbbW5hTg9/8T9U05N0zE=";
     };
     armv7l-linux = fetchurl {
       url = "https://github.com/rancher/k3s/releases/download/v${version}/k3s-airgap-images-arm.tar";
-      sha256 = "1v90wyvj47hz4nphdq7isfbl758yrzg4bx7c73ghmlgvr6p9cdzb";
+      sha256 = "sha256-j/ARBtHDnfRk/7BpOvavoHe7L5dmsCZe5+wuZ5t4V/k=";
     };
   }.${stdenv.hostPlatform.system} or throwError;
 

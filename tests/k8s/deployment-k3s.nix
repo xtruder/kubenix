@@ -32,11 +32,11 @@ in {
       services.kubernetes.kubelet.seedDockerImages = config.docker.export;
     };
     testScript = ''
-      $kube->waitUntilSucceeds("kubectl apply -f ${config.kubernetes.result}");
+      kube.wait_until_succeeds("kubectl apply -f ${config.kubernetes.result}")
 
-      $kube->succeed("kubectl get deployment | grep -i nginx");
-      $kube->waitUntilSucceeds("kubectl get deployment -o go-template nginx --template={{.status.readyReplicas}} | grep 10");
-      $kube->waitUntilSucceeds("curl http://nginx.default.svc.cluster.local | grep -i hello");
+      kube.succeed("kubectl get deployment | grep -i nginx")
+      kube.wait_until_succeeds("kubectl get deployment -o go-template nginx --template={{.status.readyReplicas}} | grep 10")
+      kube.wait_until_succeeds("curl http://nginx.default.svc.cluster.local | grep -i hello")
     '';
   };
 
