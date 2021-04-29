@@ -1,7 +1,7 @@
 { name ? "k8s"
 , pkgs ? import <nixpkgs> {}
 , lib ? pkgs.lib
-, spec ? ./specs/1.10/swagger.json
+, spec ? ./specs/1.21/swagger.json
 , ... }:
 
 with lib;

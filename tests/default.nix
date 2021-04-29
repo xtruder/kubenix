@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {}
 , lib ? pkgs.lib
 , kubenix ? import ../. { inherit pkgs lib; }
-, k8sVersion ? "1.18"
+, k8sVersion ? "1.21"
 , nixosPath ? toString <nixpkgs/nixos>
 
 # whether any testing error should throw an error
