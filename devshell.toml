@@ -1,0 +1,36 @@
+[devshell]
+name = "kubenix"
+packages = [
+  "fd",
+  "nixpkgs-fmt",
+  "dive",
+  "kube3d",
+  "kubie",
+  "k9s",
+]
+
+[[commands]]
+name = "fmt"
+help = "Check Nix formatting"
+category = "checks"
+command = "nixpkgs-fmt ${@} ."
+
+[[commands]]
+name = "evalnix"
+help = "Check Nix parsing"
+category = "checks"
+command = "fd --extension nix --exec nix-instantiate --parse --quiet {} >/dev/null"
+
+# K8s related tools
+[[commands]]
+package = "dive"
+category = "k8s"
+
+[[commands]]
+package = "kubie"
+category = "k8s"
+
+[[commands]]
+package = "k9s"
+category = "k8s"
+

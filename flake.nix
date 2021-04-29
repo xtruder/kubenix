@@ -21,10 +21,7 @@
           };
         in
         rec {
-          devShell = with pkgs; mkShell {
-            buildInputs = [
-            ];
-          };
+          devShell = import ./shell.nix { inherit system pkgs; };
 
           packages = flake-utils.lib.flattenTree {
             inherit (pkgs)
@@ -43,6 +40,9 @@
         kubenix = prev.callPackage ./default.nix {
           nixosPath = "${nixpkgs}/nixos";
         };
+        # up to date versions of their nixpkgs equivalents
+        kubernetes = prev.callPackage ./pkgs/applications/networking/cluster/kubernetes { };
+        kubectl = prev.callPackage ./pkgs/applications/networking/cluster/kubectl { };
       };
     };
 }
