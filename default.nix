@@ -1,4 +1,10 @@
-{ pkgs ? import <nixpkgs> {}, nixosPath ? toString <nixpkgs/nixos>, lib ? pkgs.lib }:
+let
+  fetch = import ./lib/compat.nix;
+in
+{ pkgs ? import (fetch "nixpkgs") { }
+, nixosPath ? toString (fetch "nixpkgs") + "/nixos"
+, lib ? pkgs.lib
+}:
 
 with lib;
 

@@ -9,7 +9,8 @@ in {
   imports = [ kubenix.modules.test kubenix.modules.k8s kubenix.modules.docker ];
 
   test = {
-    name = "k8s-deployment";
+    distro = "k3s";
+    name = "k8s-deployment-k3s";
     description = "Simple k8s testing a simple deployment";
     assertions = [{
       message = "should have correct apiVersion and kind set";
