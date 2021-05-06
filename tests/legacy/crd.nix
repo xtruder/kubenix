@@ -1,4 +1,4 @@
-{ options, config, lib, kubenix, pkgs, k8sVersion, ... }:
+{ options, config, lib, kubenix, pkgs, ... }:
 
 with lib;
 
@@ -28,7 +28,6 @@ in {
     }];
   };
 
-  kubernetes.version = k8sVersion;
   kubernetes.namespace = "test";
 
   kubernetes.moduleDefinitions.secret-claim.module = { config, k8s, module, ... }: {

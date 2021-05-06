@@ -52,21 +52,5 @@ in {
       type = types.nullOr (types.either types.lines types.path);
     };
 
-    testScript = mkOption {
-      description = "Script to run as part of testing";
-      type = types.nullOr types.lines;
-      default = null;
-    };
-
-    distro = mkOption {
-      description = "Kubernetes distro to run the test with. Defaults to 'nixos', other option is 'k3s'";
-      type = types.nullOr types.str;
-      default = null;
-    };
-
-    driver = mkOption {
-      description = "Name of the driver to use for testing";
-      type = types.str;
-    };
   };
 }

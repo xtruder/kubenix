@@ -1,4 +1,4 @@
-{ options, config, lib, kubenix, pkgs, k8sVersion, ... }:
+{ options, config, lib, kubenix, pkgs, ... }:
 
 with lib;
 
@@ -35,8 +35,6 @@ in {
         config.kubernetes.resources.deployments.myapp2-app2-app.metadata.labels.module-label or false == "value";
     }];
   };
-
-  kubernetes.version = k8sVersion;
 
   kubernetes.defaults.all.metadata.labels.module-label = "value";
 

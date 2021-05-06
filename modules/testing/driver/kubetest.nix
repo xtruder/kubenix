@@ -18,9 +18,9 @@ let
       ${cfg.defaultHeader}
       ${t.script}
     ''
-    else p.script;
+    else t.script;
 
-  tests = pkgs.linkFarm "${testing.name}-tests" (map (t: {
+  tests = builtins.trace testing pkgs.linkFarm "${testing.name}-tests" (map (t: {
     path = toTestScript t;
     name = "${t.name}_test.py";
   }) testing.tests);

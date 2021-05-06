@@ -4,7 +4,7 @@
 
 , nixosPath ? toString <nixpkgs/nixos>
 
-, k8sVersion ? "1.18"
+, k8sVersion ? "1.21"
 , registryUrl ? throw "Registry url not defined"
 , throwError ? true # whether any testing error should throw an error
 , enabledTests ? null }:
@@ -26,7 +26,6 @@ let
           tests = [
             ./k8s/simple.nix
             ./k8s/deployment.nix
-            ./k8s/deployment-k3s.nix
             #  ./k8s/crd.nix # flaky
             ./k8s/defaults.nix
             ./k8s/order.nix

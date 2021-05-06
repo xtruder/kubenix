@@ -42,7 +42,6 @@ in {
       message = "should have replicas set";
       assertion = cfg.spec.replicas == 3;
     }];
-    driver = "kubetest";
     script = ''
       import time
 

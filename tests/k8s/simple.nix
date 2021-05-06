@@ -1,4 +1,4 @@
-{ config, kubenix, k8sVersion, ... }:
+{ config, kubenix, ... }:
 
 let
   cfg = config.kubernetes.api.resources.pods.nginx;
@@ -16,8 +16,6 @@ in {
       assertion = cfg.metadata.name == "nginx";
     }];
   };
-
-  kubernetes.version = k8sVersion;
 
   kubernetes.resources.pods.nginx = {};
 }

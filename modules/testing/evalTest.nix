@@ -55,29 +55,7 @@ let
     then evaled' else null;
 
 in {
-  imports = [
-    ./driver/kubetest.nix
-  ];
-
   options = {
-    name = mkOption {
-      description = "test name";
-      type = types.str;
-      internal = true;
-    };
-
-    description = mkOption {
-      description = "test description";
-      type = types.str;
-      internal = true;
-    };
-
-    enable = mkOption {
-      description = "Whether to enable test";
-      type = types.bool;
-      internal = true;
-    };
-
     module = mkOption {
       description = "Module defining kubenix test";
       type = types.unspecified;
@@ -96,6 +74,25 @@ in {
       default = false;
     };
 
+    # transparently forwarded from the test's `test` attribute for ease of access
+    name = mkOption {
+      description = "test name";
+      type = types.str;
+      internal = true;
+    };
+
+    description = mkOption {
+      description = "test description";
+      type = types.str;
+      internal = true;
+    };
+
+    enable = mkOption {
+      description = "Whether to enable test";
+      type = types.bool;
+      internal = true;
+    };
+
     assertions = mkOption {
       description = "Test result";
       type = types.unspecified;
@@ -109,26 +106,20 @@ in {
       internal = true;
     };
 
-    driver = mkOption {
-      description = "Name of the driver to use for testing";
-      type = types.str;
-      internal = true;
-    };
   };
 
   config = mkMerge [
     {
       inherit evaled;
-      inherit (testConfig) name description enable driver;
+      inherit (testConfig) name description enable;
     }
 
     # if test is evaled check assertions
     (mkIf (config.evaled != null) {
-      inherit (evaled.config.test) assertions;
+      inherit (evaled.config.test) assertions script;
 
       # if all assertions are true, test is successfull
       success = all (el: el.assertion) config.assertions;
-      script = evaled.config.test.script;
     })
   ];
 }

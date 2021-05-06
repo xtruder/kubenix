@@ -6,7 +6,7 @@ let
   cfg = config.testing;
 
   testModule = {
-    imports = [ ./test.nix ];
+    imports = [ ./evalTest.nix ];
 
     # passthru testing configuration
     config._module.args = {
@@ -86,12 +86,14 @@ in {
     };
 
     success = mkOption {
+      internal = true; # read only property
       description = "Whether testing was a success";
       type = types.bool;
       default = all (test: test.success) cfg.tests;
     };
 
     testScript = mkOption {
+      internal = true; # set by test driver
       type = types.package;
       description = "Script to run e2e tests";
     };

@@ -1,4 +1,4 @@
-{ config, lib, kubenix, k8sVersion, ... }:
+{ config, lib, kubenix, ... }:
 
 with lib;
 
@@ -20,8 +20,6 @@ in {
       assertion = deployment.metadata.name == "nginx-deployment";
     }];
   };
-
-  kubernetes.version = k8sVersion;
 
   kubernetes.imports = [
     ./pod.json

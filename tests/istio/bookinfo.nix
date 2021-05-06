@@ -1,4 +1,4 @@
-{ config, kubenix, k8sVersion, ... }:
+{ config, kubenix, ... }:
 
 {
   imports = with kubenix.modules; [ test k8s istio ];
@@ -7,8 +7,6 @@
     name = "istio-bookinfo";
     description = "Simple istio bookinfo application (WIP)";
   };
-
-  kubernetes.version = k8sVersion;
 
   kubernetes.api."networking.istio.io"."v1alpha3" = {
     Gateway."bookinfo-gateway" = {

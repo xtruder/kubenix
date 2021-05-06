@@ -1,4 +1,4 @@
-{ config, lib, kubenix, pkgs, k8sVersion, ... }:
+{ config, lib, kubenix, pkgs, ... }:
 
 with lib;
 
@@ -22,8 +22,6 @@ in {
       kube.succeed("kubectl get crontabs | grep -i latest")
     '';
   };
-
-  kubernetes.version = k8sVersion;
 
   kubernetes.customTypes = [
     {

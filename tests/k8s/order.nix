@@ -1,4 +1,4 @@
-{ config, lib, kubenix, pkgs, k8sVersion, ... }:
+{ config, lib, kubenix, pkgs, ... }:
 
 with lib;
 
@@ -18,8 +18,6 @@ in {
         (elemAt config.kubernetes.objects 2).kind == "CronTab";
     }];
   };
-
-  kubernetes.version = k8sVersion;
 
   kubernetes.resources.customResourceDefinitions.crontabs = {
     apiVersion = "apiextensions.k8s.io/v1";
