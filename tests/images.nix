@@ -32,6 +32,10 @@ with lib;
     extraCommands = ''
       mkdir -p etc
       chmod u+w etc
+      mkdir -p var/cache/nginx
+      chmod u+w var/cache/nginx
+      mkdir -p var/log/nginx
+      chmod u+w var/log/nginx
       echo "nginx:x:1000:1000::/:" > etc/passwd
       echo "nginx:x:1000:nginx" > etc/group
     '';

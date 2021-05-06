@@ -61,6 +61,17 @@ let
       };
 
       systemd.extraConfig = "DefaultLimitNOFILE=1048576";
+
+      systemd.services.copy-certs = {
+        description = "Share k8s certificates with host";
+        script = "cp -rf /var/lib/kubernetes/secrets /tmp/xchg/";
+        after = [ "kubernetes.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+      };
     }
     (mkIf (any (role: role == "master") config.services.kubernetes.roles) {
       networking.firewall.allowedTCPPorts = [

@@ -1,3 +1,11 @@
+[[env]]
+name = "QEMU_NET_OPTS"
+value = "hostfwd=tcp::5443-:443"
+
+[[env]]
+name = "KUBECONFIG"
+eval = "$DEVSHELL_ROOT/kubeconfig.json"
+
 [devshell]
 name = "kubenix"
 packages = [
