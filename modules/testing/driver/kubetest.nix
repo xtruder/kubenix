@@ -6,7 +6,9 @@ let
   testing = config.testing;
   cfg = testing.driver.kubetest;
 
-  pythonEnv = pkgs.python37.withPackages (ps: with ps; [
+  kubetest = import ./kubetestdrv.nix {inherit pkgs;};
+
+  pythonEnv = pkgs.python38.withPackages (ps: with ps; [
     pytest
     kubetest
     kubernetes
