@@ -50,6 +50,7 @@ in {
     script = mkOption {
       description = "Test script to use for e2e test";
       type = types.nullOr (types.either types.lines types.path);
+      default = null;
     };
 
   };

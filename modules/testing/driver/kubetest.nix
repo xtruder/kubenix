@@ -22,10 +22,13 @@ let
     ''
     else t.script;
 
-  tests = builtins.trace testing pkgs.linkFarm "${testing.name}-tests" (map (t: {
-    path = toTestScript t;
-    name = "${t.name}_test.py";
-  }) testing.tests);
+  tests = pkgs.linkFarm "${testing.name}-tests" (
+    map (t: {
+      path = toTestScript t;
+      name = "${t.name}_test.py";
+    })
+    ( filter (t: t.script != null) testing.tests )
+  );
 
   testScript = pkgs.writeScript "test-${testing.name}.sh" ''
     #!/usr/bin/env bash
