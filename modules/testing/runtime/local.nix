@@ -38,27 +38,6 @@ in {
       type = types.package;
       description = "Runtime script";
     };
-
-    docker = {
-      registryUrl = mkOption {
-        type = types.str;
-        description = "Docker registry url";
-      };
-
-      copyScript = mkOption {
-        type = types.package;
-        description = "Script used to copy docker images";
-      };
-    };
-    copyImages = mkOption {
-      type = types.package;
-      description = "Script used to copy docker images";
-    };
-
-    registryUrl = mkOption {
-      type = types.str;
-      description = "Registry url to copy docker images";
-    };
   };
 
   config.testing.runtime.local.script = script;
