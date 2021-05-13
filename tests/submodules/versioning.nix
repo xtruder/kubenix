@@ -1,7 +1,6 @@
 { name, config, lib, kubenix, ... }:
 
 with lib;
-
 let
   inst-exact = config.submodules.instances.inst-exact.config;
   inst-regex = config.submodules.instances.inst-regex.config;
@@ -17,7 +16,8 @@ let
 
     config.submodule.name = "subm";
   };
-in {
+in
+{
   imports = with kubenix.modules; [ test submodules ];
 
   test = {
@@ -26,36 +26,45 @@ in {
     assertions = [{
       message = "should select exact version";
       assertion = inst-exact.version == "1.1.0";
-    } {
-      message = "should select regex version";
-      assertion = inst-regex.version == "1.2.1";
-    } {
-      message = "should select latest version";
-      assertion = inst-latest.version == "1.2.1";
-    }];
+    }
+      {
+        message = "should select regex version";
+        assertion = inst-regex.version == "1.2.1";
+      }
+      {
+        message = "should select latest version";
+        assertion = inst-latest.version == "1.2.1";
+      }];
   };
 
   submodules.imports = [{
     modules = [{
       config.submodule.version = "1.0.0";
       config.version = "1.0.0";
-    } submodule];
-  } {
-    modules = [{
-      config.submodule.version = "1.1.0";
-      config.version = "1.1.0";
-    } submodule];
-  } {
-    modules = [{
-      config.submodule.version = "1.2.0";
-      config.version = "1.2.0";
-    } submodule];
-  } {
-    modules = [{
-      config.submodule.version = "1.2.1";
-      config.version = "1.2.1";
-    } submodule];
-  }];
+    }
+      submodule];
+  }
+    {
+      modules = [{
+        config.submodule.version = "1.1.0";
+        config.version = "1.1.0";
+      }
+        submodule];
+    }
+    {
+      modules = [{
+        config.submodule.version = "1.2.0";
+        config.version = "1.2.0";
+      }
+        submodule];
+    }
+    {
+      modules = [{
+        config.submodule.version = "1.2.1";
+        config.version = "1.2.1";
+      }
+        submodule];
+    }];
 
   submodules.instances.inst-exact = {
     submodule = "subm";

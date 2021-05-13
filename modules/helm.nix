@@ -4,7 +4,6 @@
 { config, lib, pkgs, helm, ... }:
 
 with lib;
-
 let
   cfg = config.kubernetes.helm;
 
@@ -14,17 +13,20 @@ let
     name = "recursive-attrs";
     description = "recursive attribute set";
     check = isAttrs;
-    merge = loc: foldl' (res: def: recursiveUpdate res def.value) {};
+    merge = loc: foldl' (res: def: recursiveUpdate res def.value) { };
   };
 
-  parseApiVersion = apiVersion: let
-    splitted = splitString "/" apiVersion;
-  in {
-    group = if length splitted == 1 then "core" else head splitted;
-    version = last splitted;
-  };
+  parseApiVersion = apiVersion:
+    let
+      splitted = splitString "/" apiVersion;
+    in
+    {
+      group = if length splitted == 1 then "core" else head splitted;
+      version = last splitted;
+    };
 
-in {
+in
+{
   imports = [ ./k8s.nix ];
 
   options.kubernetes.helm = {
@@ -52,7 +54,7 @@ in {
           values = mkOption {
             description = "Values to pass to chart";
             type = recursiveAttrs;
-            default = {};
+            default = { };
           };
 
           kubeVersion = mkOption {
@@ -64,7 +66,7 @@ in {
           overrides = mkOption {
             description = "Overrides to apply to all chart resources";
             type = types.listOf types.unspecified;
-            default = [];
+            default = [ ];
           };
 
           overrideNamespace = mkOption {
@@ -76,7 +78,7 @@ in {
           objects = mkOption {
             description = "Generated kubernetes objects";
             type = types.listOf types.attrs;
-            default = [];
+            default = [ ];
           };
         };
 
@@ -88,7 +90,7 @@ in {
           inherit (config) chart name namespace values kubeVersion;
         });
       }));
-      default = {};
+      default = { };
     };
   };
 
@@ -96,15 +98,21 @@ in {
     # expose helm helper methods as module argument
     _module.args.helm = import ../lib/helm { inherit pkgs; };
 
-    kubernetes.api.resources = mkMerge (flatten (mapAttrsToList (_: instance:
-      map (object: let
-        apiVersion = parseApiVersion object.apiVersion;
-        name = object.metadata.name;
-      in {
-        "${apiVersion.group}"."${apiVersion.version}".${object.kind}."${name}" = mkMerge ([
-          object
-        ] ++ instance.overrides);
-      }) instance.objects
-    ) cfg.instances));
+    kubernetes.api.resources = mkMerge (flatten (mapAttrsToList
+      (_: instance:
+        map
+          (object:
+            let
+              apiVersion = parseApiVersion object.apiVersion;
+              name = object.metadata.name;
+            in
+            {
+              "${apiVersion.group}"."${apiVersion.version}".${object.kind}."${name}" = mkMerge ([
+                object
+              ] ++ instance.overrides);
+            })
+          instance.objects
+      )
+      cfg.instances));
   };
 }

@@ -1,10 +1,10 @@
 { config, lib, kubenix, pkgs, ... }:
 
 with lib;
-
 let
   latestCrontab = config.kubernetes.api.resources.cronTabs.latest;
-in {
+in
+{
   imports = with kubenix.modules; [ test k8s ];
 
   test = {
@@ -37,7 +37,8 @@ in {
         };
       };
 
-    } {
+    }
+    {
       group = "stable.example.com";
       version = "v2";
       kind = "CronTab";
@@ -56,7 +57,8 @@ in {
           };
         };
       };
-    } {
+    }
+    {
       group = "stable.example.com";
       version = "v3";
       kind = "CronTab";

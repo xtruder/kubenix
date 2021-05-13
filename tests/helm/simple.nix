@@ -3,7 +3,6 @@
 with lib;
 with kubenix.lib;
 with pkgs.dockerTools;
-
 let
   corev1 = config.kubernetes.api.resources.core.v1;
   appsv1 = config.kubernetes.api.resources.apps.v1;
@@ -31,7 +30,8 @@ let
     finalImageName = "docker.io/bitnami/bitnami-shell";
     finalImageTag = "10";
   };
-in {
+in
+{
   imports = [ kubenix.modules.test kubenix.modules.helm kubenix.modules.k8s ];
 
   test = {
@@ -43,15 +43,17 @@ in {
         appsv1.StatefulSet ? "app-psql-postgresql-primary" &&
         appsv1.StatefulSet ? "app-psql-postgresql-read" &&
         corev1.Secret ? "app-psql-postgresql" &&
-        corev1.Service ? "app-psql-postgresql-headless" ;
-    } {
-      message = "should have values passed";
-      assertion = appsv1.StatefulSet.app-psql-postgresql-read.spec.replicas == 2;
-    } {
-      message = "should have namespace defined";
-      assertion =
-        appsv1.StatefulSet.app-psql-postgresql-primary.metadata.namespace == "test";
-    }];
+        corev1.Service ? "app-psql-postgresql-headless";
+    }
+      {
+        message = "should have values passed";
+        assertion = appsv1.StatefulSet.app-psql-postgresql-read.spec.replicas == 2;
+      }
+      {
+        message = "should have namespace defined";
+        assertion =
+          appsv1.StatefulSet.app-psql-postgresql-primary.metadata.namespace == "test";
+      }];
     testScript = ''
       kube.wait_until_succeeds("docker load < ${postgresql}")
       kube.wait_until_succeeds("docker load < ${postgresqlExporter}")
@@ -61,7 +63,7 @@ in {
     '';
   };
 
-  kubernetes.resources.namespaces.test = {};
+  kubernetes.resources.namespaces.test = { };
 
   kubernetes.helm.instances.app-psql = {
     namespace = "test";

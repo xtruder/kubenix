@@ -27,4 +27,3 @@ stdenv.mkDerivation {
     homepage = "https://github.com/kubernetes/kubectl";
   };
 }
-

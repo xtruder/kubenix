@@ -1,16 +1,16 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-with import ../../lib/docker.nix { inherit lib pkgs;  };
-
+with import ../../lib/docker.nix { inherit lib pkgs; };
 let
   testing = config.testing;
 
-  allImages = flatten (map (t: t.evaled.config.docker.export or []) testing.tests);
+  allImages = flatten (map (t: t.evaled.config.docker.export or [ ]) testing.tests);
 
   cfg = config.testing.docker;
 
-in {
+in
+{
   options.testing.docker = {
     registryUrl = mkOption {
       description = "Docker registry url";
@@ -38,7 +38,7 @@ in {
   };
 
   config.testing.defaults = [{
-    features = ["docker"];
+    features = [ "docker" ];
     default = {
       docker.registry.url = cfg.registryUrl;
     };

@@ -1,10 +1,10 @@
 { config, lib, pkgs, docker, ... }:
 
 with lib;
-
 let
   cfg = config.docker;
-in {
+in
+{
   imports = [ ./base.nix ];
 
   options.docker = {
@@ -52,13 +52,13 @@ in {
           };
         };
       }));
-      default = {};
+      default = { };
     };
 
     export = mkOption {
       description = "List of images to export";
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
     };
 
     copyScript = mkOption {
@@ -73,7 +73,7 @@ in {
 
   config = {
     # define docker feature
-    _m.features = ["docker"];
+    _m.features = [ "docker" ];
 
     # propagate docker options if docker feature is enabled
     _m.propagate = [{

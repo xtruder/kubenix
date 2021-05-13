@@ -1,11 +1,11 @@
 { lib, config, pkgs, ... }:
 
 with lib;
-
 let
   cfg = config.test;
 
-in {
+in
+{
   options.test = {
     name = mkOption {
       description = "Test name";
@@ -38,8 +38,8 @@ in {
           };
         };
       });
-      default = [];
-      example = [ { assertion = false; message = "you can't enable this for some reason"; } ];
+      default = [ ];
+      example = [{ assertion = false; message = "you can't enable this for some reason"; }];
       description = ''
         This option allows modules to express conditions that must
         hold for the evaluation of the system configuration to

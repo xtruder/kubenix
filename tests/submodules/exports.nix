@@ -1,7 +1,6 @@
 { name, config, lib, kubenix, subm-lib, ... }:
 
 with lib;
-
 let
   submodule = {
     imports = [ kubenix.modules.submodule ];
@@ -13,7 +12,8 @@ let
       };
     };
   };
-in {
+in
+{
   imports = with kubenix.modules; [ test submodules ];
 
   test = {
@@ -26,7 +26,7 @@ in {
   };
 
   submodules.imports = [{
-    modules = [submodule];
+    modules = [ submodule ];
     exportAs = "subm-lib";
   }];
 }

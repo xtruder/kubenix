@@ -1,8 +1,7 @@
 # This file was generated with kubenix k8s generator, do not edit
-{lib, config, ... }:
+{ lib, config, ... }:
 
 with lib;
-
 let
   types = lib.types // rec {
     str = mkOptionType {
@@ -15,61 +14,68 @@ let
     # Either value of type `finalType` or `coercedType`, the latter is
     # converted to `finalType` using `coerceFunc`.
     coercedTo = coercedType: coerceFunc: finalType:
-    mkOptionType rec {
-      name = "coercedTo";
-      description = "${finalType.description} or ${coercedType.description}";
-      check = x: finalType.check x || coercedType.check x;
-      merge = loc: defs:
-        let
-          coerceVal = val:
-            if finalType.check val then val
-            else let
-              coerced = coerceFunc val;
-            in assert finalType.check coerced; coerced;
+      mkOptionType rec {
+        name = "coercedTo";
+        description = "${finalType.description} or ${coercedType.description}";
+        check = x: finalType.check x || coercedType.check x;
+        merge = loc: defs:
+          let
+            coerceVal = val:
+              if finalType.check val then val
+              else
+                let
+                  coerced = coerceFunc val;
+                in
+                assert finalType.check coerced; coerced;
 
-        in finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
-      getSubOptions = finalType.getSubOptions;
-      getSubModules = finalType.getSubModules;
-      substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
-      typeMerge = t1: t2: null;
-      functor = (defaultFunctor name) // { wrapped = finalType; };
-    };
+          in
+          finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
+        getSubOptions = finalType.getSubOptions;
+        getSubModules = finalType.getSubModules;
+        substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
+        typeMerge = t1: t2: null;
+        functor = (defaultFunctor name) // { wrapped = finalType; };
+      };
   };
 
   mkOptionDefault = mkOverride 1001;
 
   extraOptions = {
-    kubenix = {};
+    kubenix = { };
   };
 
   mergeValuesByKey = mergeKey: values:
     listToAttrs (map
-      (value: nameValuePair (
-        if isAttrs value.${mergeKey}
-        then toString value.${mergeKey}.content
-        else (toString value.${mergeKey})
-      ) value)
-    values);
+      (value: nameValuePair
+        (
+          if isAttrs value.${mergeKey}
+          then toString value.${mergeKey}.content
+          else (toString value.${mergeKey})
+        )
+        value)
+      values);
 
-  submoduleOf = ref: types.submodule ({name, ...}: {
+  submoduleOf = ref: types.submodule ({ name, ... }: {
     options = definitions."${ref}".options;
     config = definitions."${ref}".config;
   });
 
-  submoduleWithMergeOf = ref: mergeKey: types.submodule ({name, ...}: let
-    convertName = name:
-      if definitions."${ref}".options.${mergeKey}.type == types.int
-      then toInt name
-      else name;
-  in {
-    options = definitions."${ref}".options;
-    config = definitions."${ref}".config // {
-      ${mergeKey} = mkOverride 1002 (convertName name);
-    };
-  });
+  submoduleWithMergeOf = ref: mergeKey: types.submodule ({ name, ... }:
+    let
+      convertName = name:
+        if definitions."${ref}".options.${mergeKey}.type == types.int
+        then toInt name
+        else name;
+    in
+    {
+      options = definitions."${ref}".options;
+      config = definitions."${ref}".config // {
+        ${mergeKey} = mkOverride 1002 (convertName name);
+      };
+    });
 
   submoduleForDefinition = ref: resource: kind: group: version:
-    types.submodule ({name, ...}: {
+    types.submodule ({ name, ... }: {
       options = definitions."${ref}".options // extraOptions;
       config = mkMerge ([
         definitions."${ref}".config
@@ -80,8 +86,8 @@ let
           # metdata.name cannot use option default, due deep config
           metadata.name = mkOptionDefault name;
         }
-      ] ++ (config.defaults.${resource} or [])
-        ++ (config.defaults.all or []));
+      ] ++ (config.defaults.${resource} or [ ])
+      ++ (config.defaults.all or [ ]));
     });
 
   coerceAttrsOfSubmodulesToListByKey = ref: mergeKey: (types.coercedTo
@@ -2846,7 +2852,7 @@ let
       };
     };
 
-    "istio_mixer_v1_ReportResponse" = {};
+    "istio_mixer_v1_ReportResponse" = { };
 
     "istio_mixer_v1_RouteDirective" = {
       options = {
@@ -4697,225 +4703,261 @@ let
       };
     };
 
-  } // (import ./istio-overrides.nix {inherit definitions lib;});
-in {
+  } // (import ./istio-overrides.nix { inherit definitions lib; });
+in
+{
   kubernetes.customResources = [
-  {
-    group = "networking.istio.io";
-    version = "v1alpha3";
-    kind = "DestinationRule";
-    description = "";
-    module = definitions."istio_networking_v1alpha3_DestinationRule";
-  }{
-    group = "networking.istio.io";
-    version = "v1alpha3";
-    kind = "EnvoyFilter";
-    description = "";
-    module = definitions."istio_networking_v1alpha3_EnvoyFilter";
-  }{
-    group = "networking.istio.io";
-    version = "v1alpha3";
-    kind = "Gateway";
-    description = "";
-    module = definitions."istio_networking_v1alpha3_Gateway";
-  }{
-    group = "authentication.istio.io";
-    version = "v1alpha1";
-    kind = "Policy";
-    description = "";
-    module = definitions."istio_authentication_v1alpha1_Policy";
-  }{
-    group = "rbac.istio.io";
-    version = "v1alpha1";
-    kind = "RbacConfig";
-    description = "";
-    module = definitions."istio_rbac_v1alpha1_RbacConfig";
-  }{
-    group = "policy.istio.io";
-    version = "v1beta1";
-    kind = "Rule";
-    description = "";
-    module = definitions."istio_policy_v1beta1_Rule";
-  }{
-    group = "networking.istio.io";
-    version = "v1alpha3";
-    kind = "ServiceEntry";
-    description = "";
-    module = definitions."istio_networking_v1alpha3_ServiceEntry";
-  }{
-    group = "rbac.istio.io";
-    version = "v1alpha1";
-    kind = "ServiceRole";
-    description = "";
-    module = definitions."istio_rbac_v1alpha1_ServiceRole";
-  }{
-    group = "rbac.istio.io";
-    version = "v1alpha1";
-    kind = "ServiceRoleBinding";
-    description = "";
-    module = definitions."istio_rbac_v1alpha1_ServiceRoleBinding";
-  }{
-    group = "networking.istio.io";
-    version = "v1alpha3";
-    kind = "VirtualService";
-    description = "";
-    module = definitions."istio_networking_v1alpha3_VirtualService";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "apikey";
-    description = "";
-    module = definitions."istio_mixer_apikey_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "authorization";
-    description = "";
-    module = definitions."istio_mixer_authorization_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "bypass";
-    description = "";
-    module = definitions."istio_adapter_bypass_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "checknothing";
-    description = "";
-    module = definitions."istio_mixer_checknothing_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "circonus";
-    description = "";
-    module = definitions."istio_adapter_circonus_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "denier";
-    description = "";
-    module = definitions."istio_adapter_denier_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "edge";
-    description = "";
-    module = definitions."istio_mixer_edge_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "fluentd";
-    description = "";
-    module = definitions."istio_adapter_fluentd_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "kubernetesenv";
-    description = "";
-    module = definitions."istio_adapter_kubernetesenv_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "listentry";
-    description = "";
-    module = definitions."istio_mixer_listentry_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "logentry";
-    description = "";
-    module = definitions."istio_mixer_logentry_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "memquota";
-    description = "";
-    module = definitions."istio_adapter_memquota_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "metric";
-    description = "";
-    module = definitions."istio_mixer_metric_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "opa";
-    description = "";
-    module = definitions."istio_adapter_opa_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "prometheus";
-    description = "";
-    module = definitions."istio_adapter_prometheus_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "quota";
-    description = "";
-    module = definitions."istio_mixer_quota_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "rbac";
-    description = "";
-    module = definitions."istio_adapter_rbac_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "redisquota";
-    description = "";
-    module = definitions."istio_adapter_redisquota_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "reportnothing";
-    description = "";
-    module = definitions."istio_mixer_reportnothing_InstanceMsg";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "servicecontrol";
-    description = "";
-    module = definitions."istio_adapter_servicecontrol_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "signalfx";
-    description = "";
-    module = definitions."istio_adapter_signalfx_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "solarwinds";
-    description = "";
-    module = definitions."istio_adapter_solarwinds_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "stackdriver";
-    description = "";
-    module = definitions."istio_adapter_stackdriver_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "statsd";
-    description = "";
-    module = definitions."istio_adapter_statsd_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "stdio";
-    description = "";
-    module = definitions."istio_adapter_stdio_Params";
-  }{
-    group = "config.istio.io";
-    version = "v1alpha2";
-    kind = "tracespan";
-    description = "";
-    module = definitions."istio_mixer_tracespan_InstanceMsg";
-  }
+    {
+      group = "networking.istio.io";
+      version = "v1alpha3";
+      kind = "DestinationRule";
+      description = "";
+      module = definitions."istio_networking_v1alpha3_DestinationRule";
+    }
+    {
+      group = "networking.istio.io";
+      version = "v1alpha3";
+      kind = "EnvoyFilter";
+      description = "";
+      module = definitions."istio_networking_v1alpha3_EnvoyFilter";
+    }
+    {
+      group = "networking.istio.io";
+      version = "v1alpha3";
+      kind = "Gateway";
+      description = "";
+      module = definitions."istio_networking_v1alpha3_Gateway";
+    }
+    {
+      group = "authentication.istio.io";
+      version = "v1alpha1";
+      kind = "Policy";
+      description = "";
+      module = definitions."istio_authentication_v1alpha1_Policy";
+    }
+    {
+      group = "rbac.istio.io";
+      version = "v1alpha1";
+      kind = "RbacConfig";
+      description = "";
+      module = definitions."istio_rbac_v1alpha1_RbacConfig";
+    }
+    {
+      group = "policy.istio.io";
+      version = "v1beta1";
+      kind = "Rule";
+      description = "";
+      module = definitions."istio_policy_v1beta1_Rule";
+    }
+    {
+      group = "networking.istio.io";
+      version = "v1alpha3";
+      kind = "ServiceEntry";
+      description = "";
+      module = definitions."istio_networking_v1alpha3_ServiceEntry";
+    }
+    {
+      group = "rbac.istio.io";
+      version = "v1alpha1";
+      kind = "ServiceRole";
+      description = "";
+      module = definitions."istio_rbac_v1alpha1_ServiceRole";
+    }
+    {
+      group = "rbac.istio.io";
+      version = "v1alpha1";
+      kind = "ServiceRoleBinding";
+      description = "";
+      module = definitions."istio_rbac_v1alpha1_ServiceRoleBinding";
+    }
+    {
+      group = "networking.istio.io";
+      version = "v1alpha3";
+      kind = "VirtualService";
+      description = "";
+      module = definitions."istio_networking_v1alpha3_VirtualService";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "apikey";
+      description = "";
+      module = definitions."istio_mixer_apikey_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "authorization";
+      description = "";
+      module = definitions."istio_mixer_authorization_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "bypass";
+      description = "";
+      module = definitions."istio_adapter_bypass_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "checknothing";
+      description = "";
+      module = definitions."istio_mixer_checknothing_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "circonus";
+      description = "";
+      module = definitions."istio_adapter_circonus_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "denier";
+      description = "";
+      module = definitions."istio_adapter_denier_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "edge";
+      description = "";
+      module = definitions."istio_mixer_edge_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "fluentd";
+      description = "";
+      module = definitions."istio_adapter_fluentd_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "kubernetesenv";
+      description = "";
+      module = definitions."istio_adapter_kubernetesenv_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "listentry";
+      description = "";
+      module = definitions."istio_mixer_listentry_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "logentry";
+      description = "";
+      module = definitions."istio_mixer_logentry_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "memquota";
+      description = "";
+      module = definitions."istio_adapter_memquota_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "metric";
+      description = "";
+      module = definitions."istio_mixer_metric_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "opa";
+      description = "";
+      module = definitions."istio_adapter_opa_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "prometheus";
+      description = "";
+      module = definitions."istio_adapter_prometheus_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "quota";
+      description = "";
+      module = definitions."istio_mixer_quota_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "rbac";
+      description = "";
+      module = definitions."istio_adapter_rbac_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "redisquota";
+      description = "";
+      module = definitions."istio_adapter_redisquota_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "reportnothing";
+      description = "";
+      module = definitions."istio_mixer_reportnothing_InstanceMsg";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "servicecontrol";
+      description = "";
+      module = definitions."istio_adapter_servicecontrol_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "signalfx";
+      description = "";
+      module = definitions."istio_adapter_signalfx_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "solarwinds";
+      description = "";
+      module = definitions."istio_adapter_solarwinds_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "stackdriver";
+      description = "";
+      module = definitions."istio_adapter_stackdriver_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "statsd";
+      description = "";
+      module = definitions."istio_adapter_statsd_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "stdio";
+      description = "";
+      module = definitions."istio_adapter_stdio_Params";
+    }
+    {
+      group = "config.istio.io";
+      version = "v1alpha2";
+      kind = "tracespan";
+      description = "";
+      module = definitions."istio_mixer_tracespan_InstanceMsg";
+    }
   ];
 }

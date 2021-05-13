@@ -1,7 +1,6 @@
 { config, lib, pkgs, kubenix, images, ... }:
 
 with lib;
-
 let
   cfg = config.kubernetes.api.resources.deployments.nginx;
   image = images.nginx;
@@ -16,12 +15,13 @@ let
     spec.containers = [{
       name = "curl";
       image = config.docker.images.curl.path;
-      args = ["curl" "--retry" "20" "--retry-connrefused" "http://nginx"];
+      args = [ "curl" "--retry" "20" "--retry-connrefused" "http://nginx" ];
     }];
     spec.restartPolicy = "Never";
   });
 
-in {
+in
+{
   imports = [ kubenix.modules.test kubenix.modules.k8s kubenix.modules.docker ];
 
   test = {
@@ -35,13 +35,15 @@ in {
         else if ((builtins.compareVersions config.kubernetes.version "1.8") <= 0)
         then cfg.apiVersion == "apps/v1beta2"
         else cfg.apiVersion == "apps/v1";
-    } {
-      message = "should have corrent kind set";
-      assertion = cfg.kind == "Deployment";
-    } {
-      message = "should have replicas set";
-      assertion = cfg.spec.replicas == 3;
-    }];
+    }
+      {
+        message = "should have corrent kind set";
+        assertion = cfg.kind == "Deployment";
+      }
+      {
+        message = "should have replicas set";
+        assertion = cfg.spec.replicas == 3;
+      }];
     script = ''
       import time
 

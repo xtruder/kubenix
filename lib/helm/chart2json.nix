@@ -13,19 +13,22 @@ with lib;
 , namespace ? null
 
   # values to pass to chart
-, values ? {}
+, values ? { }
 
   # kubernetes version to template chart for
-, kubeVersion ? null }: let
+, kubeVersion ? null
+}:
+let
   valuesJsonFile = builtins.toFile "${name}-values.json" (builtins.toJSON values);
-in stdenvNoCC.mkDerivation {
+in
+stdenvNoCC.mkDerivation {
   name = "${name}.json";
   buildCommand = ''
     # template helm file and write resources to yaml
     helm template "${name}" \
       ${optionalString (kubeVersion != null) "--api-versions ${kubeVersion}"} \
       ${optionalString (namespace != null) "--namespace ${namespace}"} \
-      ${optionalString (values != {}) "-f ${valuesJsonFile}"} \
+      ${optionalString (values != { }) "-f ${valuesJsonFile}"} \
       ${chart} >resources.yaml
 
     # split multy yaml file into multiple files

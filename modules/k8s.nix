@@ -3,19 +3,20 @@
 { options, config, lib, pkgs, k8s, ... }:
 
 with lib;
-
 let
   cfg = config.kubernetes;
 
   gvkKeyFn = type: "${type.group}/${type.version}/${type.kind}";
 
   getDefaults = resource: group: version: kind:
-    catAttrs "default" (filter (default:
-      (resource == null || default.resource == null || default.resource == resource) &&
-      (default.group == null || default.group == group) &&
-      (default.version == null || default.version == version) &&
-      (default.kind == null || default.kind == kind)
-    ) cfg.api.defaults);
+    catAttrs "default" (filter
+      (default:
+        (resource == null || default.resource == null || default.resource == resource) &&
+        (default.group == null || default.group == group) &&
+        (default.version == null || default.version == version) &&
+        (default.kind == null || default.kind == kind)
+      )
+      cfg.api.defaults);
 
   moduleToAttrs = value:
     if isAttrs value
@@ -34,7 +35,7 @@ let
 
       defaults = mkOption {
         description = "Kubernetes defaults to apply to resources";
-        type = types.listOf (types.submodule ({config, ...}: {
+        type = types.listOf (types.submodule ({ config, ... }: {
           options = {
             group = mkOption {
               description = "Group to apply default to (all by default)";
@@ -69,45 +70,47 @@ let
             default = mkOption {
               description = "Default to apply";
               type = types.unspecified;
-              default = {};
+              default = { };
             };
           };
         }));
-        default = [];
+        default = [ ];
         apply = unique;
       };
 
       types = mkOption {
         description = "List of registered kubernetes types";
-        type = coerceListOfSubmodulesToAttrs {
-          options = {
-            group = mkOption {
-              description = "Resource type group";
-              type = types.str;
-            };
+        type = coerceListOfSubmodulesToAttrs
+          {
+            options = {
+              group = mkOption {
+                description = "Resource type group";
+                type = types.str;
+              };
 
-            version = mkOption {
-              description = "Resoruce type version";
-              type = types.str;
-            };
+              version = mkOption {
+                description = "Resoruce type version";
+                type = types.str;
+              };
 
-            kind = mkOption {
-              description = "Resource type kind";
-              type = types.str;
-            };
+              kind = mkOption {
+                description = "Resource type kind";
+                type = types.str;
+              };
 
-            name = mkOption {
-              description = "Resource type name";
-              type = types.nullOr types.str;
-            };
+              name = mkOption {
+                description = "Resource type name";
+                type = types.nullOr types.str;
+              };
 
-            attrName = mkOption {
-              description = "Name of the nixified attribute";
-              type = types.str;
+              attrName = mkOption {
+                description = "Name of the nixified attribute";
+                type = types.str;
+              };
             };
-          };
-        } gvkKeyFn;
-        default = {};
+          }
+          gvkKeyFn;
+        default = { };
       };
     };
 
@@ -120,24 +123,32 @@ let
   indexOf = lst: value:
     head (filter (v: v != -1) (imap0 (i: v: if v == value then i else -1) lst));
 
-  compareVersions = ver1: ver2: let
-    getVersion = v: substring 1 10 v;
-    splittedVer1 = builtins.splitVersion (getVersion ver1);
-    splittedVer2 = builtins.splitVersion (getVersion ver2);
+  compareVersions = ver1: ver2:
+    let
+      getVersion = v: substring 1 10 v;
+      splittedVer1 = builtins.splitVersion (getVersion ver1);
+      splittedVer2 = builtins.splitVersion (getVersion ver2);
 
-    v1 = if length splittedVer1 == 1 then "${getVersion ver1}prod" else getVersion ver1;
-    v2 = if length splittedVer2 == 1 then "${getVersion ver2}prod" else getVersion ver2;
-  in builtins.compareVersions v1 v2;
+      v1 = if length splittedVer1 == 1 then "${getVersion ver1}prod" else getVersion ver1;
+      v2 = if length splittedVer2 == 1 then "${getVersion ver2}prod" else getVersion ver2;
+    in
+    builtins.compareVersions v1 v2;
 
-  customResourceTypesByAttrName = zipAttrs (mapAttrsToList (_: resourceType: {
-    ${resourceType.attrName} = resourceType;
-  }) cfg.customTypes);
+  customResourceTypesByAttrName = zipAttrs (mapAttrsToList
+    (_: resourceType: {
+      ${resourceType.attrName} = resourceType;
+    })
+    cfg.customTypes);
 
-  customResourceTypesByAttrNameSortByVersion = mapAttrs (_: resourceTypes:
-    reverseList (sort (r1: r2:
-      compareVersions r1.version r2.version > 0
-    ) resourceTypes)
-  ) customResourceTypesByAttrName;
+  customResourceTypesByAttrNameSortByVersion = mapAttrs
+    (_: resourceTypes:
+      reverseList (sort
+        (r1: r2:
+          compareVersions r1.version r2.version > 0
+        )
+        resourceTypes)
+    )
+    customResourceTypesByAttrName;
 
   latestCustomResourceTypes =
     mapAttrsToList (_: resources: last resources) customResourceTypesByAttrNameSortByVersion;
@@ -163,7 +174,7 @@ let
       spec = mkOption {
         description = "Module spec";
         type = types.either types.attrs (types.submodule ct.module);
-        default = {};
+        default = { };
       };
     };
 
@@ -174,34 +185,43 @@ let
     };
   };
 
-  customResourceOptions = (mapAttrsToList (_: ct: {config, ...}: let
-    module = customResourceModuleForType config ct;
-  in {
-    options.resources.${ct.group}.${ct.version}.${ct.kind} = mkOption {
-      description = ct.description;
-      type = types.attrsOf (types.submodule module);
-      default = {};
-    };
-  }) cfg.customTypes) ++ (map (ct: { options, config, ... }: let
-    module = customResourceModuleForType config ct;
-  in {
-    options.resources.${ct.attrName} = mkOption {
-      description = ct.description;
-      type = types.attrsOf (types.submodule module);
-      default = {};
-    };
+  customResourceOptions = (mapAttrsToList
+    (_: ct: { config, ... }:
+      let
+        module = customResourceModuleForType config ct;
+      in
+      {
+        options.resources.${ct.group}.${ct.version}.${ct.kind} = mkOption {
+          description = ct.description;
+          type = types.attrsOf (types.submodule module);
+          default = { };
+        };
+      })
+    cfg.customTypes) ++ (map
+    (ct: { options, config, ... }:
+      let
+        module = customResourceModuleForType config ct;
+      in
+      {
+        options.resources.${ct.attrName} = mkOption {
+          description = ct.description;
+          type = types.attrsOf (types.submodule module);
+          default = { };
+        };
 
-    config.resources.${ct.group}.${ct.version}.${ct.kind} =
-      mkAliasDefinitions options.resources.${ct.attrName};
-  }) latestCustomResourceTypes);
+        config.resources.${ct.group}.${ct.version}.${ct.kind} =
+          mkAliasDefinitions options.resources.${ct.attrName};
+      })
+    latestCustomResourceTypes);
 
-in {
+in
+{
   imports = [ ./base.nix ];
 
   options.kubernetes = {
     version = mkOption {
       description = "Kubernetes version to use";
-      type = types.enum ["1.19" "1.20" "1.21"];
+      type = types.enum [ "1.19" "1.20" "1.21" ];
       default = "1.21";
     };
 
@@ -227,76 +247,80 @@ in {
           apiOptions
         ] ++ customResourceOptions;
       };
-      default = {};
+      default = { };
     };
 
     imports = mkOption {
       type = types.listOf (types.either types.package types.path);
       description = "List of resources to import";
-      default = [];
+      default = [ ];
     };
 
     resources = mkOption {
       description = "Alias for `config.kubernetes.api.resources` options";
-      default = {};
+      default = { };
       type = types.attrsOf types.attrs;
     };
 
     customTypes = mkOption {
       description = "List of custom resource types to make API for";
-      type = coerceListOfSubmodulesToAttrs {
-        options = {
-          group = mkOption {
-            description = "Custom type group";
-            type = types.str;
-          };
+      type = coerceListOfSubmodulesToAttrs
+        {
+          options = {
+            group = mkOption {
+              description = "Custom type group";
+              type = types.str;
+            };
 
-          version = mkOption {
-            description = "Custom type version";
-            type = types.str;
-          };
+            version = mkOption {
+              description = "Custom type version";
+              type = types.str;
+            };
 
-          kind = mkOption {
-            description = "Custom type kind";
-            type = types.str;
-          };
+            kind = mkOption {
+              description = "Custom type kind";
+              type = types.str;
+            };
 
-          name = mkOption {
-            description = "Custom type resource name";
-            type = types.nullOr types.str;
-            default = null;
-          };
+            name = mkOption {
+              description = "Custom type resource name";
+              type = types.nullOr types.str;
+              default = null;
+            };
 
-          attrName = mkOption {
-            description = "Name of the nixified attribute";
-            type = types.str;
-          };
+            attrName = mkOption {
+              description = "Name of the nixified attribute";
+              type = types.str;
+            };
 
-          description = mkOption {
-            description = "Custom type description";
-            type = types.str;
-            default = "";
-          };
+            description = mkOption {
+              description = "Custom type description";
+              type = types.str;
+              default = "";
+            };
 
-          module = mkOption {
-            description = "Custom type module";
-            type = types.unspecified;
-            default = {};
+            module = mkOption {
+              description = "Custom type module";
+              type = types.unspecified;
+              default = { };
+            };
           };
-        };
-      } gvkKeyFn;
-      default = {};
+        }
+        gvkKeyFn;
+      default = { };
     };
 
     objects = mkOption {
       description = "List of generated kubernetes objects";
       type = types.listOf types.attrs;
-      apply = items: sort (r1: r2:
-        if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
-        then indexOf cfg.resourceOrder r1.kind < indexOf cfg.resourceOrder r2.kind
-        else if elem r1.kind cfg.resourceOrder then true else false
-      ) (unique items);
-      default = [];
+      apply = items: sort
+        (r1: r2:
+          if elem r1.kind cfg.resourceOrder && elem r2.kind cfg.resourceOrder
+          then indexOf cfg.resourceOrder r1.kind < indexOf cfg.resourceOrder r2.kind
+          else if elem r1.kind cfg.resourceOrder then true else false
+        )
+        (unique items);
+      default = [ ];
     };
 
     generated = mkOption {
@@ -321,41 +345,44 @@ in {
 
     # module propagation options
     _m.propagate = [{
-      features = ["k8s"];
+      features = [ "k8s" ];
       module = { config, ... }: {
         # propagate kubernetes version and namespace
         kubernetes.version = mkDefault cfg.version;
         kubernetes.namespace = mkDefault cfg.namespace;
       };
-    } {
-      features = ["k8s" "submodule"];
-      module = { config, ... }: {
-        # set module defaults
-        kubernetes.api.defaults = (
-          # propagate defaults if default propagation is enabled
-          (filter (default: default.propagate) cfg.api.defaults) ++
+    }
+      {
+        features = [ "k8s" "submodule" ];
+        module = { config, ... }: {
+          # set module defaults
+          kubernetes.api.defaults = (
+            # propagate defaults if default propagation is enabled
+            (filter (default: default.propagate) cfg.api.defaults) ++
 
-          [
-            # set module name and version for all kuberentes resources
-            {
-              default.metadata.labels = {
-                "kubenix/module-name" = config.submodule.name;
-                "kubenix/module-version" = config.submodule.version;
-              };
-            }
-          ]
-        );
-      };
-    }];
+            [
+              # set module name and version for all kuberentes resources
+              {
+                default.metadata.labels = {
+                  "kubenix/module-name" = config.submodule.name;
+                  "kubenix/module-version" = config.submodule.version;
+                };
+              }
+            ]
+          );
+        };
+      }];
 
     # expose k8s helper methods as module argument
     _module.args.k8s = import ../lib/k8s.nix { inherit lib; };
 
     kubernetes.api = mkMerge ([{
       # register custom types
-      types = mapAttrsToList (_: cr: {
-        inherit (cr) name group version kind attrName;
-      }) cfg.customTypes;
+      types = mapAttrsToList
+        (_: cr: {
+          inherit (cr) name group version kind attrName;
+        })
+        cfg.customTypes;
 
       defaults = [{
         default = {
@@ -373,24 +400,30 @@ in {
     }] ++
 
     # import of yaml files
-    (map (i: let
-      # load yaml file
-      object = loadYAML i;
-      groupVersion = splitString "/" object.apiVersion;
-      name = object.metadata.name;
-      version = last groupVersion;
-      group =
-        if version == (head groupVersion)
-        then "core" else head groupVersion;
-      kind = object.kind;
-    in {
-      resources.${group}.${version}.${kind}.${name} = object;
-    }) cfg.imports));
+    (map
+      (i:
+        let
+          # load yaml file
+          object = loadYAML i;
+          groupVersion = splitString "/" object.apiVersion;
+          name = object.metadata.name;
+          version = last groupVersion;
+          group =
+            if version == (head groupVersion)
+            then "core" else head groupVersion;
+          kind = object.kind;
+        in
+        {
+          resources.${group}.${version}.${kind}.${name} = object;
+        })
+      cfg.imports));
 
-    kubernetes.objects = flatten (mapAttrsToList (_: type:
-      mapAttrsToList (name: resource: moduleToAttrs resource)
-        cfg.api.resources.${type.group}.${type.version}.${type.kind}
-    ) cfg.api.types);
+    kubernetes.objects = flatten (mapAttrsToList
+      (_: type:
+        mapAttrsToList (name: resource: moduleToAttrs resource)
+          cfg.api.resources.${type.group}.${type.version}.${type.kind}
+      )
+      cfg.api.types);
 
     kubernetes.generated = k8s.mkHashedList {
       items = config.kubernetes.objects;

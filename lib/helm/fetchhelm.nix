@@ -1,9 +1,9 @@
 { stdenvNoCC, lib, kubernetes-helm, cacert }:
-
 let
-  cleanName = name: lib.replaceStrings ["/"] ["-"] name;
+  cleanName = name: lib.replaceStrings [ "/" ] [ "-" ] name;
 
-in {
+in
+{
   # name of the chart
   chart
 
@@ -13,20 +13,21 @@ in {
   # version of the chart
 , version ? null
 
-# chart hash
+  # chart hash
 , sha256
 
-# whether to extract chart
+  # whether to extract chart
 , untar ? true
 
-# use custom charts repo
+  # use custom charts repo
 , repo ? null
 
-# pass --verify to helm chart
+  # pass --verify to helm chart
 , verify ? false
 
-# pass --devel to helm chart
-, devel ? false }: stdenvNoCC.mkDerivation {
+  # pass --devel to helm chart
+, devel ? false
+}: stdenvNoCC.mkDerivation {
   name = "${cleanName chart}-${if version == null then "dev" else version}";
 
   buildCommand = ''

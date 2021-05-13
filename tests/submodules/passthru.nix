@@ -1,7 +1,6 @@
 { name, config, lib, kubenix, ... }:
 
 with lib;
-
 let
   submodule = { name, ... }: {
     imports = [ kubenix.modules.submodule ];
@@ -11,14 +10,15 @@ let
       passthru.global.${name} = "true";
     };
   };
-in {
+in
+{
   imports = with kubenix.modules; [ test submodules ];
 
   options = {
     global = mkOption {
       description = "Global value";
       type = types.attrs;
-      default = {};
+      default = { };
     };
   };
 
@@ -29,17 +29,19 @@ in {
       assertions = [{
         message = "should passthru values if passthru enabled";
         assertion = hasAttr "inst1" config.global && config.global.inst1 == "true";
-      } {
-        message = "should not passthru values if passthru not enabled";
-        assertion = !(hasAttr "inst2" config.global);
-      } {
-        message = "should passthru by default";
-        assertion = hasAttr "inst3" config.global && config.global.inst3 == "true";
-      }];
+      }
+        {
+          message = "should not passthru values if passthru not enabled";
+          assertion = !(hasAttr "inst2" config.global);
+        }
+        {
+          message = "should passthru by default";
+          assertion = hasAttr "inst3" config.global && config.global.inst3 == "true";
+        }];
     };
 
     submodules.imports = [{
-      modules = [submodule];
+      modules = [ submodule ];
     }];
 
     submodules.instances.inst1 = {

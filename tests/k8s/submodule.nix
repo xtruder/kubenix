@@ -1,10 +1,10 @@
 { name, config, lib, kubenix, images, ... }:
 
 with lib;
-
 let
   cfg = config.submodules.instances.passthru;
-in {
+in
+{
   imports = with kubenix.modules; [ test submodules k8s docker ];
 
   test = {
@@ -13,16 +13,17 @@ in {
     assertions = [{
       message = "Submodule has correct name set";
       assertion = (head config.kubernetes.objects).metadata.name == "passthru";
-    } {
-      message = "Should expose docker image";
-      assertion = (head config.docker.export).imageName == "xtruder/nginx";
-    }];
+    }
+      {
+        message = "Should expose docker image";
+        assertion = (head config.docker.export).imageName == "xtruder/nginx";
+      }];
   };
 
   kubernetes.namespace = "test-namespace";
 
   submodules.imports = [{
-    module = {name, config, ...}: {
+    module = { name, config, ... }: {
       imports = with kubenix.modules; [ submodule k8s docker ];
 
       config = {

@@ -1,7 +1,6 @@
 { lib, config, testing, kubenix, ... }:
 
 with lib;
-
 let
   modules = [
     # testing module
@@ -36,25 +35,29 @@ let
 
   # defaults that can be applied on tests
   defaults =
-    filter (d:
-      (intersectLists d.features testFeatures) == d.features ||
-      (length d.features) == 0
-    ) testing.defaults;
+    filter
+      (d:
+        (intersectLists d.features testFeatures) == d.features ||
+        (length d.features) == 0
+      )
+      testing.defaults;
 
   # add default modules to all modules
   modulesWithDefaults = modules ++ (map (d: d.default) defaults);
 
   # evaled test
-  evaled = let
-    evaled' = kubenix.evalModules {
-      modules = modulesWithDefaults;
-    };
-  in
+  evaled =
+    let
+      evaled' = kubenix.evalModules {
+        modules = modulesWithDefaults;
+      };
+    in
     if testing.throwError then evaled'
     else if (builtins.tryEval evaled'.config.test.assertions).success
     then evaled' else null;
 
-in {
+in
+{
   options = {
     module = mkOption {
       description = "Module defining kubenix test";
@@ -97,7 +100,7 @@ in {
       description = "Test result";
       type = types.unspecified;
       internal = true;
-      default = [];
+      default = [ ];
     };
 
     script = mkOption {

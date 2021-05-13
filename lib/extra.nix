@@ -21,31 +21,39 @@ rec {
 
     else mkOverride priority value;
 
-  loadYAML = path: importJSON (pkgs.runCommand "yaml-to-json" {
-  } "${pkgs.remarshal}/bin/remarshal -i ${path} -if yaml -of json > $out");
+  loadYAML = path: importJSON (pkgs.runCommand "yaml-to-json"
+    { } "${pkgs.remarshal}/bin/remarshal -i ${path} -if yaml -of json > $out");
 
-  toYAML = config: builtins.readFile (pkgs.runCommand "to-yaml" {
-    buildInputs = [pkgs.remarshal];
-  } ''
+  toYAML = config: builtins.readFile (pkgs.runCommand "to-yaml"
+    {
+      buildInputs = [ pkgs.remarshal ];
+    } ''
     remarshal -i ${pkgs.writeText "to-json" (builtins.toJSON config)} -if json -of yaml > $out
   '');
 
-  toMultiDocumentYaml = name: documents: pkgs.runCommand name {
-    buildInputs = [ pkgs.remarshal ];
-  } (concatMapStringsSep "\necho --- >> $out\n" (d:
-    "remarshal -i ${builtins.toFile "doc" (builtins.toJSON d)} -if json -of yaml >> $out"
-  ) documents);
+  toMultiDocumentYaml = name: documents: pkgs.runCommand name
+    {
+      buildInputs = [ pkgs.remarshal ];
+    }
+    (concatMapStringsSep "\necho --- >> $out\n"
+      (d:
+        "remarshal -i ${builtins.toFile "doc" (builtins.toJSON d)} -if json -of yaml >> $out"
+      )
+      documents);
 
   toBase64 = value:
     builtins.readFile
-      (pkgs.runCommand "value-to-b64" {} "echo -n '${value}' | ${pkgs.coreutils}/bin/base64 -w0 > $out");
+      (pkgs.runCommand "value-to-b64" { } "echo -n '${value}' | ${pkgs.coreutils}/bin/base64 -w0 > $out");
 
   exp = base: exp: foldr (value: acc: acc * base) 1 (range 1 exp);
 
-  octalToDecimal = value: (foldr (char: acc: {
-    i = acc.i + 1;
-    value = acc.value + (toInt char) * (exp 8 acc.i);
-  }) {i = 0; value = 0;} (stringToCharacters value)).value;
+  octalToDecimal = value: (foldr
+    (char: acc: {
+      i = acc.i + 1;
+      value = acc.value + (toInt char) * (exp 8 acc.i);
+    })
+    { i = 0; value = 0; }
+    (stringToCharacters value)).value;
 
   submoduleWithSpecialArgs = opts: specialArgs:
     let
@@ -58,13 +66,15 @@ rec {
       merge = loc: defs:
         let
           coerce = def: if isFunction def then def else { config = def; };
-          modules = opts' ++ map (def: { _file = def.file; imports = [(coerce def.value)]; }) defs;
-        in (evalModules {
+          modules = opts' ++ map (def: { _file = def.file; imports = [ (coerce def.value) ]; }) defs;
+        in
+        (evalModules {
           inherit modules specialArgs;
           prefix = loc;
         }).config;
       getSubOptions = prefix: (evalModules
-        { modules = opts'; inherit prefix specialArgs;
+        {
+          modules = opts'; inherit prefix specialArgs;
           # This is a work-around due to the fact that some sub-modules,
           # such as the one included in an attribute set, expects a "args"
           # attribute to be given to the sub-module. As the option
@@ -87,16 +97,19 @@ rec {
       functor = (defaultFunctor name) // {
         # Merging of submodules is done as part of mergeOptionDecls, as we have to annotate
         # each submodule with its location.
-        payload = [];
-        binOp = lhs: rhs: [];
+        payload = [ ];
+        binOp = lhs: rhs: [ ];
       };
     };
 
-    coerceListOfSubmodulesToAttrs = submodule: keyFn: let
+  coerceListOfSubmodulesToAttrs = submodule: keyFn:
+    let
       mergeValuesByFn = keyFn: values:
-        listToAttrs (map (value:
-          nameValuePair (toString (keyFn value)) value
-        ) values);
+        listToAttrs (map
+          (value:
+            nameValuePair (toString (keyFn value)) value
+          )
+          values);
 
       # Either value of type `finalType` or `coercedType`, the latter is
       # converted to `finalType` using `coerceFunc`.
@@ -113,14 +126,16 @@ rec {
                 else
                   let coerced = coerceFunc val; in assert finalType.check coerced; coerced;
 
-            in finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
+            in
+            finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
           getSubOptions = finalType.getSubOptions;
           getSubModules = finalType.getSubModules;
           substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
           typeMerge = t1: t2: null;
           functor = (defaultFunctor name) // { wrapped = finalType; };
         };
-    in coercedTo
+    in
+    coercedTo
       (types.listOf (types.submodule submodule))
       (mergeValuesByFn keyFn)
       (types.attrsOf (types.submodule submodule));

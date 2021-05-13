@@ -4,7 +4,7 @@ with lib;
 
 rec {
   # TODO: refactor with mkOptionType
-  mkSecretOption = {description ? "", default ? {}, allowNull ? true}: mkOption {
+  mkSecretOption = { description ? "", default ? { }, allowNull ? true }: mkOption {
     inherit description;
     type = (if allowNull then types.nullOr else id) (types.submodule {
       options = {
@@ -24,7 +24,7 @@ rec {
         }));
       };
     });
-    default = if default == null then null else {};
+    default = if default == null then null else { };
   };
 
   secretToEnv = value: {
@@ -34,7 +34,7 @@ rec {
   };
 
   # Creates kubernetes list from a list of kubernetes objects
-  mkList = { items, labels ? {} }: {
+  mkList = { items, labels ? { } }: {
     kind = "List";
     apiVersion = "v1";
 
@@ -42,19 +42,23 @@ rec {
   };
 
   # Creates hashed kubernetes list from a list of kubernetes objects
-  mkHashedList = { items, labels ? {} }: let
-    hash = builtins.hashString "sha1" (builtins.toJSON items);
+  mkHashedList = { items, labels ? { } }:
+    let
+      hash = builtins.hashString "sha1" (builtins.toJSON items);
 
-    labeledItems = map (item: recursiveUpdate item {
-      metadata.labels."kubenix/hash" = hash;
-    }) items;
+      labeledItems = map
+        (item: recursiveUpdate item {
+          metadata.labels."kubenix/hash" = hash;
+        })
+        items;
 
-  in mkList {
-    items = labeledItems;
-    labels = {
-      "kubenix/hash" = hash;
-    } // labels;
-  };
+    in
+    mkList {
+      items = labeledItems;
+      labels = {
+        "kubenix/hash" = hash;
+      } // labels;
+    };
 
   toBase64 = lib.toBase64;
   octalToDecimal = lib.octalToDecimal;

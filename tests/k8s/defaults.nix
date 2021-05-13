@@ -1,11 +1,11 @@
 { config, lib, kubenix, ... }:
 
 with lib;
-
 let
   pod1 = config.kubernetes.api.resources.pods.pod1;
   pod2 = config.kubernetes.api.resources.pods.pod2;
-in {
+in
+{
   imports = with kubenix.modules; [ test k8s ];
 
   test = {
@@ -14,16 +14,18 @@ in {
     assertions = [{
       message = "Should have label set with resource";
       assertion = pod1.metadata.labels.resource-label == "value";
-    } {
-      message = "Should have default label set with group, version, kind";
-      assertion = pod1.metadata.labels.gvk-label == "value";
-    } {
-      message = "Should have conditional annotation set";
-      assertion = pod2.metadata.annotations.conditional-annotation == "value";
-    }];
+    }
+      {
+        message = "Should have default label set with group, version, kind";
+        assertion = pod1.metadata.labels.gvk-label == "value";
+      }
+      {
+        message = "Should have conditional annotation set";
+        assertion = pod2.metadata.annotations.conditional-annotation == "value";
+      }];
   };
 
-  kubernetes.resources.pods.pod1 = {};
+  kubernetes.resources.pods.pod1 = { };
 
   kubernetes.resources.pods.pod2 = {
     metadata.labels.custom-label = "value";
@@ -32,17 +34,19 @@ in {
   kubernetes.api.defaults = [{
     resource = "pods";
     default.metadata.labels.resource-label = "value";
-  } {
-    group = "core";
-    kind = "Pod";
-    version = "v1";
-    default.metadata.labels.gvk-label = "value";
-  } {
-    resource = "pods";
-    default = { config, ... }: {
-      config.metadata.annotations = mkIf (config.metadata.labels ? "custom-label") {
-        conditional-annotation = "value";
+  }
+    {
+      group = "core";
+      kind = "Pod";
+      version = "v1";
+      default.metadata.labels.gvk-label = "value";
+    }
+    {
+      resource = "pods";
+      default = { config, ... }: {
+        config.metadata.annotations = mkIf (config.metadata.labels ? "custom-label") {
+          conditional-annotation = "value";
+        };
       };
-    };
-  }];
+    }];
 }

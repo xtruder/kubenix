@@ -1,10 +1,10 @@
 { config, lib, kubenix, pkgs, ... }:
 
 with lib;
-
 let
   cfg = config.kubernetes.api.resources.customResourceDefinitions.crontabs;
-in {
+in
+{
   imports = with kubenix.modules; [ test k8s ];
 
   test = {
@@ -34,7 +34,7 @@ in {
         plural = "crontabs";
         singular = "crontab";
         kind = "CronTab";
-        shortNames = ["ct"];
+        shortNames = [ "ct" ];
       };
     };
   };
@@ -55,7 +55,7 @@ in {
     };
   }];
 
-  kubernetes.resources.namespaces.test = {};
+  kubernetes.resources.namespaces.test = { };
 
   kubernetes.resources."stable.example.com"."v1".CronTab.crontab.spec.schedule = "* * * * *";
 }

@@ -1,11 +1,11 @@
 { name, config, lib, kubenix, images, ... }:
 
 with lib;
-
 let
   cfg = config.submodules.instances.test.config;
   deployment = cfg.kubernetes.api.deployments.nginx;
-in {
+in
+{
   imports = [ kubenix.modules.test kubenix.module ];
 
   test = {
@@ -14,13 +14,15 @@ in {
     assertions = [{
       message = "Namespace not propagated";
       assertion = deployment.metadata.namespace == "test";
-    } {
-      message = "Version not propagated";
-      assertion = cfg.kubernetes.version == config.kubernetes.version;
-    } {
-      message = "docker image should be added to exported images";
-      assertion = (head config.docker.export) == images.nginx;
-    }];
+    }
+      {
+        message = "Version not propagated";
+        assertion = cfg.kubernetes.version == config.kubernetes.version;
+      }
+      {
+        message = "docker image should be added to exported images";
+        assertion = (head config.docker.export) == images.nginx;
+      }];
     testScript = ''
       kube.wait_until_succeeds("docker load < ${images.nginx}")
       kube.wait_until_succeeds("kubectl apply -f ${config.kubernetes.result}")
@@ -31,7 +33,7 @@ in {
   };
 
   submodules.imports = [{
-    module = {name, config, ...}: {
+    module = { name, config, ... }: {
       submodule.name = "nginx";
       kubernetes.api.deployments.nginx = {
         metadata = {
@@ -55,7 +57,7 @@ in {
     };
   }];
 
-  kubernetes.api.namespaces.test = {};
+  kubernetes.api.namespaces.test = { };
 
   submodules.instances.test = {
     submodule = "nginx";

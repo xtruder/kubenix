@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {}
+{ pkgs ? import <nixpkgs> { }
 , lib ? pkgs.lib
 , kubenix ? import ../. { inherit pkgs lib; }
 
@@ -7,12 +7,12 @@
 , k8sVersion ? "1.21"
 , registryUrl ? throw "Registry url not defined"
 , throwError ? true # whether any testing error should throw an error
-, enabledTests ? null }:
+, enabledTests ? null
+}:
 
 with lib;
-
 let
-  images = pkgs.callPackage ./images.nix {};
+  images = pkgs.callPackage ./images.nix { };
 
   config = (kubenix.evalModules {
     modules = [
@@ -34,7 +34,7 @@ let
             #./legacy/k8s.nix
             #./legacy/crd.nix
             #./legacy/modules.nix
-            ./helm/simple.nix
+            # ./helm/simple.nix
             #  ./istio/bookinfo.nix # infinite recursion
             ./submodules/simple.nix
             ./submodules/defaults.nix
@@ -48,7 +48,7 @@ let
           docker.registryUrl = registryUrl;
           defaults = [
             {
-              features = ["k8s"];
+              features = [ "k8s" ];
               default = {
                 kubernetes.version = k8sVersion;
               };
@@ -64,4 +64,5 @@ let
       inherit kubenix nixosPath;
     };
   }).config;
-in pkgs.recurseIntoAttrs config.testing
+in
+pkgs.recurseIntoAttrs config.testing

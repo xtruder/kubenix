@@ -9,7 +9,6 @@
 }:
 
 with lib;
-
 let
   testing = config.testing;
   kubeconfig = "/etc/${config.services.kubernetes.pki.etcClusterAdminKubeconfig}";

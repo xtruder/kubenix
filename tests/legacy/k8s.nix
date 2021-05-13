@@ -1,10 +1,10 @@
 { config, lib, kubenix, pkgs, ... }:
 
 with lib;
-
 let
   cfg = config.kubernetes.api.resources.deployments.app;
-in {
+in
+{
   imports = with kubenix.modules; [ test k8s legacy ];
 
   test = {
@@ -15,13 +15,14 @@ in {
       assertion =
         cfg.kind == "Deployment" &&
         cfg.metadata.name == "app";
-    } {
-      message = "should have correct defaults set";
-      assertion =
-        cfg.metadata.namespace == "test" &&
-        cfg.metadata.labels.label1 == "value1" &&
-        cfg.metadata.labels.label2 == "value2";
-    }];
+    }
+      {
+        message = "should have correct defaults set";
+        assertion =
+          cfg.metadata.namespace == "test" &&
+          cfg.metadata.labels.label1 == "value1" &&
+          cfg.metadata.labels.label2 == "value2";
+      }];
   };
 
   kubernetes.resources.deployments.app = {
@@ -39,7 +40,7 @@ in {
   };
 
   kubernetes.resources.configMaps.app = {
-    data."my-conf.json" = builtins.toJSON {};
+    data."my-conf.json" = builtins.toJSON { };
   };
 
   kubernetes.defaults = {

@@ -18,25 +18,28 @@
             name = "http";
             protocol = "HTTP";
           };
-          hosts = ["*"];
+          hosts = [ "*" ];
         }];
       };
     };
 
     VirtualService.bookinfo = {
       spec = {
-        hosts = ["*"];
-        gateways = ["bookinfo-gateway"];
+        hosts = [ "*" ];
+        gateways = [ "bookinfo-gateway" ];
         http = [{
           match = [{
             uri.exact = "/productpage";
-          } {
-            uri.exact = "/login";
-          } {
-            uri.exact = "/logout";
-          } {
-            uri.prefix = "/api/v1/products";
-          }];
+          }
+            {
+              uri.exact = "/login";
+            }
+            {
+              uri.exact = "/logout";
+            }
+            {
+              uri.prefix = "/api/v1/products";
+            }];
           route = [{
             destination = {
               host = "productpage";
@@ -63,13 +66,15 @@
         subsets = [{
           name = "v1";
           labels.version = "v1";
-        } {
-          name = "v2";
-          labels.version = "v2";
-        } {
-          name = "v3";
-          labels.version = "v3";
-        }];
+        }
+          {
+            name = "v2";
+            labels.version = "v2";
+          }
+          {
+            name = "v3";
+            labels.version = "v3";
+          }];
       };
     };
 
@@ -79,16 +84,19 @@
         subsets = [{
           name = "v1";
           labels.version = "v1";
-        } {
-          name = "v2";
-          labels.version = "v2";
-        } {
-          name = "v2-mysql";
-          labels.version = "v2-mysql";
-        } {
-          name = "v2-mysql-vm";
-          labels.version = "v2-mysql-vm";
-        }];
+        }
+          {
+            name = "v2";
+            labels.version = "v2";
+          }
+          {
+            name = "v2-mysql";
+            labels.version = "v2-mysql";
+          }
+          {
+            name = "v2-mysql-vm";
+            labels.version = "v2-mysql-vm";
+          }];
       };
     };
 
@@ -98,10 +106,11 @@
         subsets = [{
           name = "v1";
           labels.version = "v1";
-        } {
-          name = "v2";
-          labels.version = "v2";
-        }];
+        }
+          {
+            name = "v2";
+            labels.version = "v2";
+          }];
       };
     };
   };

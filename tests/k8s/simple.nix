@@ -1,8 +1,8 @@
 { config, kubenix, ... }:
-
 let
   cfg = config.kubernetes.api.resources.pods.nginx;
-in {
+in
+{
   imports = [ kubenix.modules.test kubenix.modules.k8s ];
 
   test = {
@@ -11,11 +11,12 @@ in {
     assertions = [{
       message = "should have apiVersion and kind set";
       assertion = cfg.apiVersion == "v1" && cfg.kind == "Pod";
-    } {
-      message = "should have name set";
-      assertion = cfg.metadata.name == "nginx";
-    }];
+    }
+      {
+        message = "should have name set";
+        assertion = cfg.metadata.name == "nginx";
+      }];
   };
 
-  kubernetes.resources.pods.nginx = {};
+  kubernetes.resources.pods.nginx = { };
 }

@@ -1,16 +1,18 @@
 { options, config, lib, kubenix, pkgs, ... }:
 
 with lib;
-
 let
-  findObject = { kind, name }: filter (object:
-    object.kind == kind && object.metadata.name == name
-  ) config.kubernetes.objects;
+  findObject = { kind, name }: filter
+    (object:
+      object.kind == kind && object.metadata.name == name
+    )
+    config.kubernetes.objects;
 
   getObject = filter: head (findObject filter);
 
   hasObject = { kind, name }: length (findObject { inherit kind name; }) == 1;
-in {
+in
+{
   imports = with kubenix.modules; [ test k8s legacy ];
 
   test = {
@@ -20,12 +22,13 @@ in {
     assertions = [{
       message = "should define crd in module";
       assertion =
-        hasObject {kind = "SecretClaim"; name = "module-claim";};
-    } {
-      message = "should define crd in root";
-      assertion =
-        hasObject {kind = "SecretClaim"; name = "root-claim";};
-    }];
+        hasObject { kind = "SecretClaim"; name = "module-claim"; };
+    }
+      {
+        message = "should define crd in root";
+        assertion =
+          hasObject { kind = "SecretClaim"; name = "root-claim"; };
+      }];
   };
 
   kubernetes.namespace = "test";
@@ -40,7 +43,7 @@ in {
 
       type = mkOption {
         description = "Type of the secret";
-        type = types.enum ["Opaque" "kubernetes.io/tls"];
+        type = types.enum [ "Opaque" "kubernetes.io/tls" ];
         default = "Opaque";
       };
 
@@ -62,7 +65,7 @@ in {
       };
     };
 
-		config = {
+    config = {
       kubernetes.resources.customResourceDefinitions.secret-claims = {
         kind = "CustomResourceDefinition";
         apiVersion = "apiextensions.k8s.io/v1beta1";
@@ -74,7 +77,7 @@ in {
           names = {
             plural = "secretclaims";
             kind = "SecretClaim";
-            shortNames = ["scl"];
+            shortNames = [ "scl" ];
           };
         };
       };

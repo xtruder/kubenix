@@ -1,7 +1,6 @@
 { lib, config, pkgs, ... }:
 
 with lib;
-
 let
   testing = config.testing;
 
@@ -32,7 +31,8 @@ let
     echo "--> running tests"
     ${testing.testScript} --kube-config=$KUBECONFIG
   '';
-in {
+in
+{
   options.testing.runtime.local = {
     script = mkOption {
       type = types.package;

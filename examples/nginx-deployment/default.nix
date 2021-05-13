@@ -1,4 +1,4 @@
-{ kubenix ? import ../.. {}, registry ? "docker.io/gatehub" }:
+{ kubenix ? import ../.. { }, registry ? "docker.io/gatehub" }:
 
 with kubenix.lib;
 

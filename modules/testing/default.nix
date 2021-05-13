@@ -1,7 +1,6 @@
 { nixosPath, config, pkgs, lib, kubenix, ... }:
 
 with lib;
-
 let
   cfg = config.testing;
 
@@ -18,7 +17,8 @@ let
   isTestEnabled = test:
     (cfg.enabledTests == null || elem test.name cfg.enabledTests) && test.enable;
 
-in {
+in
+{
   imports = [
     ./docker.nix
     ./driver/kubetest.nix
@@ -40,30 +40,32 @@ in {
 
     defaults = mkOption {
       description = "List of defaults to apply to tests";
-      type = types.listOf (types.submodule ({config, ...}: {
+      type = types.listOf (types.submodule ({ config, ... }: {
         options = {
           features = mkOption {
             description = "List of features that test has to have to apply defaults";
             type = types.listOf types.str;
-            default = [];
+            default = [ ];
           };
 
           default = mkOption {
             description = "Default to apply to test";
             type = types.unspecified;
-            default = {};
+            default = { };
           };
         };
       }));
-      default = [];
+      default = [ ];
     };
 
     tests = mkOption {
       description = "List of test cases";
-      default = [];
-      type = types.listOf (types.coercedTo types.path (module: {
-        inherit module;
-      }) (types.submodule testModule));
+      default = [ ];
+      type = types.listOf (types.coercedTo types.path
+        (module: {
+          inherit module;
+        })
+        (types.submodule testModule));
       apply = tests: filter isTestEnabled tests;
     };
 
@@ -82,7 +84,7 @@ in {
     args = mkOption {
       description = "Attribute set of extra args passed to tests";
       type = types.attrs;
-      default = {};
+      default = { };
     };
 
     success = mkOption {
