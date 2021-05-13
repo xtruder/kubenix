@@ -15,5 +15,8 @@ jobs:
     - name: Run Nix Flake Check
       run: nix -Lv flake check
 
-    - name: Check Nix parsing
-      run: nix -Lv develop -c "evalnix"
+    - name: Check Nix Parsing
+      Run: nix -Lv develop -c "evalnix"
+
+    - name: Check Nix Format
+      run: nix -Lv develop -c nixpkgs-fmt --check .
