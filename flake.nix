@@ -4,10 +4,12 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs";
+    devshell-flake.url = "github:numtide/devshell";
+    flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    { nixosModules = import ./modules; }
+  outputs = { self, nixpkgs, flake-utils, devshell-flake, flake-compat }:
+    { modules = import ./modules; }
     //
     (flake-utils.lib.eachDefaultSystem
       (system:
@@ -16,12 +18,20 @@
             inherit system;
             overlays = [
               self.overlay
+              devshell-flake.overlay
             ];
-            config = { };
+            config = {
+              allowUnsupportedSystem = true;
+            };
           };
         in
         rec {
-          devShell = import ./shell.nix { inherit system pkgs; };
+          devShell = with pkgs; devshell.mkShell
+            {
+              imports = [
+                (devshell.importTOML ./devshell.toml)
+              ];
+            };
 
           packages = flake-utils.lib.flattenTree {
             inherit (pkgs)
@@ -41,7 +51,8 @@
           nixosPath = "${nixpkgs}/nixos";
         };
         # up to date versions of their nixpkgs equivalents
-        kubernetes = prev.callPackage ./pkgs/applications/networking/cluster/kubernetes { };
+        kubernetes = prev.callPackage ./pkgs/applications/networking/cluster/kubernetes
+          { };
         kubectl = prev.callPackage ./pkgs/applications/networking/cluster/kubectl { };
       };
     };

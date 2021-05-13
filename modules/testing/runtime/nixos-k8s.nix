@@ -1,7 +1,6 @@
 # nixos-k8s implements nixos kubernetes testing runtime
 
-{
-  nixosPath
+{ nixosPath
 , config
 , pkgs
 , lib
@@ -16,12 +15,12 @@ let
   kubeconfig = "/etc/${config.services.kubernetes.pki.etcClusterAdminKubeconfig}";
 
   # how we differ from the standard configuration of mkKubernetesBaseTest
-  extraConfiguration = { config, pkgs, lib, nodes, ...}: {
+  extraConfiguration = { config, pkgs, lib, nodes, ... }: {
     virtualisation.memorySize = mkDefault 2048;
     networking = {
-      nameservers = ["10.0.0.254"];
+      nameservers = [ "10.0.0.254" ];
       firewall = {
-        trustedInterfaces = ["docker0" "cni0"];
+        trustedInterfaces = [ "docker0" "cni0" ];
       };
     };
     services.kubernetes = {
@@ -45,16 +44,17 @@ let
             }];
           };
         }];
-    };
-    systemd.extraConfig = "DefaultLimitNOFILE=1048576";
-    systemd.services.copy-certs = {
-      description = "Share k8s certificates with host";
-      script = "cp -rf /var/lib/kubernetes/secrets /tmp/xchg/";
-      after = [ "kubernetes.target" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+      };
+      systemd.extraConfig = "DefaultLimitNOFILE=1048576";
+      systemd.services.copy-certs = {
+        description = "Share k8s certificates with host";
+        script = "cp -rf /var/lib/kubernetes/secrets /tmp/xchg/";
+        after = [ "kubernetes.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
       };
     };
   };
@@ -70,7 +70,7 @@ let
       inherit (config) name;
       test = script;
     };
-  
+
 
 in
 {

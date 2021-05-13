@@ -1,3 +1,0 @@
-language: nix
-script:
-- nix eval -f ./ci.nix --arg release.e2e false test-check
