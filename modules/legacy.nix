@@ -25,7 +25,7 @@ let
         );
 
       injectModuleAttrs = module: attrs: (
-        if isFunction module then args: (applyIfFunction file module args) // attrs
+        if isFunction module then args: (applyModuleArgsIfFunction file module args) // attrs
         else if isAttrs mkOptionDefault.module then module // attrs
         else module
       );
