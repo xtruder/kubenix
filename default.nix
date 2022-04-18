@@ -19,11 +19,15 @@ let
   }@attrs: let
     attrs' = filterAttrs (n: _: n != "module") attrs;
   in lib'.evalModules (recursiveUpdate {
-    inherit specialArgs modules;
-    args = {
-      inherit pkgs;
-      name = "default";
-    };
+    inherit specialArgs;
+    modules = [
+      {
+        _module.args = {
+          inherit pkgs;
+          name = "default";
+        };
+      }
+    ] ++ modules;
   } attrs');
 
   modules = import ./modules;
