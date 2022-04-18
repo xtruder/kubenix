@@ -58,24 +58,7 @@ rec {
           prefix = loc;
         }).config;
       getSubOptions = prefix: (evalModules
-        { modules = opts'; inherit prefix specialArgs;
-          # This is a work-around due to the fact that some sub-modules,
-          # such as the one included in an attribute set, expects a "args"
-          # attribute to be given to the sub-module. As the option
-          # evaluation does not have any specific attribute name, we
-          # provide a default one for the documentation.
-          #
-          # This is mandatory as some option declaration might use the
-          # "name" attribute given as argument of the submodule and use it
-          # as the default of option declarations.
-          #
-          # Using lookalike unicode single angle quotation marks because
-          # of the docbook transformation the options receive. In all uses
-          # &gt; and &lt; wouldn't be encoded correctly so the encoded values
-          # would be used, and use of `<` and `>` would break the XML document.
-          # It shouldn't cause an issue since this is cosmetic for the manual.
-          args.name = "‹name›";
-        }).options;
+        { modules = opts'; inherit prefix specialArgs; }).options;
       getSubModules = opts';
       substSubModules = m: submoduleWithSpecialArgs m specialArgs;
       functor = (defaultFunctor name) // {

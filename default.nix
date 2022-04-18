@@ -13,19 +13,24 @@ let
   # evalModules with same interface as lib.evalModules and kubenix as
   # special argument
   evalModules = {
+    args ? {},
+    check ? false,
     module ? null,
     modules ? [module],
     specialArgs ? defaultSpecialArgs, ...
   }@attrs: let
-    attrs' = filterAttrs (n: _: n != "module") attrs;
+    attrs' = builtins.removeAttrs attrs [ "args" "check" "module" ];
   in lib'.evalModules (recursiveUpdate {
     inherit specialArgs;
     modules = [
       {
-        _module.args = {
-          inherit pkgs;
-          name = "default";
-        };
+        _module = {
+          inherit check;
+          args = recursiveUpdated {
+            inherit pkgs;
+            name = "default";
+          };
+        } args;
       }
     ] ++ modules;
   } attrs');

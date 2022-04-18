@@ -127,8 +127,7 @@ in {
           (types.submodule ({name, config, ...}: let
             evaledSubmodule' = evalModules {
               inherit specialArgs;
-              modules = config.modules ++ [ ./base.nix ];
-              check = false;
+              modules = config.modules ++ [ ./base.nix { _module.check = false; } ];
             };
 
             evaledSubmodule =

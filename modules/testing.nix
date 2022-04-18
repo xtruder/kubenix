@@ -120,8 +120,7 @@ let
     }] ++ cfg.defaults;
 
     test = (kubenix.evalModules {
-      check = false;
-      inherit modules;
+      modules = modules ++ [ { _module.check = false; } ];
     }).config.test;
 
     evaled' = kubenix.evalModules {
