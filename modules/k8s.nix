@@ -199,10 +199,19 @@ in {
   imports = [ ./base.nix ];
 
   options.kubernetes = {
-    version = mkOption {
+    version =
+      let
+        minVersion = 8;  # k8s v1.8
+        maxVersion = 23; # k8s v1.23
+
+        supportedVersions =
+          map
+          (n: "1.${builtins.toString n}")
+          (lib.lists.range minVersion maxVersion);
+      in mkOption {
       description = "Kubernetes version to use";
-      type = types.enum ["1.7" "1.8" "1.9" "1.10" "1.11" "1.12" "1.13" "1.14" "1.15" "1.16" "1.17" "1.18"];
-      default = "1.15";
+      type = types.enum supportedVersions;
+      default = "1.${builtins.toString maxVersion}";
     };
 
     namespace = mkOption {

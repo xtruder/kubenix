@@ -1,6 +1,5 @@
 {
   k8s = ./k8s.nix;
-  istio = ./istio.nix;
   submodules = ./submodules.nix;
   submodule = ./submodule.nix;
   helm = ./helm.nix;

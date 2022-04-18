@@ -33,7 +33,6 @@ let
           ./legacy/crd.nix
           ./legacy/modules.nix
           ./helm/simple.nix
-          ./istio/bookinfo.nix
           ./submodules/simple.nix
           ./submodules/defaults.nix
           ./submodules/versioning.nix

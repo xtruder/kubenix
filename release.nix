@@ -15,11 +15,6 @@ let
     inherit spec;
   };
 
-  generateIstio = import ./generators/istio {
-    inherit pkgs;
-    inherit (pkgs) lib;
-  };
-
   runK8STests = k8sVersion: import ./tests {
     inherit pkgs lib kubenix k8sVersion e2e throwError nixosPath;
   };
@@ -154,12 +149,10 @@ in rec {
     }
   ];
 
-  generate.istio = pkgs.linkFarm "istio-generated.nix" [{
-    name = "latest.nix";
-    path = generateIstio;
-  }];
-
   tests = {
+    k8s-1_8 = runK8STests "1.8";
+    k8s-1_9 = runK8STests "1.9";
+    k8s-1_10 = runK8STests "1.10";
     k8s-1_11 = runK8STests "1.11";
     k8s-1_12 = runK8STests "1.12";
     k8s-1_13 = runK8STests "1.13";
@@ -168,6 +161,11 @@ in rec {
     k8s-1_16 = runK8STests "1.16";
     k8s-1_17 = runK8STests "1.17";
     k8s-1_18 = runK8STests "1.18";
+    k8s-1_19 = runK8STests "1.19";
+    k8s-1_20 = runK8STests "1.20";
+    k8s-1_21 = runK8STests "1.21";
+    k8s-1_22 = runK8STests "1.22";
+    k8s-1_23 = runK8STests "1.23";
   };
 
   test-results = pkgs.recurseIntoAttrs (mapAttrs (_: t: pkgs.recurseIntoAttrs {
