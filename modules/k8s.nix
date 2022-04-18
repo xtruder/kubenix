@@ -201,7 +201,7 @@ in {
   options.kubernetes = {
     version =
       let
-        minVersion = 8;  # k8s v1.8
+        minVersion = 19; # k8s v1.19
         maxVersion = 23; # k8s v1.23
 
         supportedVersions =
