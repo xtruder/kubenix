@@ -21,13 +21,12 @@ let
   }@attrs: let
     attrs' = builtins.removeAttrs attrs [ "args" "check" "module" ];
   in lib'.evalModules (recursiveUpdate {
-    inherit specialArgs;
+    specialArgs = specialArgs // { inherit pkgs; };
     modules = [
       {
         _module = {
           inherit check;
           args = recursiveUpdated {
-            inherit pkgs;
             name = "default";
           };
         } args;
