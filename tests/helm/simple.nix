@@ -11,21 +11,21 @@ let
   postgresql = pullImage {
     imageName = "docker.io/bitnami/postgresql";
     imageDigest = "sha256:ec16eb9ff2e7bf0669cfc52e595f17d9c52efd864c3f943f404d525dafaaaf96";
-    sha256 = "1idl8amp2jifc71lq8ymyns41d76cnasqbxyaild0gjzlpxmsn9n";
+    sha256 = "sha256-xdAUnAve0CWgMlEnDo9RzZJdizoFQX1upg8Huf9FWYo=";
     finalImageTag = "11.7.0-debian-10-r55";
   };
 
   postgresqlExporter = pullImage {
     imageName = "docker.io/bitnami/postgres-exporter";
     imageDigest = "sha256:08ab46104b83834760a5e0329af11de23ccf920b4beffd27c506f34421920313";
-    sha256 = "14yw8fp6ja7x1wn3lyw8ws5lc5z9jz54vdc5ad5s7yxjfs0jvk6d";
+    sha256 = "sha256-59ZkRBx4eMHBTloVr4PMbuUagpFZ0gcFBxRKC1Q4URI=";
     finalImageTag = "0.8.0-debian-10-r66";
   };
 
   minideb = pullImage {
     imageName = "docker.io/bitnami/minideb";
     imageDigest = "sha256:2f430acaa0ffd88454ac330a6843840f1e1204007bf92f8ce7b654fd3b558d68";
-    sha256 = "1h589digi99jvpdzn3azx4p8hlh7plci04him9vfmx2vfa5zxq4i";
+    sha256 = "sha256-b6DI1JYpVkgSVA3Ln28E0s82+gEv6LBMLUWCZ9PAGaA=";
     finalImageTag = "buster";
   };
 in {
