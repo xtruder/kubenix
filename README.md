@@ -1,4 +1,4 @@
-**Kubenix 2.0 is in still work in progress, expect breaking changes**
+**This repo has been deprecated and replaced by a fork of this project https://github.com/hall/kubenix**
 
 # KubeNix
 
